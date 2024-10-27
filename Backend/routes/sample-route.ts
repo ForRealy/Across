@@ -1,2 +1,0 @@
-// your routes goes here 
-

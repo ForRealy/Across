@@ -1,1 +1,0 @@
-// util functions like generate token, obtain token or verify token goes here. 
