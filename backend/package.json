@@ -12,11 +12,17 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.21.1",
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
     "mysql": "^2.18.1",
+    "mysql2": "^3.13.0",
     "typescript": "^5.6.3"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.13.10",
     "nodemon": "^3.1.7",
     "ts-node": "^10.9.2"
   }

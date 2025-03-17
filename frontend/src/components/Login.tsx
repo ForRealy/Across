@@ -8,16 +8,34 @@ const Login: React.FC = () => {
     const [error, setError] = useState<string>("");
     const navigate = useNavigate(); // Inicializar useNavigate
 
-    const handleSubmit = (e: FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         if (!name || !password) {
-            setError("Por favor, ingresa tu nombre de usuario y contraseña");
+          setError("Por favor, ingresa tu nombre de usuario y contraseña");
         } else {
-            setError("");
-            console.log("Nombre: ", name);
-            console.log("Contraseña: ", password);
+          setError("");
+          try {
+            const response = await fetch("http://localhost:3001/api/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ username: name, password })
+            });
+    
+            if (response.ok) {
+              const data = await response.json();
+              console.log("Login exitoso:", data);
+              // Redirige al dashboard o a la ruta deseada después del login
+              navigate("/dashboard");
+            } else {
+              const err = await response.json();
+              setError(err.error || "Error en el login");
+            }
+          } catch (error) {
+            console.error(error);
+            setError("Error en el servidor");
+          }
         }
-    };
+      };
 
     return (
         <div className="login-container">
