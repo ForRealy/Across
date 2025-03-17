@@ -10,9 +10,9 @@ app.use(express.json());
 // Configura el pool de conexiones con tus datos de MySQL
 const pool = mysql.createPool({
   host: "localhost",
-  user: "tu_usuario",
-  password: "tu_contraseña",
-  database: "tu_basededatos",
+  user: "usuario",
+  password: "usuario",
+  database: "across",
 });
 
 // Endpoint para registrar usuarios
