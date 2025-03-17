@@ -44,8 +44,13 @@ const Login: React.FC = () => {
                     />
                 </div>
                 {error && <p className="error-message">{error}</p>}
-                <button type="submit" className="login-btn">Iniciar sesión</button>
                 <button 
+                    type="button" 
+                    className="login-btn" 
+                    onClick={() => navigate("/home")} // Redirigir al hacer clic
+                >
+                    Iniciar sessión
+                </button>                <button 
                     type="button" 
                     className="register-btn" 
                     onClick={() => navigate("/register")} // Redirigir al hacer clic
