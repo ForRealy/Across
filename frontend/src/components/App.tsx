@@ -1,13 +1,20 @@
-import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./Login";
 import Register from "./Register";
+import Header from "./Header";
 
-const App: React.FC = () => {
-    return (
-        <div className="App">
-            <Login />
-        </div>
-    );
-};
+function App() {
+  return (
+    <Router>
+      {/* Colocamos el Header fuera de Routes para que siempre se muestre */}
+      <Header username="Player123" />
+
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+      </Routes>
+    </Router>
+  );
+}
 
 export default App;

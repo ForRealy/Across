@@ -1,4 +1,5 @@
 import React, { useState, FormEvent } from "react";
+import { useNavigate } from "react-router-dom"; // Importar useNavigate
 import '../assets/Login.css';
 
 const Login: React.FC = () => {
@@ -6,11 +7,13 @@ const Login: React.FC = () => {
     const [password, setPassword] = useState<string>("");
     const [email, setMail] = useState<string>("");
     const [error, setError] = useState<string>("");
+    const navigate = useNavigate(); // Inicializar useNavigate
+    
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         if (!name || !password || !email) {
-            setError("Por favor, ingresa tu nombre de usuario y contraseña");
+            setError("Por favor, ingresa tu nombre de usuario, contraseña y email");
         }
         else {
             setError("");
@@ -67,9 +70,14 @@ const Login: React.FC = () => {
                     />
                 </div>
                 {error && <p className="error-message"> {error} </p>}
-                <button type="submit" className="login-btn"> Registrate </button>
-                <button type="submit" className="register-btn"> ¿Ya tienes cuenta? Inicia sessión </button>
-
+                <button type="submit" className="register-btn"> Registrate </button>
+                <button 
+                    type="button" 
+                    className="login-btn" 
+                    onClick={() => navigate("/")} // Redirigir al hacer clic
+                >
+                    ¿No tienes cuenta? Regístrate
+                </button>
             </form>
         </div>
     );
