@@ -68,7 +68,8 @@ const Login: React.FC = () => {
                     onClick={() => navigate("/home")} // Redirigir al hacer clic
                 >
                     Iniciar sessión
-                </button>                <button 
+                </button>                
+                <button 
                     type="button" 
                     className="register-btn" 
                     onClick={() => navigate("/register")} // Redirigir al hacer clic
