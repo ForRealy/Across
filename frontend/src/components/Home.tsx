@@ -1,161 +1,120 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Importar useNavigate
+import { useNavigate } from 'react-router-dom';
 import Header from "./Header";
+import '../assets/Home.css'; // Importar el archivo CSS
 
 const Home: React.FC = () => {
-    const navigate = useNavigate(); // Inicializar useNavigate
-    
-    const images = [
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSS_FQTWLlPuRltYTU22XBavXv1jzcDuKY4KA&s",
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSS_FQTWLlPuRltYTU22XBavXv1jzcDuKY4KA&s",
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSS_FQTWLlPuRltYTU22XBavXv1jzcDuKY4KA&s",
-    ];
 
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const navigate = useNavigate();
 
-    const handleNext = () => {
-        // Avanza a la siguiente imagen
-        if (currentImageIndex < images.length - 1) {
-            setCurrentImageIndex(currentImageIndex + 1);
-        }
-    };
 
-    const handlePrevious = () => {
-        // Retrocede a la imagen anterior
-        if (currentImageIndex > 0) {
-          setCurrentImageIndex(currentImageIndex - 1);
-        }
-    };
+  const images = [
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrhWz5dvYt_FD2k0KvELKFQWecENideIjHmw&s",
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrAgTgehIqQIYO-aqaNq3kE92YS_cIE57QnA&s",
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTradwvUgUAu2gmC-0-1ijboIWz2ayYU9lbLg&s",
+  ];
 
-    const styles: { 
-        main: React.CSSProperties; 
-        catalog: React.CSSProperties; 
-        container: React.CSSProperties;
-        imageContainer: React.CSSProperties;
-        image: React.CSSProperties;
-        button: React.CSSProperties;
-    } = {
-        container: {
-            height: "100vh", // Hacemos que el fondo ocupe toda la altura de la pantalla
-            width: "100vh", // Asegura que el contenedor ocupe todo el ancho
-            display: "flex",
-            flexDirection: "column", // Los elementos dentro se apilan verticalmente
-            backgroundColor: "#600000", // Fondo granate más oscuro
-        },
-        main: {
-            flex: 1, // Hace que el main ocupe todo el espacio disponible
-            padding: "20px",
-            textAlign: "center",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center", // Centra el contenido verticalmente
-        },
-    catalog: {
-      marginTop: "20px", // Espaciado entre el texto y el catálogo
-    },
-    imageContainer: {
-      marginBottom: "20px",
-    },
-    image: {
-      width: "300px", // Tamaño de la imagen
-      height: "200px",
-      objectFit: "cover", // Asegura que la imagen se ajuste bien
-    },
-    button: {
-      margin: "10px",
-      padding: "10px 20px",
-      backgroundColor: "#fff",
-      border: "none",
-      borderRadius: "5px",
-      cursor: "pointer",
-      color: "black",
-    },
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const handleNext = () => {
+    // Avanza a la siguiente imagen
+    if (currentImageIndex < images.length - 1) {
+      setCurrentImageIndex(currentImageIndex + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    // Retrocede a la imagen anterior
+    if (currentImageIndex > 0) {
+      setCurrentImageIndex(currentImageIndex - 1);
+    }
   };
 
   return (
-    <div style={styles.container}>
+    <div className="container">
       <Header username="Player123" />
       
-      <main style={styles.main}>
-       {/* primer juego */}
-       <section style={styles.catalog}>
-          <div style={styles.imageContainer}>
+      <main className="main">
+        {/* Primer juego */}
+        <section className="catalog">
+          <div className="imageContainer">
             <img
               src={images[currentImageIndex]}
               alt="Juego"
-              style={styles.image}
-              onClick={() => navigate("/game")}            
+              className="image"
+              onClick={() => navigate("/EldenRing")}            
+              />
+          </div>
+
+          <div>
+            <button onClick={handlePrevious} className="button">
+              Anterior
+            </button>
+            <button onClick={handleNext} className="button">
+              Siguiente
+            </button>
+          </div>
+        </section>
+
+        {/* Segundo juego */}
+        <section className="catalog">
+          <div className="imageContainer">
+            <img
+              src={images[currentImageIndex]}
+              alt="Juego"
+              className="image"
+              onClick={() => navigate("/home")}            
+
             />
           </div>
 
           <div>
-            <button onClick={handlePrevious} style={styles.button}>
+            <button onClick={handlePrevious} className="button">
               Anterior
             </button>
-            <button onClick={handleNext} style={styles.button}>
+            <button onClick={handleNext} className="button">
               Siguiente
             </button>
           </div>
         </section>
 
-        {/* segundo juego */}
-        <section style={styles.catalog}>
-          <div style={styles.imageContainer}>
+        {/* Tercer juego */}
+        <section className="catalog">
+          <div className="imageContainer">
             <img
               src={images[currentImageIndex]}
               alt="Juego"
-              style={styles.image}
-              onClick={() => navigate("/game")}            
-              />
+              className="image"
+              onClick={() => navigate("/home")}            
+            />
           </div>
 
           <div>
-            <button onClick={handlePrevious} style={styles.button}>
+            <button onClick={handlePrevious} className="button">
               Anterior
             </button>
-            <button onClick={handleNext} style={styles.button}>
+            <button onClick={handleNext} className="button">
               Siguiente
             </button>
           </div>
         </section>
 
-        {/* tercer juego */}
-        <section style={styles.catalog}>
-          <div style={styles.imageContainer}>
+        {/* Cuarto juego */}
+        <section className="catalog">
+          <div className="imageContainer">
             <img
               src={images[currentImageIndex]}
               alt="Juego"
-              style={styles.image}
-              onClick={() => navigate("/game")}            
-              />
+              className="image"
+              onClick={() => navigate("/home")}            
+            />
           </div>
 
           <div>
-            <button onClick={handlePrevious} style={styles.button}>
+            <button onClick={handlePrevious} className="button">
               Anterior
             </button>
-            <button onClick={handleNext} style={styles.button}>
-              Siguiente
-            </button>
-          </div>
-        </section>
-
-        {/* cuarto juego */}
-        <section style={styles.catalog}>
-          <div style={styles.imageContainer}>
-            <img
-              src={images[currentImageIndex]}
-              alt="Juego"
-              style={styles.image}
-              onClick={() => navigate("/game")}            
-              />
-          </div>
-
-          <div>
-            <button onClick={handlePrevious} style={styles.button}>
-              Anterior
-            </button>
-            <button onClick={handleNext} style={styles.button}>
+            <button onClick={handleNext} className="button">
               Siguiente
             </button>
           </div>

@@ -1,0 +1,64 @@
+.container {
+    height: 100vh; /* Hacemos que el fondo ocupe toda la altura de la pantalla */
+    width: 100vh; /* Asegura que el contenedor ocupe todo el ancho */
+    display: flex;
+    flex-direction: column; /* Los elementos dentro se apilan verticalmente */
+    background-color: #600000; /* Fondo granate más oscuro */
+}
+
+.sidebar {
+    width: 250px;
+    background: #282c34;
+    color: white;
+    padding: 20px;
+  }
+  
+  .sidebar h2 {
+    margin-top: 0;
+  }
+  
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .sidebar li {
+    padding: 10px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  
+  .sidebar li:hover {
+    background: #3a3f47;
+  }
+  
+  .content {
+    flex: 1;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+  }
+  
+  .game-cover {
+    width: 150px;
+    height: 200px;
+    object-fit: cover;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.2s, border 0.2s;
+  }
+  
+  .game-cover:hover {
+    transform: scale(1.1);
+  }
+  
+  .selected {
+    border: 2px solid #ffcc00;
+  }
+  

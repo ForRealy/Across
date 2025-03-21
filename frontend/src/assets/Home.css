@@ -1,0 +1,48 @@
+/* assets/Home.css */
+
+/* Contenedor principal que ocupa toda la pantalla */
+.container {
+    height: 100vh; /* Hacemos que el fondo ocupe toda la altura de la pantalla */
+    width: 100vh; /* Asegura que el contenedor ocupe todo el ancho */
+    display: flex;
+    flex-direction: column; /* Los elementos dentro se apilan verticalmente */
+    background-color: #600000; /* Fondo granate más oscuro */
+  }
+  
+  /* Estilos para el main */
+  .main {
+    flex: 1; /* Hace que el main ocupe todo el espacio disponible */
+    padding: 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centra el contenido verticalmente */
+  }
+  
+  /* Espaciado entre el texto y el catálogo */
+  .catalog {
+    margin-top: 20px;
+  }
+  
+  /* Contenedor de las imágenes */
+  .imageContainer {
+    margin-bottom: 20px;
+  }
+  
+  /* Estilo de la imagen */
+  .image {
+    width: 300px; /* Tamaño de la imagen */
+    height: 200px;
+    object-fit: cover; /* Asegura que la imagen se ajuste bien */
+  }
+  
+  /* Estilo de los botones */
+  .button {
+    margin: 10px;
+    padding: 10px 20px;
+    background-color: #fff;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
