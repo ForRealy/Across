@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import mysql from "mysql2/promise";
+import bcrypt from "bcrypt";
 
 const app = express();
 
@@ -15,16 +16,19 @@ const pool = mysql.createPool({
   database: "across",
 });
 
+const saltRounds = 10;
 // Endpoint para registrar usuarios
 app.post("/api/register", async (req, res) => {
   const { profile_name, email, password, real_name, username, biography } = req.body;
   
   // En un ambiente de producción NO se deben almacenar las contraseñas en texto plano.
   try {
-    const [result]: any = await pool.query(
-      "INSERT INTO users (profile_name, email, password, real_name, username, biography) VALUES (?, ?, ?, ?, ?, ?)",
-      [profile_name, email, password, real_name, username, biography]
-    );
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+const [result]: any = await pool.query(
+  "INSERT INTO users (profile_name, email, password, real_name, username, biography) VALUES (?, ?, ?, ?, ?, ?)",
+  [profile_name, email, hashedPassword, real_name, username, biography]
+);
     res.status(201).json({ message: "Usuario registrado correctamente", id: result.insertId });
   } catch (error) {
     console.error(error);
