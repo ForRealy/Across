@@ -21,6 +21,30 @@ const Login: React.FC = () => {
             console.log("Contraseña: ", password);
             console.log("Repite la contraseña: ", password);
             console.log("Email: ", email);
+            fetch("http://localhost:3001/api/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    profile_name: name,
+                    email: email,
+                    password: password,
+                    real_name: name,
+                    username: name,
+                    biography: ""
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Respuesta del servidor:", data);
+                // Aquí puedes redirigir o manejar la respuesta según necesites
+                // Ejemplo: navigate("/dashboard");
+            })
+            .catch(error => {
+                console.error("Error al registrar:", error);
+            });
+            
 
         }
     };
