@@ -1,5 +1,5 @@
 import React, { useState, FormEvent } from "react";
-import { useNavigate } from "react-router-dom"; // Importar useNavigate
+import { useNavigate } from "react-router-dom"; 
 import '../assets/Login-register.css';
 
 const Login: React.FC = () => {
@@ -7,9 +7,8 @@ const Login: React.FC = () => {
     const [password, setPassword] = useState<string>("");
     const [email, setMail] = useState<string>("");
     const [error, setError] = useState<string>("");
-    const navigate = useNavigate(); // Inicializar useNavigate
+    const navigate = useNavigate();
     
-
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         if (!name || !password || !email) {
@@ -17,10 +16,31 @@ const Login: React.FC = () => {
         }
         else {
             setError("");
-            console.log("Nombre: ", name);
-            console.log("Contraseña: ", password);
-            console.log("Repite la contraseña: ", password);
-            console.log("Email: ", email);
+            fetch("http://localhost:3001/api/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    profile_name: name,
+                    email: email,
+                    password: password,
+                    real_name: name,
+                    username: name,
+                    biography: ""
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Respuesta del servidor:", data);
+                // Aquí puedes redirigir o manejar la respuesta según necesites
+                alert("Usuario creado correctamente");
+                navigate("/");
+            })
+            .catch(error => {
+                console.error("Error al registrar:", error);
+            });
+            
 
         }
     };

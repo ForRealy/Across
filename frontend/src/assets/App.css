@@ -40,3 +40,27 @@
 .read-the-docs {
   color: #888;
 }
+/* Estilo para el mensaje de éxito */
+.success-message {
+  background-color: #dff0d8;
+  color: #3c763d;
+  padding: 10px;
+  border: 1px solid #d6e9c6;
+  border-radius: 4px;
+  text-align: center;
+  margin-top: 10px;
+  animation: fadeOut 3s forwards;
+}
+
+/* Animación para que el mensaje se desvanezca */
+@keyframes fadeOut {
+  0% {
+      opacity: 1;
+  }
+  80% {
+      opacity: 1;
+  }
+  100% {
+      opacity: 0;
+  }
+}
