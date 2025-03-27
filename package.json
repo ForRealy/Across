@@ -17,5 +17,8 @@
   "bugs": {
     "url": "https://github.com/ForRealy/Across/issues"
   },
-  "homepage": "https://github.com/ForRealy/Across#readme"
+  "homepage": "https://github.com/ForRealy/Across#readme",
+  "dependencies": {
+    "pg": "^8.14.1"
+  }
 }

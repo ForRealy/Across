@@ -1,0 +1,13 @@
+.container {
+    display: flex;              /* Usamos flexbox para alinear los elementos */
+    align-items: left;          /* Alinea los elementos verticalmente */
+}
+
+.profile-img {
+    width: 20rem;               /* Tamaño de la imagen (se mantiene en 20rem) */
+    height: 20rem;              /* Mantiene la proporción de la imagen cuadrada */
+    border-radius: 50%;         /* Hace que la imagen sea redonda */
+    object-fit: cover;          /* Asegura que la imagen se recorte bien sin distorsionarse */
+    margin-top: 50px;           /* Margen superior de 20px */
+    margin-left: 20px;          /* Margen izquierdo de 20px */
+}

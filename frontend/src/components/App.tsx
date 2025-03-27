@@ -5,6 +5,9 @@ import Home from "./Home";
 import Library from "./Library";
 import EldenRing from "./EldenRing";
 import Downloads from "./Downloads";
+import Profile from "./Profile";
+import Cart from "./Cart";
+import Configuration from "./Configuration";
 
 function App() {
   return (
@@ -15,8 +18,10 @@ function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/library" element={<Library />} />
         <Route path="/EldenRing" element={<EldenRing />} />
-        <Route path="/Downloads" element={<Downloads />} />
-
+        <Route path="/downloads" element={<Downloads />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/configuration" element={<Configuration />} />
       </Routes>
     </Router>
   );

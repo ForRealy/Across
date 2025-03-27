@@ -14,10 +14,10 @@ import bcrypt from "bcrypt";
 const app = express();
 app.use(cors());
 app.use(express.json());
-// Configura el pool de conexiones con tus datos de MySQL
+// Configura el pool de conexiones con MySQL
 const pool = mysql.createPool({
     host: "localhost",
-    user: "usuario",
+    user: "root",
     password: "usuario",
     database: "across",
 });
@@ -25,44 +25,71 @@ const saltRounds = 10;
 // Endpoint para registrar usuarios
 app.post("/api/register", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { profile_name, email, password, real_name, username, biography } = req.body;
-    // En un ambiente de producción NO se deben almacenar las contraseñas en texto plano.
+    console.log("📩 Datos recibidos:", req.body);
+    if (!profile_name || !email || !password || !username) {
+        res.status(400).json({ error: "Faltan datos obligatorios" });
+        return;
+    }
     try {
         const hashedPassword = yield bcrypt.hash(password, saltRounds);
-        const [result] = yield pool.query("INSERT INTO users (profile_name, email, password, real_name, username, biography) VALUES (?, ?, ?, ?, ?, ?)", [profile_name, email, hashedPassword, real_name, username, biography]);
+        const [result] = yield pool.query("INSERT INTO users (profile_name, email, password, real_name, username, biography) VALUES (?, ?, ?, ?, ?, ?)", [profile_name, email, hashedPassword, real_name || null, username, biography || null]);
+        console.log("✅ Usuario registrado con ID:", result.insertId);
         res.status(201).json({ message: "Usuario registrado correctamente", id: result.insertId });
     }
     catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Error al registrar el usuario" });
+        console.error("❌ Error al registrar usuario:", error);
+        if (error.code === "ER_DUP_ENTRY") {
+            res.status(400).json({ error: "El email o username ya están en uso" });
+            return;
+        }
+        res.status(500).json({ error: "Error al registrar el usuario", details: error.message });
     }
 }));
-// Endpoint para hacer login
+// Endpoint para hacer login de usuarios
 app.post("/api/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { username, password } = req.body;
+    console.log("🔑 Intento de login para:", username);
+    if (!username || !password) {
+        res.status(400).json({ error: "Faltan datos obligatorios" });
+        return;
+    }
     try {
-        // Se busca el usuario por username
+        // Realiza la consulta para obtener el usuario por su username
         const [rows] = yield pool.query("SELECT * FROM users WHERE username = ?", [username]);
+        console.log("Resultados de la consulta:", rows);
+        // Si no se encuentra el usuario, se responde con un error
         if (rows.length === 0) {
-            // Si no se encuentra el usuario, se responde con error
+            console.log("❌ Usuario no encontrado");
             res.status(401).json({ error: "Credenciales inválidas" });
             return;
         }
         const user = rows[0];
-        // Se compara la contraseña ingresada con el hash almacenado
-        const validPassword = yield bcrypt.compare(password, user.password);
-        if (!validPassword) {
-            // Si la comparación falla, se responde con error
+        // Verifica si la contraseña existe en la base de datos antes de compararla
+        if (!user.password) {
+            console.log("❌ Contraseña no encontrada en la base de datos");
             res.status(401).json({ error: "Credenciales inválidas" });
             return;
         }
-        // Si la contraseña es válida, se responde con éxito y la información del usuario
+        // Compara la contraseña ingresada con la almacenada en la base de datos
+        const validPassword = yield bcrypt.compare(password, user.password);
+        if (!validPassword) {
+            console.log("❌ Contraseña incorrecta");
+            res.status(401).json({ error: "Credenciales inválidas" });
+            return;
+        }
+        // Si el login es exitoso, responde con los datos del usuario
+        console.log("✅ Login exitoso para:", username);
         res.json({ message: "Login exitoso", user });
     }
     catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Error en el servidor" });
+        // Si ocurre un error en el proceso, responde con un error 500
+        console.error("❌ Error en login:", error.message);
+        console.error("Stack trace:", error.stack);
+        res.status(500).json({ error: "Error en el servidor", details: error.message });
     }
 }));
-app.listen(3001, () => {
-    console.log("Servidor corriendo en el puerto 3001");
+// Configurar puerto
+const PORT = 3000;
+app.listen(PORT, () => {
+    console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 });

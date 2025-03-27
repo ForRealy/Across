@@ -148,3 +148,24 @@
     border-radius: 5px;
     width: 100%;
 }
+
+.cart-section {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.add-to-cart, .go-to-cart {
+    background-color: #ff6600;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+.add-to-cart:hover, .go-to-cart:hover {
+    background-color: #e65c00;
+}
+

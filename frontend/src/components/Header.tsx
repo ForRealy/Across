@@ -10,10 +10,11 @@ const Header: React.FC<HeaderProps> = ({ username }) => {
     <header style={styles.header}>
       <h1 style={styles.title}>Store</h1>
       <nav>
-        <Link to={"/Home"} style={styles.link}>Home</Link>
+        <Link to="/Home" style={styles.link}>Home</Link>
         <Link to="/library" style={styles.link}>Library</Link>
+        <Link to="/cart" style={styles.link}>Cart</Link>
         <Link to="/downloads" style={styles.link}>Downloads</Link>
-        <span style={styles.username}>{username}</span>
+        <Link to="/profile" style={styles.link}>{username}</Link>
       </nav>
     </header>
   );
