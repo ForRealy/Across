@@ -8,6 +8,7 @@ import Downloads from "./Downloads";
 import Profile from "./Profile";
 import Cart from "./Cart";
 import Configuration from "./Configuration";
+import EditProfile from "./EditProfile";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/configuration" element={<Configuration />} />
+        <Route path="/editProfile" element={<EditProfile />} />
       </Routes>
     </Router>
   );
