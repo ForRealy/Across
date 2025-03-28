@@ -14,9 +14,9 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/home" element={<Home />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/library" element={<Library />} />
         <Route path="/EldenRing" element={<EldenRing />} />
         <Route path="/downloads" element={<Downloads />} />
