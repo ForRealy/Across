@@ -11,7 +11,7 @@ app.use(express.json());
 // Configura el pool de conexiones con MySQL
 const pool = mysql.createPool({
   host: "localhost",
-  user: "root",
+  user: "usuario",
   password: "usuario",
   database: "across",
 });
