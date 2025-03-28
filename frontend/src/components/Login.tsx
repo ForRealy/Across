@@ -26,7 +26,7 @@ const Login: React.FC = () => {
         const data = await response.json();
         console.log("Login exitoso:", data);
         // Redirige al dashboard u otra ruta protegida después del login
-        navigate("/dashboard");
+        navigate("/");
       } else {
         const err = await response.json();
         setError(err.error || "Error en el login");
