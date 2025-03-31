@@ -22,7 +22,7 @@ const Profile: React.FC = () => {
                 <img src={Foto_Perfil} alt="Foto de perfil" className="profile-img" />
                 <div className="profile-details">
                     <h2>Player123</h2>
-                    <p> Segunda de DAW es increíble </p>
+                    <p> Segundo de DAW es increíble </p>
                     <button onClick={handleRedirect}>Edit Profile</button>
                 </div>
             </div>
@@ -37,16 +37,16 @@ const Profile: React.FC = () => {
 
                 {/* Panel derecho con información */}
                 <div className="profile-info">
-                    <p>Status: Online</p>
-                    <p>Level: 60</p>
-                    <p>Years of Service: 6</p>
-                    <p>Badges: 84</p>
-                    <p>Friends: 7</p>
+                    <p>Status: -----</p>
+                    <p>Level: ??</p>
+                    <p>Years of Service: ?</p>
+                    <p>Badges: ?</p>
+                    <p>Friends: ?</p>
                     <button onClick={backProfile}>Profile</button>
-                    <button onClick={games}>Games (350)</button>
-                    <button onClick={wishlist}>Wishlist (120)</button>
-                    <button onClick={reviews}>Reviews (32)</button>
-                    <button onClick={friends}>Friends (7)</button>
+                    <button onClick={games}>Games (???)</button>
+                    <button onClick={wishlist}>Wishlist (???)</button>
+                    <button onClick={reviews}>Reviews (???)</button>
+                    <button onClick={friends}>Friends (?)</button>
                 </div>
             </div>
         </div>
