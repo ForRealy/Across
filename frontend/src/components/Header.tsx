@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import "../assets/Header.css"; // Importación corregida
+import "../assets/Header.css"; 
 
 interface HeaderProps {
   username: string;
@@ -15,6 +15,7 @@ const Header: React.FC<HeaderProps> = ({ username }) => {
         <Link to="/cart" className="link">Cart</Link>
         <Link to="/downloads" className="link">Downloads</Link>
         <Link to="/profile" className="link">{username}</Link>
+        <p> notificaciones </p>
     </header>
   );
 };

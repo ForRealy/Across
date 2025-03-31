@@ -1,5 +1,8 @@
 .general{
     background-color: dimgrey;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 10px;
 }
 
 .general h2{
@@ -9,3 +12,76 @@
 .general label{
     color: white;
 }
+
+.location{
+    background-color: dimgrey;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 10px;
+}
+
+.location h2{
+    color: white;
+}
+
+
+.location label{
+    color: white;
+}
+
+.preferences{
+  background-color: dimgrey;
+  padding: 10px;
+  margin: 10px;
+  border-radius: 10px;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.preferences h2{
+  color: white;
+}
+
+/* Contenedor del interruptor */
+.switch {
+    width: 60px;
+    height: 30px;
+    background-color: #ccc;
+    border-radius: 50px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  /* Cuando está encendido (verde) */
+  .switch.on {
+    background-color: #4caf50;
+  }
+  
+  /* Cuando está apagado (gris claro) */
+  .switch.off {
+    background-color: #ccc;
+  }
+  
+  /* Círculo deslizante */
+  .slider {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 24px;
+    height: 24px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+  }
+  
+  /* Cuando está encendido, el círculo se mueve a la derecha */
+  .switch.on .slider {
+    transform: translateX(30px);
+  }
+  
+  /* Cuando está apagado, el círculo está a la izquierda */
+  .switch.off .slider {
+    transform: translateX(0);
+  }

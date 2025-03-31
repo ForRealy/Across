@@ -1,13 +1,99 @@
-.container {
-    display: flex;              /* Usamos flexbox para alinear los elementos */
-    align-items: left;          /* Alinea los elementos verticalmente */
+/* Sección superior con la foto y nombre */
+.profile-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 20px;
+    background-color: #300; /* Color rojo oscuro */
+}
+
+.profile-header h2{
+    color: white;
 }
 
 .profile-img {
-    width: 20rem;               /* Tamaño de la imagen (se mantiene en 20rem) */
-    height: 20rem;              /* Mantiene la proporción de la imagen cuadrada */
-    border-radius: 50%;         /* Hace que la imagen sea redonda */
-    object-fit: cover;          /* Asegura que la imagen se recorte bien sin distorsionarse */
-    margin-top: 50px;           /* Margen superior de 20px */
-    margin-left: 20px;          /* Margen izquierdo de 20px */
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 20px;
+}
+
+.profile-details {
+    text-align: left;
+    color: white;
+}
+
+.profile-details h2 {
+    margin: 0;
+}
+
+.profile-details button {
+    background-color: #444;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+/* Contenido principal: juegos a la izquierda, info a la derecha */
+.profile-content {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 1200px;
+    margin-top: 20px;
+}
+
+/* Juegos a la izquierda */
+.profile-games {
+    flex: 2;
+    background-color: #222;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.games-tabs {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.games-tabs button {
+    background-color: #444;
+    color: white;
+    border: none;
+    padding: 10px;
+    flex: 1;
+    margin: 0 5px;
+    cursor: pointer;
+}
+
+.games-list {
+    background-color: #333;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* Información del usuario a la derecha */
+.profile-info {
+    flex: 1;
+    background-color: #111;
+    padding: 20px;
+    color: white;
+    border-radius: 10px;
+    text-align: left;
+    margin-left: 20px;
+}
+
+.profile-info button {
+    display: block;
+    width: 100%;
+    background-color: #444;
+    color: white;
+    border: none;
+    padding: 10px;
+    margin-top: 5px;
+    cursor: pointer;
 }

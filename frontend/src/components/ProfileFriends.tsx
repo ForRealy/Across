@@ -6,8 +6,8 @@ import Foto_Perfil from "../media/Foto_Perfil.jpg";
 
 const Profile: React.FC = () => {
     const navigate = useNavigate();
-
     const handleRedirect = () => navigate('/configuration');
+    const backProfile = () => navigate('/profile');
     const games = () => navigate('/games');
     const wishlist = () => navigate('/wishlist');
     const reviews = () => navigate('/reviews');
@@ -32,16 +32,7 @@ const Profile: React.FC = () => {
                 
                 {/* Juegos a la izquierda */}
                 <div className="profile-games">
-                    <div className="games-tabs">
-                        <button>Recently Played</button>
-                        <button>All Games</button>
-                        <button>Perfect Games</button>
-                        <button>Followed</button>
-                    </div>
-                    <div className="games-list">
-                        {/* Aquí podrías mapear una lista de juegos en el futuro */}
-                        <p>Lista de juegos...</p>
-                    </div>
+                    {/* Aquí iran todos los amigos */}
                 </div>
 
                 {/* Panel derecho con información */}
@@ -51,6 +42,7 @@ const Profile: React.FC = () => {
                     <p>Years of Service: 6</p>
                     <p>Badges: 84</p>
                     <p>Friends: 7</p>
+                    <button onClick={backProfile}>Profile</button>
                     <button onClick={games}>Games (350)</button>
                     <button onClick={wishlist}>Wishlist (120)</button>
                     <button onClick={reviews}>Reviews (32)</button>

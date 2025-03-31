@@ -6,6 +6,10 @@ import Library from "./Library";
 import EldenRing from "./EldenRing";
 import Downloads from "./Downloads";
 import Profile from "./Profile";
+import ProfileGames from "./ProfileGames";
+import ProfileWishlist from "./ProfileWishlist";
+import ProfileReviews from "./ProfileReviews";
+import ProfileFriends from "./ProfileFriends";
 import Cart from "./Cart";
 import Configuration from "./Configuration";
 import EditProfile from "./EditProfile";
@@ -22,6 +26,10 @@ function App() {
         <Route path="/downloads" element={<Downloads />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/games" element={<ProfileGames />} />
+        <Route path="/wishlist" element={<ProfileWishlist />} />
+        <Route path="/reviews" element={<ProfileReviews />} />
+        <Route path="/friends" element={<ProfileFriends />} />
         <Route path="/configuration" element={<Configuration />} />
         <Route path="/editProfile" element={<EditProfile />} />
       </Routes>

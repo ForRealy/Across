@@ -1,5 +1,24 @@
 .profile{
     background-color:dimgrey;
     padding: 20px;
+    margin: 10px;
     border-radius: 8px;
+}
+
+.contactInfo{
+    background-color:dimgrey;
+    padding: 20px;
+    margin: 10px;
+    border-radius: 8px;
+}
+
+.dangerZone{
+    background-color:dimgrey;
+    padding: 20px;
+    margin: 10px;
+    border-radius: 8px;
+}
+
+.dangerZone button{
+    background-color: red;
 }

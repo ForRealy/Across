@@ -50,39 +50,39 @@ const Library: React.FC = () => {
   return (
     <div className="container">
       <Header username="Player123" />
-
-      <aside className="sidebar">
-        <h2>Juegos</h2>
-        <ul>
-          {games.map((game, index) => (
-            <li key={index} onClick={() => navigate(game.path)}>
-              {game.title}
-            </li>
-          ))}
-        </ul>
-      </aside>
-
-      <main className="content">
-        <h1>Carátulas de Juegos</h1>
-        <div className="gallery">
-          {games.map((game, index) => (
-            <div key={index} className="game-item">
-              <img
-                src={game.cover}
-                alt={game.title}
-                className="game-cover"
-                onClick={() => navigate(game.path)}
-              />
-              <div className="button-container">
-                <button onClick={() => addToCart(game.title)}>Añadir al carrito</button>
+      <div>
+        <aside className="sidebar">
+          <h2>Juegos</h2>
+          <ul>
+            {games.map((game, index) => (
+              <li key={index} onClick={() => navigate(game.path)}>
+                {game.title}
+              </li>
+            ))}
+          </ul>
+        </aside>
+      </div>
+      <div>
+        <main className="content">
+          <h1>Carátulas de Juegos</h1>
+          <div className="gallery">
+            {games.map((game, index) => (
+              <div key={index} className="game-item">
+                <img
+                  src={game.cover}
+                  alt={game.title}
+                  className="game-cover"
+                  onClick={() => navigate(game.path)}
+                />
+                <div className="button-container">
+                  <button onClick={() => addToCart(game.title)}>Añadir al carrito</button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </main>
-
+            ))}
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
-
 export default Library;

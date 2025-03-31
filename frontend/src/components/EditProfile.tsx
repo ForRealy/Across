@@ -1,21 +1,29 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import "../assets/EditProfile.css";
 
+const EditProfile: React.FC = () => {
+  
+    const [encendido, setEncendido] = useState<boolean>(false);
 
-const editProfile: React.FC = () => {
+    // Función que alterna el estado
+    const toggleEncendido = () => {
+      console.log("Clic en el interruptor"); // Verificar si se está disparando el clic
+      setEncendido(!encendido);
+    };
+
     const navigate = useNavigate(); 
 
     const confirm = () => {
-        navigate('/EditProfile'); // Redirige a la ruta "/configuration"
+        navigate('/Configuration'); // Redirige a la ruta "/EditProfile"
     };
 
     return (
         <div className="container">
           <Header username="Player123" />
           <div className="general">
-            <h2> GENERAL </h2>
+            <h2>GENERAL</h2>
             <form>
                 <label htmlFor="profile_name">PROFILE NAME:</label>
                 <input type="text" id="profile_name" name="profile_name" />
@@ -28,11 +36,10 @@ const editProfile: React.FC = () => {
 
                 <label htmlFor="biography">BIOGRAPHY:</label>
                 <input type="text" id="biography" name="biography" />
-
             </form>
           </div>
           <div className="location">
-            <h2> LOCATION </h2>
+            <h2>LOCATION</h2>
             <form>
                 <label htmlFor="country">COUNTRY:</label>
                 <select id="country" name="country">
@@ -42,10 +49,22 @@ const editProfile: React.FC = () => {
                 </select>
             </form>
           </div>
-      </div>
+          <div className="preferences">
+            <h2>STORE PREFERENCES</h2>
+            <div 
+              className={`switch ${encendido ? 'on' : 'off'}`} 
+              onClick={toggleEncendido}
+            >
+              <div className="slider"></div>
+            </div>
+            <p>{encendido ? 'Store preferences enabled' : 'Store preferences disabled'}</p>
+          </div>
+          <div>
+            <button> Change </button>
+          </div>
+        </div>
+        
     );
 };
 
-
-
-export default editProfile;
+export default EditProfile;
