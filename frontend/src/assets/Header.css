@@ -1,24 +1,28 @@
 .header {
-    display: "flex";
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
     background-color: #333;
     color: #fff;
-    width: 100%;
-    box-sizing: border-box;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%; /* Usa 100% en lugar de 100vw para evitar scroll horizontal */
+    box-sizing: border-box; /* Asegura que el padding no aumente el tamaño total */
+    position: fixed; /* Fija el header en la parte superior */
+    top: 0;
+    left: 0; /* Asegura que el header inicie desde el borde izquierdo */
+    right: 0; /* Asegura que el header llegue hasta el borde derecho */
 }
 
-.title{ 
-    margin: 0 
+.title { 
+    margin: 0;
 }
 
-.link{
+.link {
     color: #fff;
     text-decoration: none;
     margin: 0 10px;
 }
 
- .username{ 
+.username { 
     font-weight: bold;
 }

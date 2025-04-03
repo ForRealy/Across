@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import "../assets/Cart.css";
 
+
+//Cambiar todo cuando Alejandro haga el backend
+
 const Cart: React.FC = () => {
   const navigate = useNavigate();
   const [cart, setCart] = useState<string[]>([]);
@@ -62,11 +65,11 @@ const Cart: React.FC = () => {
           <p>Tu carrito está vacío.</p>
         ) : (
           <>
-            <ul>
+            <ol>
               {cart.map((game, index) => (
                 <li key={index}>{game}</li>
               ))}
-            </ul>
+            </ol>
             <button onClick={clearCart}>Vaciar Carrito</button>
           </>
         )}

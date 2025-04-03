@@ -9,7 +9,6 @@ import borderlandsCover from "../media/bordelands.jpeg";
 import halfLifeCover from "../media/half-life.jpeg";
 import crysisCover from "../media/crysis.jpeg";
 
-
 const games = [
   { title: "Elden Ring", 
     cover: eldenRingCover, // Usar la variable importada
@@ -31,7 +30,6 @@ const games = [
   },
 ];
 
-
 const Library: React.FC = () => {
   const navigate = useNavigate();
   const [cart, setCart] = useState<string[]>([]);
@@ -50,7 +48,7 @@ const Library: React.FC = () => {
   return (
     <div className="container">
       <Header username="Player123" />
-      <div>
+      <div className="main-content">
         <aside className="sidebar">
           <h2>Juegos</h2>
           <ul>
@@ -61,10 +59,9 @@ const Library: React.FC = () => {
             ))}
           </ul>
         </aside>
-      </div>
-      <div>
+
         <main className="content">
-          <h1>Carátulas de Juegos</h1>
+          <h1> Juegos </h1>
           <div className="gallery">
             {games.map((game, index) => (
               <div key={index} className="game-item">

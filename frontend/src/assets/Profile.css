@@ -6,6 +6,7 @@
     width: 100%;
     padding: 20px;
     background-color: #300; /* Color rojo oscuro */
+    margin-top: 50px; /* Da espacio al header */
 }
 
 .profile-header h2{
@@ -79,7 +80,7 @@
 /* Información del usuario a la derecha */
 .profile-info {
     flex: 1;
-    background-color: #111;
+    background-color: #222;
     padding: 20px;
     color: white;
     border-radius: 10px;

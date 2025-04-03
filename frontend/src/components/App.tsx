@@ -13,6 +13,8 @@ import ProfileFriends from "./ProfileFriends";
 import Cart from "./Cart";
 import Configuration from "./Configuration";
 import EditProfile from "./EditProfile";
+import ChangeEmail from "./ChangeEmail";
+import ChangeNumber from "./ChangeNumber";
 
 function App() {
   return (
@@ -32,6 +34,8 @@ function App() {
         <Route path="/friends" element={<ProfileFriends />} />
         <Route path="/configuration" element={<Configuration />} />
         <Route path="/editProfile" element={<EditProfile />} />
+        <Route path="/changeEmail" element={<ChangeEmail />} />
+        <Route path="/changeNumber" element={<ChangeNumber />} />
       </Routes>
     </Router>
   );

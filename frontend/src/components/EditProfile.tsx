@@ -60,7 +60,7 @@ const EditProfile: React.FC = () => {
             <p>{encendido ? 'Store preferences enabled' : 'Store preferences disabled'}</p>
           </div>
           <div>
-            <button> Change </button>
+            <button onClick={confirm}> Change </button>
           </div>
         </div>
         

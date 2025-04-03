@@ -7,6 +7,8 @@ const Home: React.FC = () => {
   const navigate = useNavigate();
   const [cart, setCart] = useState<string[]>([]);
 
+  //Cambiar todo el carrito cuando Alejandro haga el backend!!
+
   // Cargar el carrito desde localStorage cuando se monta el componente
   useEffect(() => {
     const savedCart = localStorage.getItem("cart");
