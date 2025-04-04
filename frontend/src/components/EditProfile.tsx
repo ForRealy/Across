@@ -63,14 +63,13 @@ const EditProfile: React.FC = () => {
           
           {/* Sección de Ubicación */}
           <div className="edit-profile-section location">
-            <h2 className="edit-profile-header">LOCATION</h2>
+            <h2 className="edit-profile-header">LANGUAGES</h2>
             <form>
-                <label htmlFor="country">COUNTRY:</label>
+                <label htmlFor="country">LANGUAGE:</label>
                 <select id="country" name="country" className="edit-profile-input">
-                    <option value="spain">Spain</option>
-                    <option value="english">Italy</option>
-                    <option value="france">France</option>
-                    <option value="germany">Germany</option>
+                    <option value="spanish">Spanish</option>
+                    <option value="english">English</option>
+                    <option value="catalan">Catalan</option>
                 </select>
             </form>
           </div>
