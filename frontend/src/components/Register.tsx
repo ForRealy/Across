@@ -35,7 +35,7 @@ const Login: React.FC = () => {
                 console.log("Respuesta del servidor:", data);
                 // Aquí puedes redirigir o manejar la respuesta según necesites
                 alert("Usuario creado correctamente");
-                navigate("/");
+                navigate("/login");
             })
             .catch(error => {
                 console.error("Error al registrar:", error);
