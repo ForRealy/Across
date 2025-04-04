@@ -1,21 +1,21 @@
 // src/controllers/userController.ts
 import { Request, Response } from 'express';
-import db from '../db'; // Tu conexión o pool de base de datos
+import db from '../db';
 
 export const updateUserProfile = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { idUser } = req.params;
   const { profile_name, real_name, username, biography, idLanguage } = req.body;
 
   try {
     await db.query(
       `UPDATE users SET 
-        profile_name = ?, 
-        real_name = ?, 
-        username = ?, 
-        biography = ?, 
-        idLanguage = ? 
-      WHERE idUser = ?`,
-      [profile_name, real_name, username, biography, idLanguage, id]
+      profile_name = ?, 
+      real_name = ?, 
+      username = ?, 
+      biography = ?, 
+      id_language = ?
+      WHERE id_user = ?`,
+      [profile_name, real_name, username, biography, idLanguage, idUser]
     );
 
     res.status(200).json({ message: 'Profile updated successfully' });
