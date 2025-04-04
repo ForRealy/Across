@@ -27,6 +27,12 @@
     font-size: 24px;
 }
 
+.account-row {
+    display: flex;
+    align-items: center; /* Opcional: para que se alineen verticalmente al centro */
+    gap: 10px; /* Espacio entre elementos, ajusta según necesites */
+}
+
 .config-profile, .config-contact, .config-label{
     margin-top: 10px;
     color: black;

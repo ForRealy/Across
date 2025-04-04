@@ -15,30 +15,30 @@ const Configuration: React.FC = () => {
 
             <div className="config-section config-profile">
                 <h3>Profile</h3> 
-                <div>
+                <div className="account-row">
                     <h4 className="config-label">ACCOUNT NAME:</h4> 
                     <span className="config-value">{user ? user.username : "Invitado"}</span> 
-                    <p className="config-info">You can't change your account name.</p>
                 </div>
-                <div>
+                <p className="config-info">You can't change your account name.</p>
+                <div className="account-row">
                     <h4 className="config-label">PROFILE NAME:</h4> 
                     <span className="config-value">{user ? user.username : "Invitado"}</span> 
-                    <button className="config-button" onClick={() => navigate('/EditProfile')}>
+                </div>
+                <button className="config-button" onClick={() => navigate('/EditProfile')}>
                         Edit profile
                     </button>
-                </div>
             </div>
 
             <div className="config-section config-contact">
                 <h3>Contact info</h3> 
-                <div>
+                <div className="account-row">
                     <h4 className="config-label">EMAIL:</h4> 
                     <span className="config-value">*****@gmail.com</span> 
                     <button className="config-button" onClick={() => navigate('/ChangeEmail')}>
                         Change email
                     </button>
                 </div>
-                <div>
+                <div className="account-row">
                     <h4 className="config-label">PHONE NUMBER:</h4> 
                     <span className="config-value">Ends in **00</span> 
                     <button className="config-button" onClick={() => navigate('/ChangeNumber')}>
