@@ -26,6 +26,33 @@ html, body {
   flex-grow: 1;
 }
 
+.home-featured {
+  width: 100%;
+  max-width: 1000px;
+  margin-bottom: 60px;
+  display: flex;
+  justify-content: center;
+}
+
+.home-featured .home-catalog-item {
+  width: 100%;
+  max-width: 700px;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  transform: scale(1.05);
+}
+
+.home-featured .home-image {
+  max-width: 600px;
+  width: 100%;
+}
+
+.home-featured .home-button {
+  font-size: 18px;
+  padding: 12px 24px;
+}
+
 /* Catálogo general */
 .home-catalog {
   display: flex;
@@ -105,6 +132,10 @@ html, body {
     flex: 1 1 calc(50% - 20px);
     max-width: calc(50% - 20px);
   }
+
+  .home-featured {
+    margin-top: 250px; /* Reducido para pantallas medianas */
+  }
 }
 
 @media (max-width: 768px) {
@@ -130,5 +161,9 @@ html, body {
   .home-button {
     padding: 8px 16px;
     font-size: 14px;
+  }
+
+  .home-featured {
+    margin-top: 100px; /* Aún más pequeño en pantallas muy pequeñas */
   }
 }
