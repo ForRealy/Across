@@ -1,24 +1,100 @@
-.profile{
-    background-color:dimgrey;
+/* Contenedor principal */
+.config-container {
+    max-width: 800px;
+    margin-top: 60px;
     padding: 20px;
-    margin: 10px;
-    border-radius: 8px;
+    font-family: Arial, sans-serif;
+    background-color: lightgray;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.contactInfo{
-    background-color:dimgrey;
-    padding: 20px;
-    margin: 10px;
-    border-radius: 8px;
+/* Título */
+.config-title {
+    text-align: center;
+    color: #333;
 }
 
-.dangerZone{
-    background-color:dimgrey;
-    padding: 20px;
-    margin: 10px;
+/* Secciones */
+.config-section {
+    margin-bottom: 20px;
+    padding: 15px;
     border-radius: 8px;
+    background-color: rgba(105, 105, 105, 0.8);
 }
 
-.dangerZone button{
-    background-color: red;
+.config-section h3{ 
+    font-size: 24px;
+}
+
+.config-profile, .config-contact, .config-label{
+    margin-top: 10px;
+    color: black;
+    
+}
+
+.config-danger{
+    margin-top: 10px;
+    font-weight: bold;
+    color: darkred;
+}
+
+.config-value {
+    font-size: 16px;
+    margin-left: 5px;
+    color: white;
+}
+
+.config-info {
+    font-size: 12px;
+}
+
+/* Botones */
+.config-button {
+    background-color: darkred;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    margin-left: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.config-button:hover {
+    background-color: #0056b3;
+}
+
+
+/* Botón de eliminar cuenta */
+.config-danger-button {
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.config-danger-button:hover {
+    background-color: #c9302c;
+}
+
+/* Botón de confirmar cambios */
+.config-confirm-button {
+    display: block;
+    width: 100%;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.3s;
+}
+
+.config-confirm-button:hover {
+    background-color: #218838;
 }

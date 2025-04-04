@@ -20,50 +20,79 @@ const EditProfile: React.FC = () => {
     };
 
     return (
-        <div className="container">
-          <Header username="Player123" />
-          <div className="general">
-            <h2>GENERAL</h2>
-            <form>
+        <div className="edit-profile-container">
+          <Header />
+          
+          {/* Sección General */}
+          <div className="edit-profile-section general">
+            <h2 className="edit-profile-header">GENERAL</h2>
+            <form className="edit-profile-form">
                 <label htmlFor="profile_name">PROFILE NAME:</label>
-                <input type="text" id="profile_name" name="profile_name" />
+                <input 
+                    type="text" 
+                    id="profile_name" 
+                    name="profile_name" 
+                    className="edit-profile-input"
+                />
 
                 <label htmlFor="real_name">REAL NAME:</label>
-                <input type="text" id="real_name" name="real_name" />
+                <input 
+                    type="text" 
+                    id="real_name" 
+                    name="real_name" 
+                    className="edit-profile-input"
+                />
 
                 <label htmlFor="username">USERNAME:</label>
-                <input type="text" id="username" name="username" />
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    className="edit-profile-input"
+                />
 
                 <label htmlFor="biography">BIOGRAPHY:</label>
-                <input type="text" id="biography" name="biography" />
+                <input 
+                    type="text" 
+                    id="biography" 
+                    name="biography" 
+                    className="edit-profile-input"
+                />
             </form>
           </div>
-          <div className="location">
-            <h2>LOCATION</h2>
+          
+          {/* Sección de Ubicación */}
+          <div className="edit-profile-section location">
+            <h2 className="edit-profile-header">LOCATION</h2>
             <form>
                 <label htmlFor="country">COUNTRY:</label>
-                <select id="country" name="country">
+                <select id="country" name="country" className="edit-profile-input">
                     <option value="spain">Spain</option>
+                    <option value="english">Italy</option>
                     <option value="france">France</option>
                     <option value="germany">Germany</option>
                 </select>
             </form>
           </div>
-          <div className="preferences">
-            <h2>STORE PREFERENCES</h2>
-            <div 
-              className={`switch ${encendido ? 'on' : 'off'}`} 
-              onClick={toggleEncendido}
-            >
-              <div className="slider"></div>
+          
+          {/* Sección de Preferencias */}
+          <div className="edit-profile-section preferences">
+            <h2 className="edit-profile-header">PREFERENCES</h2>
+
+            <div className="preference-container">
+              <p>{encendido ? 'Store preferences enables' : 'Store preferences disabled'}</p>
+              <div
+                className={`preference-switch ${encendido ? 'on' : 'off'}`} 
+                onClick={toggleEncendido}
+              >
+                <div className="slider"></div>
+              </div>
             </div>
-            <p>{encendido ? 'Store preferences enabled' : 'Store preferences disabled'}</p>
           </div>
           <div>
-            <button onClick={confirm}> Change </button>
-          </div>
+              <button className="confirm-button" onClick={confirm}>Change</button>
+            </div>
         </div>
-        
     );
 };
 

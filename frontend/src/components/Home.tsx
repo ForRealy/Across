@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
-import '../assets/Home.css'; // Importar el archivo CSS
+import { userAuth } from "./AuthContext";
+import "../assets/Home.css";
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
-  const [cart, setCart] = useState<string[]>([]);
-
-  //Cambiar todo el carrito cuando Alejandro haga el backend!!
+  const { user } = userAuth(); 
+    const [cart, setCart] = useState<string[]>([]);
 
   // Cargar el carrito desde localStorage cuando se monta el componente
   useEffect(() => {
@@ -15,14 +15,14 @@ const Home: React.FC = () => {
     if (savedCart) {
       setCart(JSON.parse(savedCart)); // Si hay carrito guardado, cargarlo
     }
-  }, []); // Se ejecuta una vez cuando el componente se monta
+  }, []);
 
   // Guardar el carrito en localStorage cada vez que cambia
   useEffect(() => {
     if (cart.length > 0) {
-      localStorage.setItem("cart", JSON.stringify(cart)); // Guardar el carrito
+      localStorage.setItem("cart", JSON.stringify(cart));
     }
-  }, [cart]); // Se ejecuta cada vez que el carrito cambia
+  }, [cart]);
 
   const imagesEldenRing = [
     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrhWz5dvYt_FD2k0KvELKFQWecENideIjHmw&s",
@@ -33,105 +33,43 @@ const Home: React.FC = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const handleNext = () => {
-    if (currentImageIndex < imagesEldenRing.length - 1) {
-      setCurrentImageIndex(currentImageIndex + 1);
-    }
+    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % imagesEldenRing.length);
   };
 
   const handlePrevious = () => {
-    if (currentImageIndex > 0) {
-      setCurrentImageIndex(currentImageIndex - 1);
-    }
+    setCurrentImageIndex((prevIndex) => (prevIndex - 1 + imagesEldenRing.length) % imagesEldenRing.length);
   };
+
+  const games = [
+    { name: "Elden Ring", route: "/eldenring" },
+    { name: "God of War", route: "/godofwar" },
+    { name: "Cyberpunk 2077", route: "/cyberpunk" },
+    { name: "Hollow Knight", route: "/hollowknight" },
+  ];
 
   return (
     <div className="container">
-      <Header username="Player123" />
-      
+      {/* Header con el nombre del usuario autenticado */}
+      <Header />
+
       <main className="main">
-        {/* Primer juego */}
-        <section className="catalog">
-          <div className="imageContainer">
-            <img
-              src={imagesEldenRing[currentImageIndex]}
-              alt="Juego"
-              className="image"
-              onClick={() => navigate("/EldenRing")}            
-            />
-          </div>
+        {games.map((game, index) => (
+          <section key={index} className="catalog">
+            <div className="imageContainer">
+              <img
+                src={imagesEldenRing[currentImageIndex]}
+                alt={game.name}
+                className="image"
+                onClick={() => navigate(game.route)}
+              />
+            </div>
 
-          <div>
-            <button onClick={handlePrevious} className="button">
-              Anterior
-            </button>
-            <button onClick={handleNext} className="button">
-              Siguiente
-            </button>
-          </div>
-        </section>
-
-        {/* Segundo juego */}
-        <section className="catalog">
-          <div className="imageContainer">
-            <img
-              src={imagesEldenRing[currentImageIndex]}
-              alt="Juego"
-              className="image"
-              onClick={() => navigate("/home")}            
-            />
-          </div>
-
-          <div>
-            <button onClick={handlePrevious} className="button">
-              Anterior
-            </button>
-            <button onClick={handleNext} className="button">
-              Siguiente
-            </button>
-          </div>
-        </section>
-
-        {/* Tercer juego */}
-        <section className="catalog">
-          <div className="imageContainer">
-            <img
-              src={imagesEldenRing[currentImageIndex]}
-              alt="Juego"
-              className="image"
-              onClick={() => navigate("/home")}            
-            />
-          </div>
-
-          <div>
-            <button onClick={handlePrevious} className="button">
-              Anterior
-            </button>
-            <button onClick={handleNext} className="button">
-              Siguiente
-            </button>
-          </div>
-        </section>
-
-        {/* Cuarto juego */}
-        <section className="catalog">
-          <div className="imageContainer">
-            <img
-              src={imagesEldenRing[currentImageIndex]}
-              alt="Juego"
-              className="image"
-              onClick={() => navigate("/home")}            
-            />
-          </div>
-
-          <div>
-            <button onClick={handlePrevious} className="button">
-              Anterior
-            </button>
-            <button onClick={handleNext} className="button">
-              Siguiente
-            </button>
-          </div>
-        </section>
+            <div>
+              <button onClick={handlePrevious} className="button">Anterior</button>
+              <button onClick={handleNext} className="button">Siguiente</button>
+            </div>
+          </section>
+        ))}
       </main>
     </div>
   );

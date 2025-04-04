@@ -1,23 +1,34 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import "../assets/Header.css"; 
+import { userAuth } from "./AuthContext"; // Importamos el contexto de autenticación
+import "../assets/Header.css";
 
-interface HeaderProps {
-  username: string;
-}
+const Header: React.FC = () => {
+  const { user, logout } = userAuth(); // Obtener usuario autenticado y función logout
 
-const Header: React.FC<HeaderProps> = ({ username }) => {
   return (
-    <header className="header">
-      <h1 className="title">Across</h1>
-      <Link to="/" className="link">Home</Link>
-      <Link to="/library" className="link">Library</Link>
-      <Link to="/cart" className="link">Cart</Link>
-      <Link to="/downloads" className="link">Downloads</Link>
-      <Link to="/wishlist" className="link">Wishlist</Link>
-      <Link to="/login" className="link">Login</Link>
-      <Link to="/register" className="link">Register</Link>
-      <Link to="/profile" className="link">{username}</Link>
+    <header className="header-container">
+      <h1 className="header-title">Across</h1>
+      <nav className="nav-links">
+        <Link to="/" className="nav-link">Home</Link>
+        <Link to="/library" className="nav-link">Library</Link>
+        <Link to="/cart" className="nav-link">Cart</Link>
+        <Link to="/downloads" className="nav-link">Downloads</Link>
+
+        {/* Si el usuario está autenticado, mostramos su perfil y el botón de logout */}
+        {user ? (
+          <>
+            <Link to="/profile" className="nav-link username-link">{user.username}</Link>
+            <button onClick={logout} className="nav-link logout-button">Logout</button>
+          </>
+        ) : (
+          // Si no está autenticado, mostramos Login y Register
+          <>
+            <Link to="/login" className="nav-link">Login</Link>
+            <Link to="/register" className="nav-link">Register</Link>
+          </>
+        )}
+      </nav>
     </header>
   );
 };
