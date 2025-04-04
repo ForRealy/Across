@@ -5,6 +5,7 @@ import '../assets/Login-register.css';
 const Login: React.FC = () => {
     const [name, setName] = useState<string>("");
     const [password, setPassword] = useState<string>("");
+    const [passwordConfirm, setPasswordConfirm] = useState("");
     const [email, setMail] = useState<string>("");
     const [error, setError] = useState<string>("");
     const navigate = useNavigate();
@@ -60,7 +61,7 @@ const Login: React.FC = () => {
                     />
                 </div>
                 <div className="input-container">
-                    <label htmlFor="password"> Contraseña: </label>
+                    <label htmlFor="password">Contraseña:</label>
                     <input
                         type="password"
                         id="password"
@@ -70,12 +71,12 @@ const Login: React.FC = () => {
                     />
                 </div>
                 <div className="input-container">
-                    <label htmlFor="password"> Repite la contraseña: </label>
+                    <label htmlFor="passwordConfirm">Repite la contraseña:</label>
                     <input
                         type="password"
-                        id="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        id="passwordConfirm"
+                        value={passwordConfirm}
+                        onChange={(e) => setPasswordConfirm(e.target.value)}
                         placeholder="Confirma tu contraseña"
                     />
                 </div>
@@ -86,11 +87,11 @@ const Login: React.FC = () => {
                         id="mail"
                         value={email}
                         onChange={(e) => setMail(e.target.value)}
-                        placeholder="INgresa tu email"
+                        placeholder="Ingresa tu email"
                     />
                 </div>
                 {error && <p className="error-message"> {error} </p>}
-                <button type="submit" className="register-btn"> Registrate </button>
+                <button type="submit" className="register-btn" onClick={() => navigate("/login")}> Registrate </button>
                 <button 
                     type="button" 
                     className="login-btn" 
