@@ -19,7 +19,9 @@
     "express": "^4.21.2",
     "mysql": "^2.18.1",
     "mysql2": "^3.14.0",
-    "save-dev": "^0.0.1-security"
+    "reflect-metadata": "^0.2.2",
+    "save-dev": "^0.0.1-security",
+    "typeorm": "^0.3.22"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
