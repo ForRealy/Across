@@ -7,11 +7,14 @@ import Library from "./Library";
 import EldenRing from "./EldenRing";
 import Downloads from "./Downloads";
 import Profile from "./Profile";
+import GamesProfile from "./GamesProfile";
+import Wishlist from "./Wishlist";
+import ReviewProfile from "./ReviewsProfile";
+import Friends from "./Friends";
 import Cart from "./Cart";
 import Configuration from "./Configuration";
 import EditProfile from "./EditProfile";
-import ChangeEmail from "./ChangeEmail";
-import ChangeNumber from "./ChangeNumber";
+import ContactInfo from "./ContactInfo";
 
 function App() {
   return (
@@ -26,10 +29,13 @@ function App() {
         <Route path="/downloads" element={<Downloads />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/gamesprofile" element={<GamesProfile />} />
+        <Route path="/wishlist" element={<Wishlist />} />
+        <Route path="/reviews" element={<ReviewProfile />} />
+        <Route path="/friends" element={<Friends />} />
         <Route path="/configuration" element={<Configuration />} />
         <Route path="/editProfile" element={<EditProfile />} />
-        <Route path="/changeEmail" element={<ChangeEmail />} />
-        <Route path="/changeNumber" element={<ChangeNumber />} />
+        <Route path="/ContactInfo" element={<ContactInfo />} />
       </Routes>
     </Router>
     </AuthProvider>

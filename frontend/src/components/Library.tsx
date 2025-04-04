@@ -10,24 +10,10 @@ import halfLifeCover from "../media/half-life.jpeg";
 import crysisCover from "../media/crysis.jpeg";
 
 const games = [
-  { title: "Elden Ring", 
-    cover: eldenRingCover, // Usar la variable importada
-    path: "/EldenRing" 
-  },
-  {
-    title: "Borderlands",
-    cover: borderlandsCover, // Usar la variable importada
-    path: "/Borderlands"
-  },
-  { title: "Half-life", 
-    cover: halfLifeCover, // Usar la variable importada
-    path: "/Half-life" 
-  },
-  { 
-    title: "Crysis", 
-    cover: crysisCover, // Usar la variable importada
-    path: "/Crysis" 
-  },
+  { title: "Elden Ring", cover: eldenRingCover, path: "/EldenRing" },
+  { title: "Borderlands", cover: borderlandsCover, path: "/Borderlands" },
+  { title: "Half-life", cover: halfLifeCover, path: "/Half-life" },
+  { title: "Crysis", cover: crysisCover, path: "/Crysis" },
 ];
 
 const Library: React.FC = () => {
@@ -46,33 +32,42 @@ const Library: React.FC = () => {
   };
 
   return (
-    <div className="container">
-      <Header username="Player123" />
-      <div className="main-content">
-        <aside className="sidebar">
-          <h2>Juegos</h2>
-          <ul>
+    <div className="library-container">
+      <Header />
+      <div className="library-main-content">
+        <aside className="library-sidebar">
+          <h2 className="library-sidebar-title">Juegos</h2>
+          <ul className="library-game-list">
             {games.map((game, index) => (
-              <li key={index} onClick={() => navigate(game.path)}>
+              <li
+                key={index}
+                onClick={() => navigate(game.path)}
+                className="library-game-link"
+              >
                 {game.title}
               </li>
             ))}
           </ul>
         </aside>
 
-        <main className="content">
-          <h1> Juegos </h1>
-          <div className="gallery">
+        <main className="library-content">
+          <h1 className="library-title">Juegos</h1>
+          <div className="library-gallery">
             {games.map((game, index) => (
-              <div key={index} className="game-item">
+              <div key={index} className="library-game-item">
                 <img
                   src={game.cover}
                   alt={game.title}
-                  className="game-cover"
+                  className="library-game-cover"
                   onClick={() => navigate(game.path)}
                 />
-                <div className="button-container">
-                  <button onClick={() => addToCart(game.title)}>Añadir al carrito</button>
+                <div className="library-button-container">
+                  <button
+                    className="library-add-button"
+                    onClick={() => addToCart(game.title)}
+                  >
+                    Añadir al carrito
+                  </button>
                 </div>
               </div>
             ))}
@@ -82,4 +77,5 @@ const Library: React.FC = () => {
     </div>
   );
 };
+
 export default Library;

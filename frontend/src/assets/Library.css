@@ -1,116 +1,123 @@
 /* Contenedor principal */
-.container {
+.library-container {
   display: flex;
   flex-direction: row;
   width: 100%;
   height: 100vh;
   background-color: #600000; /* Fondo granate */
-  
 }
 
 /* Contenido principal */
-.main-content {
+.library-main-content {
   display: flex;
   flex-grow: 1;
   margin-left: 250px; /* Alinea el contenido a la derecha del sidebar */
   padding-top: 75px; /* Ajusta el contenido para que no quede debajo del header */
 }
 
-/* Sidebar (AHORA PEGADO A LA IZQUIERDA) */
-.sidebar {
-  width: 250px; /* Ancho fijo */
-  height: calc(100vh - 75px); /* Resta la altura del header + margen extra */
+/* Sidebar */
+.library-sidebar {
+  width: 250px;
+  height: calc(100vh - 60px); /* Ocupa toda la altura visible menos el header */
   background-color: dimgrey;
   padding: 20px;
   display: flex;
   flex-direction: column;
-  position: fixed; /* Mantiene el sidebar fijo */
-  top: 75px; /* El sidebar comienza justo debajo del header */
+  position: fixed;
+  top: 60px; /* Empieza justo debajo del header */
   left: 0;
-  overflow-y: auto; /* Permite desplazamiento si el contenido es grande */
-}
-
-/* Contenedor principal */
-.content {
-  padding: 20px;
-  color: white;
-  flex-grow: 1;
-  display: flex;
-  justify-content: flex-start; /* El contenido se alinea hacia la izquierda dentro de su contenedor */
-  align-items: center; /* Alinea el contenido verticalmente */
-  height: 100vh; /* Ajusta la altura para que no tape el header */
-  width: 100%;
+  overflow-y: auto;
   box-sizing: border-box;
 }
 
 
-/* Estilos del Sidebar */
-.sidebar ul {
+.library-sidebar-title {
+  color: white;
+  margin-bottom: 10px;
+}
+
+.library-game-list {
   list-style: none;
   padding: 0;
 }
 
-.sidebar li {
+.library-game-link {
   padding: 10px;
   cursor: pointer;
   color: white;
   transition: background 0.3s;
 }
 
-.sidebar li:hover {
+.library-game-link:hover {
   background-color: #444;
 }
 
-/* Galería de juegos */
-.gallery {
+/* Contenido de la galería */
+.library-content {
+  padding: 20px;
+  color: white;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.library-title {
+  margin-bottom: 20px;
+}
+
+.library-gallery {
   display: flex;
   flex-wrap: wrap;
   gap: 40px;
-  align-items: center;
   justify-content: center;
+  align-items: center;
 }
 
-.game-item {
+.library-game-item {
   width: 200px;
   text-align: center;
 }
 
-.game-cover {
+.library-game-cover {
   width: 100%;
   border-radius: 10px;
   cursor: pointer;
 }
 
-.button-container {
+.library-button-container {
   margin-top: 10px;
 }
 
-button {
+.library-add-button {
   padding: 10px;
   background-color: white;
   color: black;
   border: none;
   cursor: pointer;
   border-radius: 5px;
+  transition: background-color 0.3s;
 }
 
-button:hover {
+.library-add-button:hover {
   background-color: #ddd;
 }
 
 /* Responsive: Ajustar en pantallas más pequeñas */
 @media (max-width: 768px) {
-  .main-content {
+  .library-main-content {
     flex-direction: column;
   }
 
-  .sidebar {
+  .library-sidebar {
     position: relative;
     width: 100%;
     min-height: auto;
   }
 
-  .content {
+  .library-content {
     margin-left: 0;
   }
 }

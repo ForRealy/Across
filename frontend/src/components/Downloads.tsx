@@ -85,10 +85,10 @@ const Downloads: React.FC = () => {
 
   return (
     <div className="container">
-      <Header username="Player123" />
+      <Header />
       {/* Verificamos si hay juegos para descargar */}
       {games.length === 0 ? (
-        <p>No tienes juegos para descargar.</p>
+        <p className="no-games-message">No tienes juego para descargar.</p>
       ) : (
         games.map((game, index) => (
           <div className="downloads" key={index}>
@@ -100,16 +100,31 @@ const Downloads: React.FC = () => {
             <p><strong>{game.status}</strong></p> {/* Mostrar el estado de la descarga */}
             
             {/* Botones para controlar la descarga */}
-            <button onClick={() => handlePrimaryButtonClick(index)}>{game.buttonLabel}</button>
+            <button
+              className="primary-button"
+              onClick={() => handlePrimaryButtonClick(index)}
+            >
+              {game.buttonLabel}
+            </button>
 
             {/* Mostrar botón de cancelación solo si el estado es "UPDATING" */}
             {game.status === "UPDATING" && (
-              <button onClick={() => handleCancelButtonClick(index)}>{game.cancelLabel}</button>
+              <button
+                className="cancel-button"
+                onClick={() => handleCancelButtonClick(index)}
+              >
+                {game.cancelLabel}
+              </button>
             )}
             
             {/* Botón Eliminar para juegos que están cancelados o completados */}
             {game.status === "CANCELLED" || game.status === "COMPLETED" ? (
-              <button onClick={() => handleDeleteButtonClick(index)}>Delete</button>
+              <button
+                className="delete-button"
+                onClick={() => handleDeleteButtonClick(index)}
+              >
+                Delete
+              </button>
             ) : null}
           </div>
         ))

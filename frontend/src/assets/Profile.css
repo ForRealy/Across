@@ -38,6 +38,10 @@
     cursor: pointer;
 }
 
+.profile-details button:hover {
+    background-color: #666;
+}
+
 /* Contenido principal: juegos a la izquierda, info a la derecha */
 .profile-content {
     display: flex;
@@ -50,7 +54,7 @@
 /* Juegos a la izquierda */
 .profile-games {
     flex: 2;
-    background-color: #222;
+    background-color: lightgray;
     padding: 20px;
     border-radius: 8px;
 }
@@ -70,6 +74,11 @@
     margin: 0 5px;
     cursor: pointer;
 }
+
+.games-tabs button:hover {
+    background-color: #666;
+}
+
 
 .games-list {
     background-color: #333;
@@ -97,4 +106,8 @@
     padding: 10px;
     margin-top: 5px;
     cursor: pointer;
+}
+
+.profile-info button:hover {
+    background-color: #666;
 }

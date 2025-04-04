@@ -33,21 +33,16 @@ const Configuration: React.FC = () => {
                 <h3>Contact info</h3> 
                 <div className="account-row">
                     <h4 className="config-label">EMAIL:</h4> 
-                    <span className="config-value">*****@gmail.com</span> 
-                    <button className="config-button" onClick={() => navigate('/ChangeEmail')}>
-                        Change email
-                    </button>
+                    <span className="config-value">*****@gmail.com</span>
                 </div>
                 <div className="account-row">
                     <h4 className="config-label">PHONE NUMBER:</h4> 
-                    <span className="config-value">Ends in **00</span> 
-                    <button className="config-button" onClick={() => navigate('/ChangeNumber')}>
-                        Change number
-                    </button> 
-                    <button className="config-button" onClick={() => navigate('/verifyNumber')}>
-                        Verify number
-                    </button>
+                    <span className="config-value">Ends in **00</span>
                 </div>
+
+                <button className="config-button" onClick={() => navigate('/ContactInfo')}>
+                        Change contact info
+                    </button>
             </div>
 
             <div className="config-section config-danger">

@@ -5,7 +5,7 @@ import { userAuth } from "./AuthContext";
 import "../assets/Profile.css";
 import Foto_Perfil from "../media/Foto_Perfil.jpg"
 
-const Profile: React.FC = () => {
+const ReviewsProfile: React.FC = () => {
     const navigate = useNavigate();
     const { user } = userAuth();
 
@@ -30,17 +30,10 @@ const Profile: React.FC = () => {
 
             <div className="profile-content">
                 <div className="profile-games">
-                    <div className="games-tabs">
-                        <button>Recently Played</button>
-                        <button>All games</button>
-                        <button>Perfect Games</button>
-                        <button>Followed</button>
-                    </div>
                     <div className="games-list">
-                        <p>Lista de juegos</p>
+                        <p>Lista de reviews</p>
                     </div>
                 </div>
-
                 <div className="profile-info">
                     <p>Status: ?</p>
                     <p>Level: ?</p>
@@ -57,4 +50,4 @@ const Profile: React.FC = () => {
     );
 };
 
-export default Profile;
+export default ReviewsProfile;

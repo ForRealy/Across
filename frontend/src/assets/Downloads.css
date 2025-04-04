@@ -8,6 +8,16 @@
     width: 90%; /* Evita que se pegue a los bordes en pantallas pequeñas */
     margin-left: auto;
     margin-right: auto; /* Centra el contenedor */
+    margin-top: 80px; /* Agregado para bajar el contenido hacia abajo */
+}
+
+/* Estilo para el mensaje cuando no hay juegos */
+.no-games-message {
+    padding: 20px;
+    font-size: 20px;
+    text-align: center;
+    margin-top: 50px; /* Espaciado desde la parte superior */
+    font-weight: bold;
 }
 
 /* Sección de descargas */
@@ -16,9 +26,51 @@
     align-items: center;
     gap: 15px;
     flex-wrap: wrap;
-    margin-top: 100px; /* Añadido para separar del header */
+    margin-top: 30px; /* Ajustado para no estar tan cerca del header */
     background-color: #444;
     padding: 10px;
     border-radius: 5px;
     width: 100%;
+}
+
+/* Estilo único para todos los botones */
+.primary-button {
+  background-color: #007bff; /* Azul */
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.primary-button:hover {
+  background-color: #0056b3; /* Azul más oscuro */
+}
+
+/* Estilo para el botón de cancelación */
+.cancel-button {
+  background-color: #dc3545; /* Rojo */
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.cancel-button:hover {
+  background-color: #c82333; /* Rojo más oscuro */
+}
+
+/* Estilo para el botón de eliminación */
+.delete-button {
+  background-color: #6c757d; /* Gris */
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  background-color: #5a6268; /* Gris más oscuro */
 }

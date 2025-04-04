@@ -5,7 +5,7 @@ import { userAuth } from "./AuthContext";
 import "../assets/Profile.css";
 import Foto_Perfil from "../media/Foto_Perfil.jpg"
 
-const Profile: React.FC = () => {
+const GamesProfile: React.FC = () => {
     const navigate = useNavigate();
     const { user } = userAuth();
 
@@ -57,4 +57,4 @@ const Profile: React.FC = () => {
     );
 };
 
-export default Profile;
+export default GamesProfile;

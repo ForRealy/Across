@@ -57,7 +57,7 @@
 
 /* Botones */
 .config-button {
-    background-color: darkred;
+    background-color: #b60000;
     color: white;
     border: none;
     padding: 8px 12px;
@@ -68,7 +68,7 @@
 }
 
 .config-button:hover {
-    background-color: #0056b3;
+    background-color: darkred;
 }
 
 

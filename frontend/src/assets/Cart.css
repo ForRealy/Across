@@ -1,57 +1,109 @@
-/* Estilo para el carrito y contenido principal */
-.container {
+/* Contenedor principal del carrito */
+.cart-container {
   padding: 20px;
-  color: white;
-  background-color: #600000; /* Fondo granate */
+  max-width: 800px;
+  color: black;
+  background-color: lightgray;
   font-family: Arial, sans-serif;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Ajustar el contenido general para que no se solape con el header */
-.content {
+/* Contenido centrado y espaciado correctamente */
+.cart-content {
   display: flex;
   flex-direction: column;
   text-align: center;
-  margin-left: auto;
-  margin-right: auto; /* Centra el contenedor */
-  margin-top: 150px; /* Aumenta este margen si es necesario */
+  margin: 0 auto; /* Ya centrado por el container */
+  margin-top: 30px;
 }
 
-/* Estilos para la sección de pago */
-.payment-section {
-  margin-top: 50px; /* Añade más espacio entre el contenido y la sección de pago */
+/* Lista de juegos */
+.cart-list {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
 }
 
-.payment-section h2 {
-  color: white;
+.cart-list li {
+  margin: 10px 0;
+  font-size: 18px;
 }
 
-.payment-section label {
-  color: white;
-  margin-bottom: 8px; /* Agrega un poco de espacio debajo de cada label */
+/* Sección de pago */
+.cart-payment-section {
+  margin-top: 50px;
 }
 
-.payment-section input {
+.cart-payment-section h2 {
+  margin-bottom: 20px;
+}
+
+.cart-payment-section label {
+  display: block;
+  margin-bottom: 8px;
+  text-align: left;
+  max-width: 400px;
+  margin-inline: auto;
+}
+
+.cart-payment-section input {
   padding: 10px;
   width: 100%;
   max-width: 400px;
   border-radius: 5px;
   border: 1px solid #ccc;
   font-size: 16px;
-  margin-bottom: 15px; /* Separación entre campos */
+  margin-bottom: 15px;
 }
 
-/* Ajustes adicionales para los botones y formularios */
-button {
-  margin-top: 20px;
-  cursor: pointer;
-  padding: 10px 15px;
-  background-color: #ff6600;
+/* Mensaje de éxito */
+.cart-payment-success {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #004d00;
   color: white;
-  border: none;
-  font-size: 16px;
   border-radius: 5px;
 }
 
-button:hover {
+/* Estilos para el botón de pago */
+.cart-pay-button {
+  padding: 12px 18px;
+  background-color: #ff6600;
+  color: white;
+  border: none;
+  font-size: 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background-color 0.3s ease;
+}
+
+.cart-pay-button:hover {
   background-color: #e65c00;
+}
+
+.cart-pay-button:focus {
+  outline: none; /* Elimina el borde azul de foco */
+}
+
+/* Estilos para el botón de volver */
+.cart-back-button {
+  padding: 12px 18px;
+  background-color: #004d00;
+  color: white;
+  border: none;
+  font-size: 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background-color 0.3s ease;
+}
+
+.cart-back-button:hover {
+  background-color: #003300;
+}
+
+.cart-back-button:focus {
+  outline: none; /* Elimina el borde azul de foco */
 }

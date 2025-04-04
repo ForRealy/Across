@@ -3,9 +3,6 @@ import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import "../assets/Cart.css";
 
-
-//Cambiar todo cuando Alejandro haga el backend
-
 const Cart: React.FC = () => {
   const navigate = useNavigate();
   const [cart, setCart] = useState<string[]>([]);
@@ -17,68 +14,57 @@ const Cart: React.FC = () => {
   });
   const [paymentSuccess, setPaymentSuccess] = useState(false);
 
-  // Cargar el carrito desde localStorage al montar el componente
   useEffect(() => {
     const savedCart = JSON.parse(localStorage.getItem("cart") || "[]");
     setCart(savedCart);
   }, []);
 
   const clearCart = () => {
-    // Limpiar el carrito y actualizar localStorage
     setCart([]);
     localStorage.setItem("cart", JSON.stringify([]));
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setPaymentData({
-      ...paymentData,
-      [name]: value,
-    });
+    setPaymentData({ ...paymentData, [name]: value });
   };
 
   const handlePayment = () => {
-    if (
-      paymentData.cardNumber &&
-      paymentData.expirationDate &&
-      paymentData.cvv &&
-      paymentData.name
-    ) {
-      // Simulación de pago exitoso
+    const { cardNumber, expirationDate, cvv, name } = paymentData;
+    if (cardNumber && expirationDate && cvv && name) {
       setPaymentSuccess(true);
-      // Guardar los juegos comprados en localStorage bajo una clave 'purchasedGames'
       const purchasedGames = JSON.parse(localStorage.getItem("purchasedGames") || "[]");
       const newPurchasedGames = [...purchasedGames, ...cart];
       localStorage.setItem("purchasedGames", JSON.stringify(newPurchasedGames));
-      clearCart(); // Vaciar carrito después del pago exitoso
+      clearCart();
     } else {
       alert("Por favor, completa todos los campos de pago.");
     }
   };
 
   return (
-    <div className="container">
-      <Header username="Player123" />
-      <main className="content">
-        <h1>Carrito de Compras</h1>
+    <div className="cart-container">
+      <Header />
+      <main className="cart-content">
+        <h1 className="cart-title">Carrito de Compras</h1>
+
         {cart.length === 0 ? (
-          <p>Tu carrito está vacío.</p>
+          <p className="cart-empty-message">Tu carrito está vacío.</p>
         ) : (
-          <>
-            <ol>
+          <div className="cart-list-section">
+            <ol className="cart-list">
               {cart.map((game, index) => (
-                <li key={index}>{game}</li>
+                <li key={index} className="cart-game-item">{game}</li>
               ))}
             </ol>
-            <button onClick={clearCart}>Vaciar Carrito</button>
-          </>
+            <button className="cart-clear-button" onClick={clearCart}>Vaciar Carrito</button>
+          </div>
         )}
 
-        {/* Sección de pago */}
-        <div className="payment-section">
-          <h2>Datos de Pago</h2>
-          <form>
-            <div className="form-group">
+        <div className="cart-payment-section">
+          <h2 className="cart-payment-title">Datos de Pago</h2>
+          <form className="cart-payment-form">
+            <div className="cart-form-group">
               <label htmlFor="name">Nombre en la tarjeta</label>
               <input
                 type="text"
@@ -90,7 +76,7 @@ const Cart: React.FC = () => {
                 required
               />
             </div>
-            <div className="form-group">
+            <div className="cart-form-group">
               <label htmlFor="cardNumber">Número de tarjeta</label>
               <input
                 type="text"
@@ -102,7 +88,7 @@ const Cart: React.FC = () => {
                 required
               />
             </div>
-            <div className="form-group">
+            <div className="cart-form-group">
               <label htmlFor="expirationDate">Fecha de expiración</label>
               <input
                 type="text"
@@ -114,7 +100,7 @@ const Cart: React.FC = () => {
                 required
               />
             </div>
-            <div className="form-group">
+            <div className="cart-form-group">
               <label htmlFor="cvv">CVV</label>
               <input
                 type="text"
@@ -126,21 +112,26 @@ const Cart: React.FC = () => {
                 required
               />
             </div>
-            <button type="button" onClick={handlePayment}>
+            <button
+              type="button"
+              className="cart-pay-button"
+              onClick={handlePayment}
+            >
               Pagar
             </button>
           </form>
         </div>
 
-        {/* Mensaje de éxito de pago */}
         {paymentSuccess && (
-          <div className="payment-success">
+          <div className="cart-payment-success">
             <h3>¡Pago exitoso!</h3>
             <p>Gracias por tu compra. Tu pedido será procesado.</p>
           </div>
         )}
-
-        <button onClick={() => navigate("/home")}>Volver a la Biblioteca</button>
+        
+        <button className="cart-back-button" onClick={() => navigate("/home")}>
+          Volver a la Biblioteca
+        </button>
       </main>
     </div>
   );
