@@ -7,17 +7,15 @@ import "../assets/Home.css";
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const { user } = userAuth(); 
-    const [cart, setCart] = useState<string[]>([]);
+  const [cart, setCart] = useState<string[]>([]);
 
-  // Cargar el carrito desde localStorage cuando se monta el componente
   useEffect(() => {
     const savedCart = localStorage.getItem("cart");
     if (savedCart) {
-      setCart(JSON.parse(savedCart)); // Si hay carrito guardado, cargarlo
+      setCart(JSON.parse(savedCart));
     }
   }, []);
 
-  // Guardar el carrito en localStorage cada vez que cambia
   useEffect(() => {
     if (cart.length > 0) {
       localStorage.setItem("cart", JSON.stringify(cart));
@@ -48,28 +46,27 @@ const Home: React.FC = () => {
   ];
 
   return (
-    <div className="container">
-      {/* Header con el nombre del usuario autenticado */}
+    <div className="home-container">
       <Header />
-
-      <main className="main">
-        {games.map((game, index) => (
-          <section key={index} className="catalog">
-            <div className="imageContainer">
-              <img
-                src={imagesEldenRing[currentImageIndex]}
-                alt={game.name}
-                className="image"
-                onClick={() => navigate(game.route)}
-              />
+      <main className="home-main">
+        <section className="home-catalog">
+          {games.map((game, index) => (
+            <div key={index} className="home-catalog-item">
+              <div className="home-image-container">
+                <img
+                  src={imagesEldenRing[currentImageIndex]}
+                  alt={game.name}
+                  className="home-image"
+                  onClick={() => navigate(game.route)}
+                />
+              </div>
+              <div className="home-buttons">
+                <button onClick={handlePrevious} className="home-button">Anterior</button>
+                <button onClick={handleNext} className="home-button">Siguiente</button>
+              </div>
             </div>
-
-            <div>
-              <button onClick={handlePrevious} className="button">Anterior</button>
-              <button onClick={handleNext} className="button">Siguiente</button>
-            </div>
-          </section>
-        ))}
+          ))}
+        </section>
       </main>
     </div>
   );

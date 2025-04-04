@@ -1,56 +1,89 @@
-/* Asegura que toda la página tenga el fondo granate */
+/* Fondo general para Home */
 html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  background-color: #600000 !important; /* Fuerza el color granate */
-  display: flex;
-  flex-direction: column;
+  background-color: #600000 !important;
+  font-family: Arial, sans-serif;
 }
 
-/* Estilos para el main (ahora siempre se expandirá correctamente) */
-.main {
+/* Contenedor principal */
+.home-container {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+}
+
+/* Main */
+.home-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 20px;
+  margin-top: 100px;
+  flex-grow: 1;
+}
+
+/* Catálogo general */
+.home-catalog {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
   width: 100%;
   max-width: 1200px;
-  padding: 20px;
-  margin-top: 100px; /* Da espacio al header */
-  flex-grow: 1; /* Hace que el main ocupe todo el espacio disponible */
-}
-
-/* Contenedor de cada juego */
-.catalog {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  max-width: 600px;
   margin-bottom: 30px;
 }
 
-/* Contenedor de la imagen */
-.imageContainer {
+/* Cada item del catálogo */
+.home-catalog-item {
+  flex: 1 1 calc(33.33% - 20px);
+  max-width: calc(33.33% - 20px);
+  padding: 15px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s;
+}
+
+.home-catalog-item:hover {
+  transform: scale(1.03);
+}
+
+/* Imagen */
+.home-image-container {
   display: flex;
   justify-content: center;
   width: 100%;
+  margin-bottom: 10px;
 }
 
-/* Estilo de la imagen */
-.image {
+.home-image {
   width: 100%;
-  max-width: 400px;
+  max-width: 300px;
   height: auto;
   object-fit: cover;
   border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.3s;
 }
 
-/* Estilo de los botones */
-.button {
-  margin: 10px;
+.home-image:hover {
+  transform: scale(1.05);
+}
+
+/* Botones */
+.home-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.home-button {
   padding: 10px 20px;
   background-color: #fff;
   color: black;
@@ -58,25 +91,43 @@ html, body {
   border-radius: 5px;
   cursor: pointer;
   font-size: 16px;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
-.button:hover {
+.home-button:hover {
   background-color: #ddd;
+  transform: scale(1.05);
 }
 
-/* Diseño responsivo */
+/* Responsivo */
+@media (max-width: 1024px) {
+  .home-catalog-item {
+    flex: 1 1 calc(50% - 20px);
+    max-width: calc(50% - 20px);
+  }
+}
+
 @media (max-width: 768px) {
-  .main {
+  .home-main {
     padding: 10px;
     margin-top: 110px;
   }
 
-  .image {
+  .home-catalog {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .home-catalog-item {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+
+  .home-image {
     width: 95%;
   }
 
-  .button {
+  .home-button {
     padding: 8px 16px;
     font-size: 14px;
   }
