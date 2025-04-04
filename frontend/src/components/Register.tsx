@@ -16,7 +16,7 @@ const Login: React.FC = () => {
         }
         else {
             setError("");
-            fetch("http://localhost:3001/api/register", {
+            fetch("http://localhost:3000/api/register", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
