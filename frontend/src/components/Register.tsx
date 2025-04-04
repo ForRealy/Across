@@ -94,9 +94,9 @@ const Login: React.FC = () => {
                 <button 
                     type="button" 
                     className="login-btn" 
-                    onClick={() => navigate("/")} // Redirigir al hacer clic
+                    onClick={() => navigate("/login")} // Redirigir al hacer clic
                 >
-                    ¿No tienes cuenta? Regístrate
+                    ¿Ya tienes cuenta? Inicai sesión
                 </button>
             </form>
         </div>

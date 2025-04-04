@@ -29,7 +29,7 @@ const EldenRing: React.FC = () => {
 
   return (
     <div className="container">
-      <Header username="Player123" />
+      <Header />
 
       {/* Título y botones */}
       <div className="game-header">
