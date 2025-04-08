@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import Header from "./Header";
-import "../assets/Downloads.css";
+import Header from "../components/Header";
+import "../styles/Downloads.css";
 
 const Downloads: React.FC = () => {
   const [games, setGames] = useState<any[]>([]);

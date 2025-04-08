@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { userAuth } from "./AuthContext"; // Importamos el contexto de autenticación
-import "../assets/Header.css";
+import { userAuth } from "../pages/AuthContext"; // Importamos el contexto de autenticación
+import "../styles/Header.css";
 
 const Header: React.FC = () => {
   const { user, logout } = userAuth(); // Obtener usuario autenticado y función logout
@@ -12,14 +12,15 @@ const Header: React.FC = () => {
       <nav className="nav-links">
         <Link to="/" className="nav-link">Home</Link>
         <Link to="/library" className="nav-link">Library</Link>
-        <Link to="/cart" className="nav-link">Cart</Link>
-        <Link to="/downloads" className="nav-link">Downloads</Link>
 
         {/* Si el usuario está autenticado, mostramos su perfil y el botón de logout */}
         {user ? (
           <>
+            <Link to="/cart" className="nav-link">Cart</Link>
+            <Link to="/downloads" className="nav-link">Downloads</Link>
             <Link to="/profile" className="nav-link username-link">{user.username}</Link>
             <button onClick={logout} className="nav-link logout-button">Logout</button>
+
           </>
         ) : (
           // Si no está autenticado, mostramos Login y Register

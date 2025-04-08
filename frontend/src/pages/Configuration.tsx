@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "./Header";
-import "../assets/Configuration.css";
+import Header from "../components/Header";
+import "../styles/Configuration.css";
 import { userAuth } from "./AuthContext";
 
 const Configuration: React.FC = () => {

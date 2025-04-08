@@ -1,12 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "./Header";
-import { userAuth } from "./AuthContext";
-import "../assets/Home.css";  // Asegúrate de que el CSS está importado correctamente
+import Header from "../components/Header";
+import "../styles/Home.css";  // Asegúrate de que el CSS está importado correctamente
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = userAuth();
 
   // Definir las imágenes para cada juego
   const images: Record<string, string[]> = {

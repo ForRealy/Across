@@ -7,7 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import db from '../db';
+import db from '../../db';
 export const updateUserProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { idUser } = req.params;
     const { profile_name, real_name, username, biography, idLanguage } = req.body;

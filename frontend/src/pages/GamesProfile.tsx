@@ -1,11 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "./Header";
+import Header from "../components/Header";
 import { userAuth } from "./AuthContext";
-import "../assets/Profile.css";
+import "../styles/Profile.css";
 import Foto_Perfil from "../media/Foto_Perfil.jpg"
 
-const Profile: React.FC = () => {
+const GamesProfile: React.FC = () => {
     const navigate = useNavigate();
     const { user } = userAuth();
 
@@ -57,4 +57,4 @@ const Profile: React.FC = () => {
     );
 };
 
-export default Profile;
+export default GamesProfile;

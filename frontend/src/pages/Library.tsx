@@ -1,34 +1,34 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "./Header";
-import "../assets/Library.css";
-
-// Importar las imágenes desde la carpeta src
-import eldenRingCover from "../media/eldenring.jpeg";
-import borderlandsCover from "../media/bordelands.jpeg";
-import halfLifeCover from "../media/half-life.jpeg";
-import crysisCover from "../media/crysis.jpeg";
-
-const games = [
-  { title: "Elden Ring", cover: eldenRingCover, path: "/EldenRing" },
-  { title: "Borderlands", cover: borderlandsCover, path: "/Borderlands" },
-  { title: "Half-life", cover: halfLifeCover, path: "/Half-life" },
-  { title: "Crysis", cover: crysisCover, path: "/Crysis" },
-];
+import Header from "../components/Header";
+import "../styles/Library.css";
+import axios from "axios";
 
 const Library: React.FC = () => {
   const navigate = useNavigate();
-  const [cart, setCart] = useState<string[]>([]);
+  const [games, setGames] = useState<{ title: string; cover: string; path: string }[]>([]);
+  const [addedToCart, setAddedToCart] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedCart = JSON.parse(localStorage.getItem("cart") || "[]");
-    setCart(savedCart);
+    // Simular datos de juegos
+    const simulatedGames = [
+      { title: "Elden Ring", cover: "/media/eldenring.jpeg", path: "/EldenRing" },
+      { title: "Borderlands", cover: "/media/bordelands.jpeg", path: "/Borderlands" },
+      { title: "Half-life", cover: "/media/half-life.jpeg", path: "/Half-life" },
+      { title: "Crysis", cover: "/media/crysis.jpeg", path: "/Crysis" },
+    ];
+    setGames(simulatedGames);
   }, []);
 
-  const addToCart = (game: string) => {
-    const updatedCart = [...cart, game];
-    setCart(updatedCart);
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
+  const addToCart = async (game: string) => {
+    try {
+      const response = await axios.post("http://localhost:3000/api/cart", { game });
+      console.log(response.data); // Ver el carrito actualizado en la consola
+      setAddedToCart(game);
+      setTimeout(() => setAddedToCart(null), 2000); // Eliminar el mensaje "Añadido" después de 2 segundos
+    } catch (error) {
+      console.error("Error al agregar al carrito:", error);
+    }
   };
 
   return (
@@ -66,7 +66,7 @@ const Library: React.FC = () => {
                     className="library-add-button"
                     onClick={() => addToCart(game.title)}
                   >
-                    Añadir al carrito
+                    {addedToCart === game.title ? "Añadido" : "Añadir al carrito"}
                   </button>
                 </div>
               </div>

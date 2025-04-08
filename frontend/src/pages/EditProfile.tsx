@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "./Header";
-import "../assets/EditProfile.css";
+import Header from "../components/Header";
+import "../styles/EditProfile.css";
 
 const EditProfile: React.FC = () => {
   const [profileName, setProfileName] = useState('');

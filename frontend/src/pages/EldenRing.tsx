@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import Header from "./Header";
-import "../assets/EldenRing.css";
+import Header from "../components/Header";
+import "../styles/EldenRing.css";
 
 const EldenRing: React.FC = () => {
   const images = [

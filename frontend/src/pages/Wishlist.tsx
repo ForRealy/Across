@@ -1,11 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "./Header";
+import Header from "../components/Header";
 import { userAuth } from "./AuthContext";
-import "../assets/Profile.css";
+import "../styles/Profile.css";
 import Foto_Perfil from "../media/Foto_Perfil.jpg"
 
-const ReviewsProfile: React.FC = () => {
+const Wishlist: React.FC = () => {
     const navigate = useNavigate();
     const { user } = userAuth();
 
@@ -31,7 +31,7 @@ const ReviewsProfile: React.FC = () => {
             <div className="profile-content">
                 <div className="profile-games">
                     <div className="games-list">
-                        <p>Lista de reviews</p>
+                        <p>Lista de juegos favoritos</p>
                     </div>
                 </div>
                 <div className="profile-info">
@@ -50,4 +50,4 @@ const ReviewsProfile: React.FC = () => {
     );
 };
 
-export default ReviewsProfile;
+export default Wishlist;

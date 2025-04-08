@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import Header from "./Header";
-import "../assets/ChangeEmail.css";
+import Header from "../components/Header";
+import "../styles/ChangeEmail.css";
 
 const ChangeEmail: React.FC = () => {
   

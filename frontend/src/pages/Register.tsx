@@ -1,6 +1,6 @@
 import React, { useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom"; 
-import '../assets/Login-register.css';
+import '../styles/Login-register.css';
 
 const Login: React.FC = () => {
     const [name, setName] = useState<string>("");

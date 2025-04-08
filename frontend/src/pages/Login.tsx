@@ -1,7 +1,7 @@
 import React, { useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { userAuth } from "./AuthContext"; // Importamos el contexto de autenticación
-import "../assets/Login-register.css"; // Importar los estilos
+import "../styles/Login-register.css"; // Importar los estilos
 
 const Login: React.FC = () => {
   const [name, setName] = useState<string>("");

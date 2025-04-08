@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "./Header";
-import "../assets/Cart.css";
+import Header from "../components/Header";
+import "../styles/Cart.css";
 
 const Cart: React.FC = () => {
   const navigate = useNavigate();
@@ -22,6 +22,12 @@ const Cart: React.FC = () => {
   const clearCart = () => {
     setCart([]);
     localStorage.setItem("cart", JSON.stringify([]));
+  };
+
+  const removeFromCart = (game: string) => {
+    const updatedCart = cart.filter(item => item !== game);
+    setCart(updatedCart);
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,10 +60,17 @@ const Cart: React.FC = () => {
           <div className="cart-list-section">
             <ol className="cart-list">
               {cart.map((game, index) => (
-                <li key={index} className="cart-game-item">{game}</li>
+                <li key={index} className="cart-game-item">
+                  {game}
+                  <button onClick={() => removeFromCart(game)} className="cart-remove-button">
+                    Eliminar
+                  </button>
+                </li>
               ))}
             </ol>
-            <button className="cart-clear-button" onClick={clearCart}>Vaciar Carrito</button>
+            <button className="cart-clear-button" onClick={clearCart}>
+              Vaciar Carrito
+            </button>
           </div>
         )}
 
