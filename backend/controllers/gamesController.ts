@@ -1,11 +1,14 @@
 import apicalypse from 'apicalypse';
 import Bottleneck from 'bottleneck';
+import axios from "axios";
 
 // Configuración del limitador (4 peticiones por segundo)
 const limiter = new Bottleneck({
   minTime: 250 // 1000ms / 4 = 250ms entre peticiones
 });
-
+const axiosInstance = axios.create({
+  timeout: 10000 // 10 segundos
+});
 export const fetchGameData = async () => {
   try { 
     // Usamos el limitador para cumplir con la cuota de peticiones
