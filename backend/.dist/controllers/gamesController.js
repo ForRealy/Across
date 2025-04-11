@@ -15,7 +15,7 @@ const limiter = new Bottleneck({
 });
 export const fetchGameData = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        // Envuelve la petición en el limitador
+        // Usamos el limitador para cumplir con la cuota de peticiones
         const response = yield limiter.schedule(() => __awaiter(void 0, void 0, void 0, function* () {
             return apicalypse({
                 headers: {
@@ -23,23 +23,23 @@ export const fetchGameData = () => __awaiter(void 0, void 0, void 0, function* (
                     'Authorization': 'Bearer 6f4u75u2cnsluaw5m84vqfq88oitoa',
                 },
             })
-                .fields('*')
-                .where('id = 1942')
+                // Especificamos únicamente los campos que necesitamos
+                .fields('name, cover')
+                // Por ejemplo, si queremos obtener varios juegos, podemos eliminar la cláusula where
+                .limit(10)
                 .request('https://api.igdb.com/v4/games');
         }));
-        console.log(response.data);
+        console.log('Datos obtenidos:', response.data);
         return response.data;
     }
     catch (err) {
         console.error('Error al obtener datos:');
-        // Verificar primero si es una instancia de Error
         if (err instanceof Error) {
             console.error(err.message);
         }
         else {
             console.error('Error desconocido:', err);
         }
-        // Verificar si es un error de tasa limitada (status 429)
         if (isApiError(err) && err.status === 429) {
             console.log('Reintentando...');
             setTimeout(fetchGameData, 1000);

@@ -4,28 +4,38 @@ import Header from "../components/Header";
 import "../styles/Library.css";
 import axios from "axios";
 
+interface Game {
+  title: string;
+  cover: string;
+  path: string;
+}
+
 const Library: React.FC = () => {
   const navigate = useNavigate();
-  const [games, setGames] = useState<{ title: string; cover: string; path: string }[]>([]);
+  const [games, setGames] = useState<Game[]>([]);
   const [addedToCart, setAddedToCart] = useState<string | null>(null);
 
   useEffect(() => {
-    // Simular datos de juegos
-    const simulatedGames = [
-      { title: "Elden Ring", cover: "/media/eldenring.jpeg", path: "/EldenRing" },
-      { title: "Borderlands", cover: "/media/bordelands.jpeg", path: "/Borderlands" },
-      { title: "Half-life", cover: "/media/half-life.jpeg", path: "/Half-life" },
-      { title: "Crysis", cover: "/media/crysis.jpeg", path: "/Crysis" },
-    ];
-    setGames(simulatedGames);
+    // Función para obtener los juegos desde el backend
+    const loadGames = async () => {
+      try {
+        const response = await axios.post("http://localhost:3000/api/games/library");
+        // Se espera que la respuesta sea un array de objetos con los campos: title, cover y path
+        setGames(response.data);
+      } catch (error) {
+        console.error("Error al cargar los juegos:", error);
+      }
+    };
+
+    loadGames();
   }, []);
 
   const addToCart = async (game: string) => {
     try {
       const response = await axios.post("http://localhost:3000/api/cart", { game });
-      console.log(response.data); // Ver el carrito actualizado en la consola
+      console.log(response.data);
       setAddedToCart(game);
-      setTimeout(() => setAddedToCart(null), 2000); // Eliminar el mensaje "Añadido" después de 2 segundos
+      setTimeout(() => setAddedToCart(null), 2000);
     } catch (error) {
       console.error("Error al agregar al carrito:", error);
     }
