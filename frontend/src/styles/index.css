@@ -1,5 +1,5 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -64,30 +64,5 @@ button:focus-visible {
   }
   button {
     background-color: #f9f9f9;
-  }
-}
-
-/* Estilo para el mensaje de éxito */
-.success-message {
-  background-color: #dff0d8;
-  color: #3c763d;
-  padding: 10px;
-  border: 1px solid #d6e9c6;
-  border-radius: 4px;
-  text-align: center;
-  margin-top: 10px;
-  animation: fadeOut 3s forwards;
-}
-
-/* Animación para que el mensaje se desvanezca */
-@keyframes fadeOut {
-  0% {
-      opacity: 1;
-  }
-  80% {
-      opacity: 1;
-  }
-  100% {
-      opacity: 0;
   }
 }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "../components/Header";
-import "../styles/Library.css";
+import Header from "../components/HeaderComponent";
+import "../styles/LibraryPage.css";
 import axios from "axios";
 
 interface Game {
@@ -43,23 +43,22 @@ const Library: React.FC = () => {
 
   return (
     <div className="library-container">
-      <Header />
-      <div className="library-main-content">
+    <Header />
+    <div className="library-layout">
         <aside className="library-sidebar">
-          <h2 className="library-sidebar-title">Juegos</h2>
-          <ul className="library-game-list">
-            {games.map((game, index) => (
-              <li
-                key={index}
-                onClick={() => navigate(game.path)}
-                className="library-game-link"
-              >
-                {game.title}
-              </li>
-            ))}
-          </ul>
+            <h2 className="library-sidebar-title">Juegos</h2>
+            <ul className="library-game-list">
+                {games.map((game, index) => (
+                    <li
+                    key={index}
+                    onClick={() => navigate(game.path)}
+                    className="library-game-link"
+                    >
+                        {game.title}
+                    </li>
+                ))}
+            </ul>
         </aside>
-
         <main className="library-content">
           <h1 className="library-title">Juegos</h1>
           <div className="library-gallery">

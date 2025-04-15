@@ -1,11 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "../components/Header";
+import Header from "../components/HeaderComponent";
 import { userAuth } from "./AuthContext";
-import "../styles/Profile.css";
+import "../styles/ProfilePage.css";
 import Foto_Perfil from "../media/Foto_Perfil.jpg"
 
-const ReviewsProfile: React.FC = () => {
+const Profile: React.FC = () => {
     const navigate = useNavigate();
     const { user } = userAuth();
 
@@ -30,10 +30,17 @@ const ReviewsProfile: React.FC = () => {
 
             <div className="profile-content">
                 <div className="profile-games">
+                    <div className="games-tabs">
+                        <button>Recently Played</button>
+                        <button>All games</button>
+                        <button>Perfect Games</button>
+                        <button>Followed</button>
+                    </div>
                     <div className="games-list">
-                        <p>Lista de reviews</p>
+                        <p>Lista de juegos</p>
                     </div>
                 </div>
+
                 <div className="profile-info">
                     <p>Status: ?</p>
                     <p>Level: ?</p>
@@ -50,4 +57,4 @@ const ReviewsProfile: React.FC = () => {
     );
 };
 
-export default ReviewsProfile;
+export default Profile;

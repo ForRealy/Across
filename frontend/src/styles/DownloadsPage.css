@@ -1,0 +1,58 @@
+.no-games-message {
+    padding: 20px;
+    font-size: 20px;
+    text-align: center;
+    margin-top: 50px;
+    font-weight: bold;
+}
+
+.downloads {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 30px;
+    background-color: #444;
+    padding: 10px;
+    border-radius: 5px;
+    width: 100%;
+}
+
+.primary-button {
+  background-color: rgb(7, 146, 7);
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.primary-button:hover {
+  background-color: green;
+}
+
+.cancel-button {
+  background-color: #dc3545;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.cancel-button:hover {
+  background-color: #c82333;
+}
+
+.delete-button {
+  background-color: #dc3545;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  background-color: #c82333;
+}

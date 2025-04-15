@@ -1,64 +1,47 @@
-/* Estilos para el contenedor principal del Header */
 .header-container {
     background-color: #333;
     color: #fff;
-    padding: 10px;
+    padding: 1%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 100%;
-    box-sizing: border-box; /* Asegura que el padding no aumente el tamaño total */
-    position: fixed; /* Fija el header en la parte superior */
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000; /* Asegura que el encabezado esté encima de otros elementos */
+    font-family: 'Poppins', sans-serif;
 }
-
-/* Estilo para el título principal en el Header */
-.header-title { 
-    margin: 0;
-    font-size: 1.8rem; /* Ajusta el tamaño del texto según el diseño */
-}
-
-/* Estilos para los enlaces del menú de navegación */
+  
 .nav-links {
     display: flex;
+    flex-direction: row;
     align-items: center;
+    gap: 16px;
 }
-
-/* Estilos comunes para los enlaces */
+  
 .nav-link {
-    color: #fff;
+    display: inline-flex;
+    align-items: center;
     text-decoration: none;
-    margin: 0 10px;
-    font-size: 1.1rem; /* Ajusta el tamaño de la fuente */
-    transition: color 0.3s ease; /* Agrega una transición suave para el hover */
+    color: white;
+    transition: color 0.3s ease;
 }
-
-/* Hover para los enlaces */
+  
 .nav-link:hover {
-    color: blanchedalmond; /* Cambia el color a dorado cuando se pasa el ratón */
+    color: blanchedalmond;
 }
-
-/* Estilo para el enlace del nombre de usuario */
+  
 .username-link {
     font-weight: bold;
-    color:blanchedalmond; /* Asegura que el nombre del usuario tenga un color dorado */
+    color: blanchedalmond;
 }
-
-/* Estilo para el botón de logout */
+  
 .logout-button {
-    background-color:brown;
+    background-color: brown;
     border: none;
-    color: #fff;
+    color: white;
     font-size: 1.1rem;
     cursor: pointer;
     transition: color 0.3s ease;
+    border-radius: 5px;
 }
-
-/* Hover para el botón de logout */
+  
 .logout-button:hover {
     color: blanchedalmond;
-    background-color: brown;
-}
+}  

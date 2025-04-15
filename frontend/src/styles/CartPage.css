@@ -1,24 +1,33 @@
-/* Contenedor principal del carrito */
+.page-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+  padding: 40px 0;
+}
+
 .cart-container {
   padding: 20px;
-  max-width: 800px;
   color: black;
   background-color: lightgray;
   font-family: Arial, sans-serif;
   border-radius: 10px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Contenido centrado y espaciado correctamente */
-.cart-content {
+  width: 100%;
+  max-width: 800px;
   display: flex;
   flex-direction: column;
-  text-align: center;
-  margin: 0 auto; /* Ya centrado por el container */
-  margin-top: 30px;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Lista de juegos */
+/* Estilos para el contenido dentro del carrito */
+.cart-content {
+  width: 100%;
+  text-align: center;
+}
+
+/* Estilo de la lista de juegos en el carrito */
 .cart-list {
   list-style: none;
   padding: 0;
@@ -33,6 +42,8 @@
 /* Sección de pago */
 .cart-payment-section {
   margin-top: 50px;
+  width: 100%;
+  text-align: center;
 }
 
 .cart-payment-section h2 {
@@ -57,7 +68,7 @@
   margin-bottom: 15px;
 }
 
-/* Mensaje de éxito */
+/* Mensaje de éxito del pago */
 .cart-payment-success {
   margin-top: 30px;
   padding: 20px;
@@ -66,7 +77,7 @@
   border-radius: 5px;
 }
 
-/* Estilos para el botón de pago */
+/* Estilo para el botón de pago */
 .cart-pay-button {
   padding: 12px 18px;
   background-color: #ff6600;
@@ -84,10 +95,10 @@
 }
 
 .cart-pay-button:focus {
-  outline: none; /* Elimina el borde azul de foco */
+  outline: none;
 }
 
-/* Estilos para el botón de volver */
+/* Estilo para el botón de volver a la biblioteca */
 .cart-back-button {
   padding: 12px 18px;
   background-color: #004d00;
@@ -105,5 +116,5 @@
 }
 
 .cart-back-button:focus {
-  outline: none; /* Elimina el borde azul de foco */
+  outline: none;
 }

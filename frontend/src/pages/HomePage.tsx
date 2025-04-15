@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "../components/Header";
-import "../styles/Home.css";  // Asegúrate de que el CSS está importado correctamente
+import Header from "../components/HeaderComponent";
+import "../styles/HomePage.css";
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -40,12 +40,12 @@ const Home: React.FC = () => {
 
   const games = [
     { name: "The Witcher 3", route: "/witcher3" },
-    { name: "Elden Ring", route: "/eldenring" },
+    { name: "Elden Ring", route: "/games" },
     { name: "Borderlands", route: "/borderlands" },
   ];
 
   return (
-    <div className="home-container">
+    <div>
       <Header />
       <main className="home-main">
         {/* Sección destacada para el juego seleccionado */}

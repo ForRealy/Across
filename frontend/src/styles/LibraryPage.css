@@ -1,0 +1,17 @@
+.library-layout {
+    display: flex;
+    height: calc(100vh - 60px); /* Ajustalo si tu Header tiene altura 60px */
+  }
+  
+  .library-sidebar {
+    width: 250px;
+    background-color: dimgrey;
+    padding: 20px;
+    color: white;
+  }
+  
+  .library-content {
+    flex: 1;
+    padding: 20px;
+  }
+  

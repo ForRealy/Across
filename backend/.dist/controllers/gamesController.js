@@ -12,25 +12,24 @@ import Bottleneck from 'bottleneck';
 import axios from "axios";
 // Configuración del limitador (4 peticiones por segundo)
 const limiter = new Bottleneck({
-    minTime: 250,
-    maxRetries: 3, // Máximo de reintentos
+    minTime: 250 // 1000ms / 4 = 250ms entre peticiones
 });
 const axiosInstance = axios.create({
     timeout: 10000 // 10 segundos
 });
-export const fetchGameData = (retryCount = 0) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
-    const MAX_RETRIES = 3;
+export const fetchGameData = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        // Usamos el limitador para cumplir con la cuota de peticiones
         const response = yield limiter.schedule(() => __awaiter(void 0, void 0, void 0, function* () {
             return apicalypse({
                 headers: {
                     'Client-ID': 'ja0p1yucvmfuhl8vhrst6fynd2q8gh',
                     'Authorization': 'Bearer 6f4u75u2cnsluaw5m84vqfq88oitoa',
                 },
-                axiosInstance: axiosInstance // Usamos la instancia personalizada
             })
+                // Especificamos únicamente los campos que necesitamos
                 .fields('name, cover')
+                // Por ejemplo, si queremos obtener varios juegos, podemos eliminar la cláusula where
                 .limit(10)
                 .request('https://api.igdb.com/v4/games');
         }));
@@ -39,23 +38,20 @@ export const fetchGameData = (retryCount = 0) => __awaiter(void 0, void 0, void 
     }
     catch (err) {
         console.error('Error al obtener datos:');
-        if (axios.isAxiosError(err)) {
-            const status = (_a = err.response) === null || _a === void 0 ? void 0 : _a.status;
-            const headers = (_b = err.response) === null || _b === void 0 ? void 0 : _b.headers;
-            if (status === 429 && retryCount < MAX_RETRIES) {
-                const retryAfter = parseInt((headers === null || headers === void 0 ? void 0 : headers['retry-after']) || '1', 10);
-                console.log(`Reintentando en ${retryAfter} segundos... (Intento ${retryCount + 1})`);
-                yield new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
-                return fetchGameData(retryCount + 1);
-            }
-            console.error(`Error HTTP ${status}: ${err.message}`);
-        }
-        else if (err instanceof Error) {
+        if (err instanceof Error) {
             console.error(err.message);
         }
         else {
             console.error('Error desconocido:', err);
         }
+        if (isApiError(err) && err.status === 429) {
+            console.log('Reintentando...');
+            setTimeout(fetchGameData, 1000);
+        }
         return null;
     }
 });
+// Type Guard personalizado
+function isApiError(error) {
+    return typeof error === 'object' && error !== null && 'status' in error;
+}

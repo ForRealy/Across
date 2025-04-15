@@ -1,14 +1,14 @@
 import React, { useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { userAuth } from "./AuthContext"; // Importamos el contexto de autenticación
-import "../styles/Login-register.css"; // Importar los estilos
+import "../styles/LoginPage.css"; // Importar los estilos
 
 const Login: React.FC = () => {
   const [name, setName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
   const navigate = useNavigate();
-  const { login } = userAuth();
+  const { login } = userAuth(); // Usamos la función login del contexto
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -29,7 +29,7 @@ const Login: React.FC = () => {
         const data = await response.json();
         console.log("Login exitoso", data);
 
-        login({username: data.user.username, email: data.user.email}); // Guardar el usuario en el contexto
+        login({ username: data.user.username, email: data.user.email }); // Guardar el usuario en el contexto
 
         navigate("/");
       }
@@ -44,11 +44,12 @@ const Login: React.FC = () => {
     }
   };
 
-    return (
+  return (
+    <div className="login-page">
       <div className="login-container">
-        <h2>Iniciar sesión</h2>
+        <h2 className="login-title">Inicia sesión</h2>
         <form onSubmit={handleSubmit}>
-          <div className="input-container">
+          <div className="login-input-container">
             <label htmlFor="name">Nombre de usuario:</label>
             <input
               type="text"
@@ -58,7 +59,7 @@ const Login: React.FC = () => {
               placeholder="Ingresa tu nombre de usuario"
             />
           </div>
-          <div className="input-container">
+          <div className="login-input-container">
             <label htmlFor="password">Contraseña:</label>
             <input
               type="password"
@@ -81,7 +82,8 @@ const Login: React.FC = () => {
           ¿No tienes cuenta? Regístrate
         </button>
       </div>
-    );
-  };
-  
+    </div>
+  );
+};
+
 export default Login;
