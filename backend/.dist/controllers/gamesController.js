@@ -7,9 +7,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import apicalypse from 'apicalypse';
 import Bottleneck from 'bottleneck';
 import axios from "axios";
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
+// Obtener el directorio actual en ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+// Cargar variables de entorno desde la raíz del proyecto
+dotenv.config({ path: resolve(__dirname, '../.env') });
+console.log('IGDB Credentials:', {
+    clientId: process.env.IGDB_CLIENT_ID,
+    auth: process.env.IGDB_AUTHORIZATION
+});
 // Configuración del limitador (4 peticiones por segundo)
 const limiter = new Bottleneck({
     minTime: 250 // 1000ms / 4 = 250ms entre peticiones
@@ -19,35 +30,24 @@ const axiosInstance = axios.create({
 });
 export const fetchGameData = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        // Usamos el limitador para cumplir con la cuota de peticiones
-        const response = yield limiter.schedule(() => __awaiter(void 0, void 0, void 0, function* () {
-            return apicalypse({
-                headers: {
-                    'Client-ID': 'ja0p1yucvmfuhl8vhrst6fynd2q8gh',
-                    'Authorization': 'Bearer 6f4u75u2cnsluaw5m84vqfq88oitoa',
-                },
-            })
-                // Especificamos únicamente los campos que necesitamos
-                .fields('name, cover')
-                // Por ejemplo, si queremos obtener varios juegos, podemos eliminar la cláusula where
-                .limit(10)
-                .request('https://api.igdb.com/v4/games');
-        }));
+        if (!process.env.IGDB_CLIENT_ID || !process.env.IGDB_AUTHORIZATION) {
+            throw new Error('Las credenciales de IGDB no están configuradas correctamente');
+        }
+        const response = yield axios({
+            method: 'POST',
+            url: 'https://api.igdb.com/v4/games',
+            headers: {
+                'Client-ID': process.env.IGDB_CLIENT_ID,
+                'Authorization': `Bearer ${process.env.IGDB_AUTHORIZATION}`,
+                'Accept': 'application/json'
+            },
+            data: 'fields name,cover;limit 10;'
+        });
         console.log('Datos obtenidos:', response.data);
         return response.data;
     }
     catch (err) {
-        console.error('Error al obtener datos:');
-        if (err instanceof Error) {
-            console.error(err.message);
-        }
-        else {
-            console.error('Error desconocido:', err);
-        }
-        if (isApiError(err) && err.status === 429) {
-            console.log('Reintentando...');
-            setTimeout(fetchGameData, 1000);
-        }
+        console.error('Error al obtener datos:', err);
         return null;
     }
 });
