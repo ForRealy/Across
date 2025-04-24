@@ -1,6 +1,5 @@
 .library-layout {
     display: flex;
-    height: calc(100vh - 60px); /* Ajustalo si tu Header tiene altura 60px */
   }
   
   .library-sidebar {

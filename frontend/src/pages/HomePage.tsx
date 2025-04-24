@@ -8,13 +8,13 @@ const Home: React.FC = () => {
 
   // Definir las imágenes para cada juego
   const images: Record<string, string[]> = {
-    "The Witcher 3": [
+    "Borderlands": [
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTradwvUgUAu2gmC-0-1ijboIWz2ayYU9lbLg&s",
     ],
-    "Elden Ring": [
+    "The Witcher 3": [
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrAgTgehIqQIYO-aqaNq3kE92YS_cIE57QnA&s",
     ],
-    "Borderlands": [
+    "Elden Ring": [
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrhWz5dvYt_FD2k0KvELKFQWecENideIjHmw&s",
     ],
   };
