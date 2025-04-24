@@ -12,23 +12,18 @@ import { fetchGameData } from "../controllers/gamesController.js";
 const router = express.Router();
 router.get("/library", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        console.log('Recibida petición a /library');
         const games = yield fetchGameData();
+        console.log('Juegos obtenidos:', games);
         if (!games) {
             res.status(500).json({ error: "Error al obtener los juegos" });
             return;
         }
-        // Transformar los datos al formato que espera el frontend
-        const formattedGames = games.map((game) => {
-            var _a;
-            return ({
-                title: game.name,
-                cover: `https://images.igdb.com/igdb/image/upload/t_cover_big/${(_a = game.cover) === null || _a === void 0 ? void 0 : _a.image_id}.jpg`,
-                path: `/game/${game.id}`
-            });
-        });
-        res.json(formattedGames);
+        // Ya no necesitamos transformar los datos aquí porque ya están transformados en el controlador
+        res.json(games);
     }
     catch (error) {
+        console.error('Error en la ruta /library:', error);
         res.status(500).json({ error: "Error interno del servidor" });
     }
 }));

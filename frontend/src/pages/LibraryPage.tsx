@@ -19,7 +19,9 @@ const Library: React.FC = () => {
     // Función para obtener los juegos desde el backend
     const loadGames = async () => {
       try {
+        console.log('Cargando juegos...');
         const response = await axios.get("http://localhost:3000/api/games/library");
+        console.log('Respuesta del backend:', response.data);
         // Se espera que la respuesta sea un array de objetos con los campos: title, cover y path
         setGames(response.data);
       } catch (error) {

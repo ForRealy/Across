@@ -30,6 +30,7 @@ export const fetchGameData = async () => {
       throw new Error('Las credenciales de IGDB no están configuradas correctamente');
     }
 
+    console.log('Haciendo petición a IGDB...');
     const response = await axios({
       method: 'POST',
       url: 'https://api.igdb.com/v4/games',
@@ -38,11 +39,31 @@ export const fetchGameData = async () => {
         'Authorization': `Bearer ${process.env.IGDB_AUTHORIZATION}`,
         'Accept': 'application/json'
       },
-      data: 'fields name,cover;limit 10;'
+      data: 'fields name,cover.image_id;limit 10;'
     });
 
-    console.log('Datos obtenidos:', response.data);
-    return response.data;
+    console.log('Respuesta de IGDB:', response.data);
+
+    // Transformar los datos una sola vez
+    const gamesWithCover = response.data.map((game: any) => {
+      if (!game.cover || !game.cover.image_id) {
+        console.warn(`Juego sin portada: ${game.name}`);
+        return {
+          title: game.name,
+          cover: 'https://via.placeholder.com/264x352?text=No+Cover',
+          path: `/game/${game.id}`
+        };
+      }
+      
+      return {
+        title: game.name,
+        cover: `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg`,
+        path: `/game/${game.id}`
+      };
+    });
+
+    console.log('Datos transformados:', gamesWithCover);
+    return gamesWithCover;
   } catch (err) {
     console.error('Error al obtener datos:', err);
     return null;
