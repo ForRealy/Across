@@ -1,89 +1,101 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/HeaderComponent";
 import "../styles/HomePage.css";
+import axios from "axios";
+
+interface Game {
+  title: string;
+  cover: string;
+  sliderImage: string;
+  rating?: number;
+  releaseDate?: string;
+}
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
+  const [popularGames, setPopularGames] = useState<Game[]>([]);
+  const [upcomingGames, setUpcomingGames] = useState<Game[]>([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
-  // Definir las imágenes para cada juego
-  const images: Record<string, string[]> = {
-    "Borderlands": [
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTradwvUgUAu2gmC-0-1ijboIWz2ayYU9lbLg&s",
-    ],
-    "The Witcher 3": [
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrAgTgehIqQIYO-aqaNq3kE92YS_cIE57QnA&s",
-    ],
-    "Elden Ring": [
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrhWz5dvYt_FD2k0KvELKFQWecENideIjHmw&s",
-    ],
-  };
+  useEffect(() => {
+    const loadGames = async () => {
+      try {
+        const [popularResponse, upcomingResponse] = await Promise.all([
+          axios.get("http://localhost:3000/api/games/popular"),
+          axios.get("http://localhost:3000/api/games/upcoming")
+        ]);
+        setPopularGames(popularResponse.data);
+        setUpcomingGames(upcomingResponse.data);
+      } catch (error) {
+        console.error("Error al cargar juegos:", error);
+      }
+    };
 
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [currentFeaturedIndex, setCurrentFeaturedIndex] = useState(0);
+    loadGames();
+  }, []);
 
-  const handleNext = () => {
-    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images["The Witcher 3"].length);
-  };
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % popularGames.length);
+    }, 5000);
 
-  const handlePrevious = () => {
-    setCurrentImageIndex((prevIndex) => (prevIndex - 1 + images["The Witcher 3"].length) % images["The Witcher 3"].length);
-  };
-
-  const handleFeaturedNext = () => {
-    setCurrentFeaturedIndex((prevIndex) => (prevIndex + 1) % Object.keys(images).length);
-  };
-
-  const handleFeaturedPrevious = () => {
-    setCurrentFeaturedIndex((prevIndex) => (prevIndex - 1 + Object.keys(images).length) % Object.keys(images).length);
-  };
-
-  const games = [
-    { name: "The Witcher 3", route: "/witcher3" },
-    { name: "Elden Ring", route: "/games" },
-    { name: "Borderlands", route: "/borderlands" },
-  ];
+    return () => clearInterval(timer);
+  }, [popularGames.length]);
 
   return (
     <div>
       <Header />
       <main className="home-main">
-        {/* Sección destacada para el juego seleccionado */}
-        <section className="home-featured">
-          <div className="home-catalog-item">
-            <div className="home-image-container">
-              <img
-                src={images[games[currentFeaturedIndex].name][currentImageIndex]}
-                alt={games[currentFeaturedIndex].name}
-                className="home-image"
-                onClick={() => navigate(games[currentFeaturedIndex].route)}
-              />
-            </div>
-            <div className="home-buttons">
-              <button onClick={handleFeaturedPrevious} className="home-button">Anterior</button>
-              <button onClick={handleFeaturedNext} className="home-button">Siguiente</button>
-            </div>
+        {/* Sección Popular Right Now */}
+        <section className="popular-section">
+          <h2 className="section-title">Popular Right Now</h2>
+          <div className="popular-slider">
+            {popularGames.length > 0 && (
+              <div className="slider-container" onClick={() => navigate(`/game/${popularGames[currentSlide].title}`)}>
+                <img
+                  src={popularGames[currentSlide].sliderImage}
+                  alt={popularGames[currentSlide].title}
+                  className="slider-image"
+                />
+                <div className="slider-info">
+                  <h3>{popularGames[currentSlide].title}</h3>
+                  <p>Rating: {popularGames[currentSlide].rating?.toFixed(1)}/100</p>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="popular-thumbnails">
+            {popularGames.map((game, index) => (
+              <div
+                key={index}
+                className={`thumbnail ${index === currentSlide ? 'active' : ''}`}
+                onClick={() => setCurrentSlide(index)}
+              >
+                <img src={game.cover} alt={game.title} />
+              </div>
+            ))}
           </div>
         </section>
 
-        {/* Catálogo general */}
-        <section className="home-catalog">
-          {games.map((game, index) => (
-            <div key={index} className="home-catalog-item">
-              <div className="home-image-container">
+        {/* Sección Próximos Lanzamientos */}
+        <section className="upcoming-section">
+          <h2 className="section-title">Próximos Lanzamientos</h2>
+          <div className="upcoming-games">
+            {upcomingGames.map((game, index) => (
+              <div key={index} className="upcoming-game-card" onClick={() => navigate(`/game/${game.title}`)}>
                 <img
-                  src={images[game.name][currentImageIndex]}
-                  alt={game.name}
-                  className="home-image"
-                  onClick={() => navigate(game.route)}
+                  src={game.cover}
+                  alt={game.title}
+                  className="upcoming-game-image"
                 />
+                <div className="upcoming-game-info">
+                  <h3>{game.title}</h3>
+                  <p>Lanzamiento: {game.releaseDate}</p>
+                </div>
               </div>
-              <div className="home-buttons">
-                <button onClick={handlePrevious} className="home-button">Anterior</button>
-                <button onClick={handleNext} className="home-button">Siguiente</button>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </section>
       </main>
     </div>

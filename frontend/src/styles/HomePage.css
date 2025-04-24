@@ -95,3 +95,175 @@ html, body{
       margin-top: 1%; /* Reducido para pantallas medianas */
     }
   }
+
+.upcoming-section {
+  width: 100%;
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.section-title {
+  color: #fff;
+  font-size: 2rem;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.upcoming-games {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+  padding: 20px;
+}
+
+.upcoming-game-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.3s;
+}
+
+.upcoming-game-card:hover {
+  transform: scale(1.05);
+}
+
+.upcoming-game-image {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+}
+
+.upcoming-game-info {
+  padding: 15px;
+  color: #fff;
+}
+
+.upcoming-game-info h3 {
+  margin: 0 0 10px 0;
+  font-size: 1.2rem;
+}
+
+.upcoming-game-info p {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.popular-section {
+  width: 100%;
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.popular-slider {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  overflow: hidden;
+  border-radius: 15px;
+  margin-bottom: 20px;
+}
+
+.slider-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.slider-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.slider-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+  color: white;
+}
+
+.slider-info h3 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.popular-thumbnails {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  padding: 10px;
+}
+
+.thumbnail {
+  width: 100px;
+  height: 60px;
+  cursor: pointer;
+  border-radius: 5px;
+  overflow: hidden;
+  opacity: 0.6;
+  transition: all 0.3s ease;
+}
+
+.thumbnail:hover {
+  opacity: 0.8;
+  transform: scale(1.05);
+}
+
+.thumbnail.active {
+  opacity: 1;
+  border: 2px solid #fff;
+}
+
+.thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Ajustes para la sección de próximos lanzamientos */
+.upcoming-games {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.upcoming-game-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.3s;
+}
+
+.upcoming-game-card:hover {
+  transform: scale(1.03);
+}
+
+.upcoming-game-image {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+}
+
+.upcoming-game-info {
+  padding: 10px;
+  color: #fff;
+}
+
+.upcoming-game-info h3 {
+  margin: 0 0 5px 0;
+  font-size: 1rem;
+}
+
+.upcoming-game-info p {
+  margin: 0;
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
