@@ -33,10 +33,16 @@ const Library: React.FC = () => {
   }, []);
 
   const addToCart = async (game: string) => {
+    console.log("Añadiendo al carrito el juego: ", game);  // Verifica que el juego se envía correctamente
     try {
-      const response = await axios.post("http://localhost:3000/api/cart", { game });
-      console.log(response.data);
+      // Enviando la solicitud POST al backend para agregar el juego al carrito
+      const response = await axios.post("http://localhost:3000/api/cart/add", { game });
+      console.log("Respuesta del backend:", response.data);
+      
+      // Actualizando el estado para reflejar que el juego ha sido añadido
       setAddedToCart(game);
+      
+      // Opcional: Restablecer el estado de "Añadido" después de 2 segundos
       setTimeout(() => setAddedToCart(null), 2000);
     } catch (error) {
       console.error("Error al agregar al carrito:", error);
@@ -45,21 +51,21 @@ const Library: React.FC = () => {
 
   return (
     <div className="library-container">
-    <Header />
-    <div className="library-layout">
+      <Header />
+      <div className="library-layout">
         <aside className="library-sidebar">
-            <h2 className="library-sidebar-title">Juegos</h2>
-            <ul className="library-game-list">
-                {games.map((game, index) => (
-                    <li
-                    key={index}
-                    onClick={() => navigate(game.path)}
-                    className="library-game-link"
-                    >
-                        {game.title}
-                    </li>
-                ))}
-            </ul>
+          <h2 className="library-sidebar-title">Juegos</h2>
+          <ul className="library-game-list">
+            {games.map((game, index) => (
+              <li
+                key={index}
+                onClick={() => navigate(game.path)}
+                className="library-game-link"
+              >
+                {game.title}
+              </li>
+            ))}
+          </ul>
         </aside>
         <main className="library-content">
           <h1 className="library-title">Juegos</h1>

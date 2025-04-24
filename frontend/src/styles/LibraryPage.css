@@ -1,16 +1,120 @@
+/* Estructura general */
+.library-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
 .library-layout {
-    display: flex;
+  display: flex;
+  flex: 1;
+}
+
+/* Barra lateral */
+.library-sidebar {
+  width: 250px;
+  background-color: dimgrey;
+  padding: 20px;
+  color: black;
+}
+
+.library-sidebar-title {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.library-game-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.library-game-link {
+  cursor: pointer;
+  padding: 10px;
+  margin-bottom: 5px;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.library-game-link:hover {
+  background-color: #e0e0e0;
+}
+
+/* Contenido principal */
+.library-content {
+  flex: 1;
+  padding: 20px;
+}
+
+.library-title {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+/* Galería de juegos */
+.library-gallery {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(2, 1fr); /* predeterminado: 2 columnas */
+}
+
+/* 1 por fila en pantallas pequeñas */
+@media (max-width: 599px) {
+  .library-gallery {
+    grid-template-columns: 1fr;
   }
-  
-  .library-sidebar {
-    width: 250px;
-    background-color: dimgrey;
-    padding: 20px;
-    color: white;
+}
+
+/* 3 por fila en pantallas grandes */
+@media (min-width: 1024px) {
+  .library-gallery {
+    grid-template-columns: repeat(3, 1fr);
   }
-  
-  .library-content {
-    flex: 1;
-    padding: 20px;
-  }
-  
+}
+
+/* Cada ítem de juego */
+.library-game-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* Carátulas con tamaño fijo uniforme */
+.library-game-cover {
+  width: 100%;
+  max-width: 200px;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.3s;
+  margin: 0 auto;
+}
+
+.library-game-cover:hover {
+  transform: scale(1.05);
+}
+
+/* Botón */
+.library-button-container {
+  margin-top: 10px;
+}
+
+.library-add-button {
+  padding: 8px 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  min-width: 120px;
+}
+
+.library-add-button:hover {
+  background-color: #0056b3;
+}

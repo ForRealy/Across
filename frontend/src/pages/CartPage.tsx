@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/HeaderComponent"; // Asegúrate de tener el Header correctamente importado
 import "../styles/CartPage.css"; // Importa el archivo CSS con los estilos mencionados
+import axios from "axios";
 
 const Cart: React.FC = () => {
   const navigate = useNavigate();
@@ -14,20 +15,36 @@ const Cart: React.FC = () => {
   });
   const [paymentSuccess, setPaymentSuccess] = useState(false);
 
+  // Cargar el carrito desde el backend (o almacenamiento local)
   useEffect(() => {
-    const savedCart = JSON.parse(localStorage.getItem("cart") || "[]");
-    setCart(savedCart);
+    const loadCart = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/cart");
+        setCart(response.data); // Se espera que el backend devuelva el carrito
+      } catch (error) {
+        console.error("Error al cargar el carrito:", error);
+      }
+    };
+
+    loadCart();
   }, []);
 
-  const clearCart = () => {
-    setCart([]);
-    localStorage.setItem("cart", JSON.stringify([]));
+  const clearCart = async () => {
+    try {
+      await axios.delete("http://localhost:3000/api/cart"); // Llamada para limpiar el carrito en el backend
+      setCart([]);
+    } catch (error) {
+      console.error("Error al vaciar el carrito:", error);
+    }
   };
 
-  const removeFromCart = (game: string) => {
-    const updatedCart = cart.filter(item => item !== game);
-    setCart(updatedCart);
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
+  const removeFromCart = async (game: string) => {
+    try {
+      await axios.delete(`http://localhost:3000/api/cart/remove/${game}`);
+      setCart(cart.filter(item => item !== game));
+    } catch (error) {
+      console.error("Error al eliminar juego del carrito:", error);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,14 +52,17 @@ const Cart: React.FC = () => {
     setPaymentData({ ...paymentData, [name]: value });
   };
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     const { cardNumber, expirationDate, cvv, name } = paymentData;
     if (cardNumber && expirationDate && cvv && name) {
       setPaymentSuccess(true);
-      const purchasedGames = JSON.parse(localStorage.getItem("purchasedGames") || "[]");
-      const newPurchasedGames = [...purchasedGames, ...cart];
-      localStorage.setItem("purchasedGames", JSON.stringify(newPurchasedGames));
-      clearCart();
+      try {
+        // Enviar los juegos comprados al backend
+        await axios.post("http://localhost:3000/api/cart/checkout", { cart });
+        clearCart();
+      } catch (error) {
+        console.error("Error en el pago:", error);
+      }
     } else {
       alert("Por favor, completa todos los campos de pago.");
     }
@@ -50,9 +70,7 @@ const Cart: React.FC = () => {
 
   return (
     <div>
-      <div>
-        <Header />
-      </div>
+      <Header />
       <div className="page-container">
         <div className="cart-container">
           <main className="cart-content">
@@ -66,7 +84,10 @@ const Cart: React.FC = () => {
                   {cart.map((game, index) => (
                     <li key={index} className="cart-game-item">
                       {game}
-                      <button onClick={() => removeFromCart(game)} className="cart-remove-button">
+                      <button
+                        onClick={() => removeFromCart(game)}
+                        className="cart-remove-button"
+                      >
                         Eliminar
                       </button>
                     </li>
@@ -145,7 +166,7 @@ const Cart: React.FC = () => {
                 <p>Gracias por tu compra. Tu pedido será procesado.</p>
               </div>
             )}
-            
+
             <button className="cart-back-button" onClick={() => navigate("/home")}>
               Volver a la Biblioteca
             </button>

@@ -6,33 +6,36 @@
     justify-content: space-between;
     align-items: center;
     font-family: 'Poppins', sans-serif;
-}
+    width: 100%; /* Asegura que ocupe todo el ancho */
+    box-sizing: border-box; /* Incluye el padding dentro del tamaño total */
+    position: relative; /* Esto ayuda a asegurar que se mantenga bien en todas las pantallas */
+  }
   
-.nav-links {
+  .nav-links {
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 16px;
-}
+  }
   
-.nav-link {
+  .nav-link {
     display: inline-flex;
     align-items: center;
     text-decoration: none;
     color: white;
     transition: color 0.3s ease;
-}
+  }
   
-.nav-link:hover {
+  .nav-link:hover {
     color: blanchedalmond;
-}
+  }
   
-.username-link {
+  .username-link {
     font-weight: bold;
     color: blanchedalmond;
-}
+  }
   
-.logout-button {
+  .logout-button {
     background-color: brown;
     border: none;
     color: white;
@@ -40,8 +43,17 @@
     cursor: pointer;
     transition: color 0.3s ease;
     border-radius: 5px;
-}
+  }
   
-.logout-button:hover {
+  .logout-button:hover {
     color: blanchedalmond;
-}  
+  }
+  
+  /* Ajustes para pantallas pequeñas */
+  @media (max-width: 599px) {
+    .header-container {
+      padding: 10px;  /* Ajustar el padding para pantallas pequeñas */
+      width: 100vw;   /* Asegura que ocupe todo el ancho de la ventana del navegador */
+    }
+  }
+  
