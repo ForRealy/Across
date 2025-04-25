@@ -1,8 +1,8 @@
 import express from "express";
 import cors from "cors";
-import authRoutes from "./routes/authRoutes";  // Si tienes autenticación, incluye estas rutas
-import gamesRoutes from "./routes/gamesRoutes";  // Rutas de juegos
-import cartRoutes from "./routes/cartRoutes";  // Rutas del carrito
+import authRoutes from "./routes/authRoutes.js";  // Si tienes autenticación, incluye estas rutas
+import gamesRoutes from "./routes/gamesRoutes.js";  // Rutas de juegos
+import cartRoutes from "./routes/cartRoutes.js";  // Rutas del carrito
 
 const app = express();
 
