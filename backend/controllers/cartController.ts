@@ -42,5 +42,19 @@ export const cartController = {
     res.status(200).json(cart);
   },
 
+  removeProduct: (req: Request, res: Response): void => {
+    const { productId } = req.params;
+    const cartId = req.headers['cart-id'] || 'default';
+
+    const cart = carts.find(c => c.id === cartId);
+    if (!cart) {
+      res.status(404).json({ error: 'Cart not found' });
+      return;
+    }
+
+    cart.products = cart.products.filter(p => p.productId !== productId);
+    res.status(200).json(cart);
+  },
+
   // Aquí podrías agregar más métodos como removeProduct, clearCart, etc.
 };

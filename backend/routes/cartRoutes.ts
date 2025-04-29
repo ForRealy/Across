@@ -9,4 +9,7 @@ router.get('/cart', cartController.getCart);
 // Ruta para agregar un producto al carrito
 router.post('/cart/add', cartController.addProduct);
 
+// Ruta para eliminar un producto del carrito
+router.delete('/cart/remove/:productId', cartController.removeProduct);
+
 export default router;
