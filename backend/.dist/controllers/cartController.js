@@ -1,5 +1,10 @@
 let carts = []; // Almacenamiento temporal del carrito
 export const cartController = {
+    getCart: (req, res) => {
+        const cartId = req.headers['cart-id'] || 'default';
+        const cart = carts.find(c => c.id === cartId) || { id: cartId, products: [] };
+        res.json(cart);
+    },
     addProduct: (req, res) => {
         const { game } = req.body; // Nombre del juego
         const cartId = req.headers['cart-id'] || 'default'; // ID del carrito, puede ser el ID de sesión o el de usuario

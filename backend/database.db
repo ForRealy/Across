@@ -1,0 +1,100 @@
+PRAGMA foreign_keys = ON;
+
+-- languages
+CREATE TABLE IF NOT EXISTS languages (
+  idLanguage INTEGER PRIMARY KEY AUTOINCREMENT,
+  language_name TEXT NOT NULL UNIQUE
+);
+
+-- users
+CREATE TABLE IF NOT EXISTS users (
+  idUser        INTEGER PRIMARY KEY AUTOINCREMENT,
+  profile_name  TEXT    NOT NULL,
+  email         TEXT    NOT NULL UNIQUE,
+  password      TEXT    NOT NULL,
+  real_name     TEXT,
+  username      TEXT    NOT NULL UNIQUE,
+  number_phone  TEXT,
+  idLanguage    INTEGER,
+  biography     TEXT,
+  foto          TEXT,
+  FOREIGN KEY(idLanguage) REFERENCES languages(idLanguage)
+);
+
+-- games
+CREATE TABLE IF NOT EXISTS games (
+  idGame       INTEGER PRIMARY KEY AUTOINCREMENT,
+  name         TEXT    NOT NULL,
+  releaseDate  DATE    NOT NULL,
+  publisher    TEXT,
+  developer    TEXT,
+  description  TEXT,
+  price        REAL    NOT NULL,
+  idLanguage   INTEGER,
+  FOREIGN KEY(idLanguage) REFERENCES languages(idLanguage)
+);
+
+-- review
+CREATE TABLE IF NOT EXISTS review (
+  idReview     INTEGER PRIMARY KEY AUTOINCREMENT,
+  idGame       INTEGER,
+  idUser       INTEGER,
+  review_type  TEXT,
+  description  TEXT,
+  recommended  BOOLEAN,
+  FOREIGN KEY(idGame) REFERENCES games(idGame),
+  FOREIGN KEY(idUser) REFERENCES users(idUser)
+);
+
+-- minimal requirements
+CREATE TABLE IF NOT EXISTS minim (
+  idRegMin   INTEGER PRIMARY KEY AUTOINCREMENT,
+  idGame     INTEGER,
+  OS         TEXT,
+  processor  TEXT,
+  memory     TEXT,
+  graphics   TEXT,
+  directX    TEXT,
+  soundCard  TEXT,
+  FOREIGN KEY(idGame) REFERENCES games(idGame)
+);
+
+-- recommended requirements
+CREATE TABLE IF NOT EXISTS recommended (
+  idRegReco  INTEGER PRIMARY KEY AUTOINCREMENT,
+  idGame     INTEGER,
+  OS         TEXT,
+  processor  TEXT,
+  memory     TEXT,
+  graphics   TEXT,
+  directX    TEXT,
+  soundCard  TEXT,
+  FOREIGN KEY(idGame) REFERENCES games(idGame)
+);
+
+-- wish list
+CREATE TABLE IF NOT EXISTS wish (
+  idUser  INTEGER NOT NULL,
+  idGame  INTEGER NOT NULL,
+  PRIMARY KEY(idUser, idGame),
+  FOREIGN KEY(idUser) REFERENCES users(idUser),
+  FOREIGN KEY(idGame) REFERENCES games(idGame)
+);
+
+-- shopping cart (updated schema)
+CREATE TABLE IF NOT EXISTS cart (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id    INTEGER NOT NULL,
+  game_id    INTEGER NOT NULL,
+  quantity   INTEGER DEFAULT 1,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, game_id),
+  FOREIGN KEY(user_id) REFERENCES users(idUser),
+  FOREIGN KEY(game_id) REFERENCES games(idGame)
+);
+
+-- seed languages
+INSERT OR IGNORE INTO languages (language_name) VALUES
+  ('español'),
+  ('inglés'),
+  ('catalán');
