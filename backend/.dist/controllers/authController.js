@@ -11,8 +11,6 @@ import bcrypt from "bcrypt";
 import pool from "../db.js";
 // Se define el número de "salt rounds" para bcrypt, determinando el coste computacional del hash.
 const saltRounds = 10;
-// Variable para almacenar los carritos (temporalmente)
-let carts = [];
 // Función para registrar un nuevo usuario.
 export const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // Se extraen de req.body los campos esperados para el registro del usuario.
@@ -80,10 +78,3 @@ export const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, functio
         res.status(500).json({ error: "Error en el login", details: error.message });
     }
 });
-// Función para el logout del usuario
-export const logoutUser = (req, res) => {
-    const cartId = req.headers['cart-id'] || 'default';
-    // Limpiar el carrito del usuario
-    carts = carts.filter(c => c.id !== cartId);
-    res.json({ message: "Logout exitoso" });
-};

@@ -12,4 +12,7 @@ router.post('/cart/add', cartController.addProduct);
 // Ruta para eliminar un producto del carrito
 router.delete('/cart/remove/:productId', cartController.removeProduct);
 
+// Ruta para vaciar el carrito
+router.delete('/cart', cartController.clearCart);
+
 export default router;

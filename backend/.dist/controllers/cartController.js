@@ -36,5 +36,19 @@ export const cartController = {
         cart.products = cart.products.filter(p => p.productId !== productId);
         res.status(200).json(cart);
     },
+    clearCart: (req, res) => {
+        const cartId = req.headers['cart-id'] || 'default';
+        const cartIndex = carts.findIndex(c => c.id === cartId);
+        if (cartIndex !== -1) {
+            // If cart exists, clear its products
+            carts[cartIndex].products = [];
+            res.status(200).json(carts[cartIndex]);
+        }
+        else {
+            // If cart doesn't exist, return empty cart
+            const emptyCart = { id: cartId, products: [] };
+            res.status(200).json(emptyCart);
+        }
+    },
     // Aquí podrías agregar más métodos como removeProduct, clearCart, etc.
 };

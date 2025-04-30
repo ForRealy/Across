@@ -1,5 +1,4 @@
 import React, {createContext, useContext, useState} from "react";
-import axios from "axios";
 
 interface User{
     username: string;
@@ -25,17 +24,9 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({children}) 
         localStorage.setItem("user", JSON.stringify(userData));
     };
 
-    const logout = async () => {
-        try {
-            await axios.post("http://localhost:3000/api/logout");
-            setUser(null);
-            localStorage.removeItem("user");
-        } catch (error) {
-            console.error("Error al cerrar sesión:", error);
-            // Still clear local state even if backend call fails
-            setUser(null);
-            localStorage.removeItem("user");
-        }
+    const logout = () => {
+        setUser(null);
+        localStorage.removeItem("user");
     };
 
     return (

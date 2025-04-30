@@ -51,14 +51,9 @@ const Cart: React.FC = () => {
   const removeFromCart = async (game: string) => {
     try {
       await axios.delete(`http://localhost:3000/api/cart/remove/${game}`);
-  
       setCart({
         ...cart,
-        products: cart.products.map(item =>
-          item.productId === game
-            ? { ...item, quantity: item.quantity > 1 ? item.quantity - 1 : 0 }
-            : item
-        ).filter(item => item.quantity > 0) // Filtra solo los que tienen cantidad mayor a 0
+        products: cart.products.filter(item => item.productId !== game)
       });
     } catch (error) {
       console.error("Error al eliminar juego del carrito:", error);
