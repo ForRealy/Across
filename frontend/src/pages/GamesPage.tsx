@@ -7,19 +7,47 @@ import "../styles/GamesPage.css";
 // Configure axios to include credentials
 axios.defaults.withCredentials = true;
 
+interface GameDetails {
+  title: string;
+  cover: string;
+  sliderImage: string;
+  rating: number;
+  releaseDate?: string;
+  description?: string;
+  developer?: string;
+  publisher?: string;
+  tags?: string[];
+}
+
 const GamesPage: React.FC = () => {
   const { title } = useParams<{ title: string }>();
   const gameTitle = title?.replace(/-/g, ' ') || "Game";
-
-  const images = [
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrhWz5dvYt_FD2k0KvELKFQWecENideIjHmw&s",
-    "https://cdn.cloudflare.steamstatic.com/steam/apps/1245620/ss_6c4054e39017ssdc920df2d00515f1d6782b23845b.1920x1080.jpg",
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrhWz5dvYt_FD2k0sKsssvELKFQWecENideIjHmw&s",
-    "https://cdn.cloudflare.steamstatic.com/steam/apps/1245620/ss_eaeb91e0f042d1733d2f13f1c3a8490438f2ef56.1920x1080.jpg"
-  ];
-
+  const [gameDetails, setGameDetails] = useState<GameDetails | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [cartId, setCartId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchGameDetails = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3000/api/games/popular`, {
+          withCredentials: true
+        });
+        const game = response.data.find((g: GameDetails) => 
+          g.title.toLowerCase() === gameTitle.toLowerCase()
+        );
+        if (game) {
+          setGameDetails(game);
+        }
+      } catch (error) {
+        console.error("Error fetching game details:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGameDetails();
+  }, [gameTitle]);
 
   useEffect(() => {
     const initializeCart = async () => {
@@ -69,12 +97,25 @@ const GamesPage: React.FC = () => {
     }
   };
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!gameDetails) {
+    return <div>Game not found</div>;
+  }
+
+  const images = [
+    gameDetails.sliderImage,
+    gameDetails.cover
+  ];
+
   return (
     <div className="gamepage-container">
       <Header />
 
       <div className="gamepage-header">
-        <h1 className="gamepage-title">{gameTitle}</h1>
+        <h1 className="gamepage-title">{gameDetails.title}</h1>
         <div className="gamepage-action-buttons">
           <button className="btn-gray">Ignore</button>
           <button className="btn-gray">Follow</button>
@@ -87,7 +128,7 @@ const GamesPage: React.FC = () => {
       <div className="gamepage-main-content">
         <div className="gamepage-left-column">
           <div className="gamepage-media-section">
-            <img src={images[currentImageIndex]} alt="Juego" className="gamepage-main-image" />
+            <img src={images[currentImageIndex]} alt={gameDetails.title} className="gamepage-main-image" />
             <div className="gamepage-cart-buttons">
               <button onClick={addToCart} className="btn-cart">Add to cart</button>
             </div>
@@ -95,42 +136,34 @@ const GamesPage: React.FC = () => {
 
           <div className="gamepage-thumbnails-section">
             <div className="gamepage-thumbnail-row">
-              {images.map((img, index) => (
-                <img
-                  key={index}
-                  src={img}
-                  alt={`Thumbnail ${index}`}
-                  className={`gamepage-thumbnail ${index === currentImageIndex ? "active" : ""}`}
-                  onClick={() => setCurrentImageIndex(index)}
-                />
-              ))}
+              
             </div>
           </div>
 
           <div className="gamepage-edition-info">
-            <p><strong>{gameTitle}</strong></p>
+            <p><strong>{gameDetails.title}</strong></p>
             <p>WEEKEND DEAL! Offer ends 19 October</p>
 
-            <p><strong>{gameTitle} Deluxe Edition</strong></p>
+            <p><strong>{gameDetails.title} Deluxe Edition</strong></p>
             <p>WEEKEND DEAL! Offer ends 19 October</p>
 
             <p><strong>Includes:</strong></p>
-            <p>{gameTitle} (full game)</p>
+            <p>{gameDetails.title} (full game)</p>
             <p>Digital Artbook & Original Soundtrack</p>
           </div>
         </div>
 
         <div className="gamepage-right-column">
-          <img src={images[0]} alt={gameTitle} className="gamepage-side-image" />
+          <img src={gameDetails.cover} alt={gameDetails.title} className="gamepage-side-image" />
           <p className="gamepage-description">
-            THE NEW FANTASY ACTION RPG. Rise, Tarnished, and be guided by grace to brandish the power of the {gameTitle}.
+            {gameDetails.description || `THE NEW FANTASY ACTION RPG. Rise, Tarnished, and be guided by grace to brandish the power of the ${gameDetails.title}.`}
           </p>
           <div className="gamepage-info-panel">
-            <p><strong>Reviews:</strong> Very Positive</p>
-            <p><strong>Release Date:</strong> February 25, 2022</p>
-            <p><strong>Developer:</strong> FromSoftware</p>
-            <p><strong>Publisher:</strong> Bandai Namco</p>
-            <p><strong>Tags:</strong> Souls-like, Dark Fantasy, Open World</p>
+            <p><strong>Reviews:</strong> {gameDetails.rating ? `Very Positive (${gameDetails.rating.toFixed(1)}/100)` : 'No reviews yet'}</p>
+            <p><strong>Release Date:</strong> {gameDetails.releaseDate || 'Coming Soon'}</p>
+            <p><strong>Developer:</strong> {gameDetails.developer || 'Unknown'}</p>
+            <p><strong>Publisher:</strong> {gameDetails.publisher || 'Unknown'}</p>
+            <p><strong>Tags:</strong> {gameDetails.tags?.join(', ') || 'Action, RPG'}</p>
           </div>
         </div>
       </div>
