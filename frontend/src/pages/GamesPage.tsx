@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 import Header from "../components/HeaderComponent";
 import "../styles/GamesPage.css";
 
 const GamesPage: React.FC = () => {
+  const { title } = useParams<{ title: string }>();
+  const gameTitle = title?.replace(/-/g, ' ') || "Game";
+
   const images = [
     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrhWz5dvYt_FD2k0KvELKFQWecENideIjHmw&s",
     "https://cdn.cloudflare.steamstatic.com/steam/apps/1245620/ss_6c4054e39017ssdc920df2d00515f1d6782b23845b.1920x1080.jpg",
@@ -44,7 +48,7 @@ const GamesPage: React.FC = () => {
     if (!cartId) return;
 
     try {
-      const productId = "elden-ring-deluxe-edition";
+      const productId = title || "";
       await axios.post(`http://localhost:3000/api/carts/${cartId}/product/${productId}`, {
         quantity: 1
       });
@@ -61,7 +65,7 @@ const GamesPage: React.FC = () => {
       <Header />
 
       <div className="gamepage-header">
-        <h1 className="gamepage-title">Elden Ring</h1>
+        <h1 className="gamepage-title">{gameTitle}</h1>
         <div className="gamepage-action-buttons">
           <button className="btn-gray">Ignore</button>
           <button className="btn-gray">Follow</button>
@@ -95,22 +99,22 @@ const GamesPage: React.FC = () => {
           </div>
 
           <div className="gamepage-edition-info">
-            <p><strong>Elden Ring</strong></p>
+            <p><strong>{gameTitle}</strong></p>
             <p>WEEKEND DEAL! Offer ends 19 October</p>
 
-            <p><strong>Elden Ring Deluxe Edition</strong></p>
+            <p><strong>{gameTitle} Deluxe Edition</strong></p>
             <p>WEEKEND DEAL! Offer ends 19 October</p>
 
             <p><strong>Includes:</strong></p>
-            <p>Elden Ring (full game)</p>
+            <p>{gameTitle} (full game)</p>
             <p>Digital Artbook & Original Soundtrack</p>
           </div>
         </div>
 
         <div className="gamepage-right-column">
-          <img src={images[0]} alt="Elden Ring" className="gamepage-side-image" />
+          <img src={images[0]} alt={gameTitle} className="gamepage-side-image" />
           <p className="gamepage-description">
-            THE NEW FANTASY ACTION RPG. Rise, Tarnished, and be guided by grace to brandish the power of the Elden Ring.
+            THE NEW FANTASY ACTION RPG. Rise, Tarnished, and be guided by grace to brandish the power of the {gameTitle}.
           </p>
           <div className="gamepage-info-panel">
             <p><strong>Reviews:</strong> Very Positive</p>

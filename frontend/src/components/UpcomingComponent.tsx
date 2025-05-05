@@ -22,7 +22,16 @@ const UpcomingGames: React.FC<UpcomingGamesProps> = ({ upcomingGames }) => {
           <div
             key={index}
             className="upcoming-game-card"
-            onClick={() => navigate(`/game/${game.title}`)}
+            onClick={() => {
+              const slug = game.title
+              .toLowerCase()
+                .replace(/\s+/g, '-')
+                .replace(/[^\w\-]+/g, '')
+                .replace(/\-\-+/g, '-')
+                .replace(/^-+|-+$/g, '');
+            
+              navigate(`/${slug}`);
+            }}
           >
             <img
               src={game.cover}

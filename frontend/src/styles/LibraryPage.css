@@ -12,10 +12,12 @@
 
 /* Barra lateral */
 .library-sidebar {
+  font-family: 'Courier New', Courier, monospace;
   width: 250px;
-  background-color: dimgrey;
+  background: rgba(255, 255, 255, 0.85);
   padding: 20px;
   color: black;
+  transition: background 0.3s ease; 
 }
 
 .library-sidebar-title {
@@ -38,8 +40,7 @@
 }
 
 .library-game-link:hover {
-  background-color: #e0e0e0;
-}
+  background: rgba(255, 255, 255, 0.95)}
 
 /* Contenido principal */
 .library-content {

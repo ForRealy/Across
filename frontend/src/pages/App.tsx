@@ -6,7 +6,7 @@ import Login from "./LoginPage";
 import Register from "./RegisterPage";
 import Cart from "./CartPage";
 import Downloads from "./DownloadsPage";
-import Games from "./GamesPage";
+import GamesPage from "./GamesPage";
 import Profile from "./ProfilePage";
 
 function App() {
@@ -16,11 +16,11 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/library" element={<Library />} />
+          <Route path="/:title" element={<GamesPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/downloads" element={<Downloads />} />
-          <Route path="/games" element={<Games />} />
           <Route path="/profile" element={<Profile />} />
         </Routes>
       </Router>

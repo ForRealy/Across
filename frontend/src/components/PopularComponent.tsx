@@ -1,5 +1,6 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import GamePage from '../pages/GamesPage';
 
 interface Game {
   title: string;
@@ -14,6 +15,13 @@ interface PopularGamesProps {
   setCurrentSlide: React.Dispatch<React.SetStateAction<number>>;
 }
 
+<Router>
+  <Routes>
+    <Route path="/:title" element={<GamePage />} />
+    {/* otras rutas */}
+  </Routes>
+</Router>
+
 const PopularGames: React.FC<PopularGamesProps> = ({ popularGames, currentSlide, setCurrentSlide }) => {
   const navigate = useNavigate();
 
@@ -24,8 +32,17 @@ const PopularGames: React.FC<PopularGamesProps> = ({ popularGames, currentSlide,
         {popularGames.length > 0 && (
           <div
             className="slider-container"
-            onClick={() => navigate(`/game/${popularGames[currentSlide].title}`)}
-          >
+            onClick={() => {
+              const slug = popularGames[currentSlide].title
+                .toLowerCase()
+                .replace(/\s+/g, '-')
+                .replace(/[^\w\-]+/g, '')
+                .replace(/\-\-+/g, '-')
+                .replace(/^-+|-+$/g, '');
+            
+              navigate(`/${slug}`);
+            }}
+                      >
             <img
               src={popularGames[currentSlide].sliderImage}
               alt={popularGames[currentSlide].title}
