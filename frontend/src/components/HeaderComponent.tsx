@@ -2,23 +2,14 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { userAuth } from "../pages/AuthContext";  // Importamos el contexto
 import "../styles/Header.css";
-import axios from "axios";
 
 const Header: React.FC = () => {
     const { user, logout } = userAuth();  // Usamos el contexto para obtener el usuario y la función logout
-    const navigate = useNavigate();
+    const navigate = useNavigate(); // Para manejar la redirección
 
-    const handleLogout = async () => {
-        try {
-            // Clear the cart before logging out
-            await axios.delete("http://localhost:3000/api/cart");
-            logout();
-            navigate("/");
-        } catch (error) {
-            console.error("Error clearing cart:", error);
-            logout();
-            navigate("/");
-        }
+    const handleLogout = () => {
+        logout();  // Ejecuta la función de cierre de sesión
+        navigate("/");  // Redirige al usuario a la página de home
     };
 
     return(

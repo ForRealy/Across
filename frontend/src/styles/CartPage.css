@@ -3,31 +3,31 @@
   justify-content: center;
   align-items: center;
   flex-grow: 1;
-  padding: 40px 0;
+  padding: 60px 20px;
+  min-height: 100vh;
+  box-sizing: border-box;
 }
 
 .cart-container {
-  padding: 20px;
-  color: black;
-  background-color: lightgray;
-  font-family: Arial, sans-serif;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  color: #1f2937;
+  background: rgba(255, 255, 255, 0.85);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 800px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  animation: fadeIn 0.8s ease;
 }
 
-/* Estilos para el contenido dentro del carrito */
 .cart-content {
   width: 100%;
   text-align: center;
 }
 
-/* Estilo de la lista de juegos en el carrito */
 .cart-list {
   list-style: none;
   padding: 0;
@@ -35,19 +35,68 @@
 }
 
 .cart-list li {
-  margin: 10px 0;
+  margin: 12px 0;
   font-size: 18px;
+  padding: 10px 15px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
 }
 
-/* Sección de pago */
+.cart-clear-button {
+  padding: 12px 18px;
+  background-color: #f97316; /* Naranja fuerte */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-top: 20px;
+}
+
+.cart-clear-button:hover {
+  background-color: #ea580c; /* Más oscuro al pasar el mouse */
+  transform: translateY(-2px);
+}
+
+.cart-clear-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.4);
+}
+
+
+.cart-remove-button {
+  padding: 8px 14px;
+  background-color: #ef4444; /* Rojo suave */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-left: 10px;
+}
+
+.cart-remove-button:hover {
+  background-color: #dc2626; /* Rojo más intenso */
+  transform: scale(1.05);
+}
+
+.cart-remove-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.4); /* Enfasis accesible */
+}
+
+
 .cart-payment-section {
-  margin-top: 50px;
+  margin-top: 40px;
   width: 100%;
   text-align: center;
 }
 
 .cart-payment-section h2 {
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+  color: #111827;
 }
 
 .cart-payment-section label {
@@ -56,65 +105,74 @@
   text-align: left;
   max-width: 400px;
   margin-inline: auto;
+  font-weight: 500;
 }
 
 .cart-payment-section input {
-  padding: 10px;
+  padding: 12px;
   width: 100%;
   max-width: 400px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
   font-size: 16px;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  box-sizing: border-box;
+  transition: border 0.2s;
 }
 
-/* Mensaje de éxito del pago */
+.cart-payment-section input:focus {
+  border-color: #3b82f6;
+  outline: none;
+}
+
 .cart-payment-success {
   margin-top: 30px;
   padding: 20px;
-  background-color: #004d00;
+  background-color: #10b981;
   color: white;
-  border-radius: 5px;
+  border-radius: 8px;
+  font-weight: bold;
+  animation: fadeIn 0.5s ease;
 }
 
-/* Estilo para el botón de pago */
-.cart-pay-button {
-  padding: 12px 18px;
-  background-color: #ff6600;
-  color: white;
+.cart-pay-button,
+.cart-back-button {
+  padding: 14px 22px;
+  font-size: 17px;
   border: none;
-  font-size: 18px;
   border-radius: 8px;
   cursor: pointer;
   margin-top: 20px;
-  transition: background-color 0.3s ease;
+  transition: transform 0.2s ease, background-color 0.3s ease;
+}
+
+.cart-pay-button {
+  background-color: #34D399;
+  color: white;
 }
 
 .cart-pay-button:hover {
-  background-color: #e65c00;
+  background-color: #059669;
+  transform: translateY(-2px);
 }
 
-.cart-pay-button:focus {
-  outline: none;
-}
-
-/* Estilo para el botón de volver a la biblioteca */
 .cart-back-button {
-  padding: 12px 18px;
-  background-color: #004d00;
+  background-color: #64748b;
   color: white;
-  border: none;
-  font-size: 18px;
-  border-radius: 8px;
-  cursor: pointer;
-  margin-top: 20px;
-  transition: background-color 0.3s ease;
 }
 
 .cart-back-button:hover {
-  background-color: #003300;
+  background-color: #475569;
+  transform: translateY(-2px);
 }
 
-.cart-back-button:focus {
-  outline: none;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

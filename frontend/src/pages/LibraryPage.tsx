@@ -7,7 +7,6 @@ import axios from "axios";
 interface Game {
   title: string;
   cover: string;
-  path: string;
 }
 
 const Library: React.FC = () => {
@@ -16,13 +15,9 @@ const Library: React.FC = () => {
   const [addedToCart, setAddedToCart] = useState<string | null>(null);
 
   useEffect(() => {
-    // Función para obtener los juegos desde el backend
     const loadGames = async () => {
       try {
-        console.log('Cargando juegos...');
         const response = await axios.get("http://localhost:3000/api/games/library");
-        console.log('Respuesta del backend:', response.data);
-        // Se espera que la respuesta sea un array de objetos con los campos: title, cover y path
         setGames(response.data);
       } catch (error) {
         console.error("Error al cargar los juegos:", error);
@@ -33,20 +28,17 @@ const Library: React.FC = () => {
   }, []);
 
   const addToCart = async (game: string) => {
-    console.log("Añadiendo al carrito el juego: ", game);  // Verifica que el juego se envía correctamente
     try {
-      // Enviando la solicitud POST al backend para agregar el juego al carrito
-      const response = await axios.post("http://localhost:3000/api/cart/add", { game });
-      console.log("Respuesta del backend:", response.data);
-      
-      // Actualizando el estado para reflejar que el juego ha sido añadido
+      await axios.post("http://localhost:3000/api/cart/add", { game });
       setAddedToCart(game);
-      
-      // Opcional: Restablecer el estado de "Añadido" después de 2 segundos
       setTimeout(() => setAddedToCart(null), 2000);
     } catch (error) {
       console.error("Error al agregar al carrito:", error);
     }
+  };
+
+  const goToGamePage = (gameTitle: string) => {
+    navigate(`/games`);  // Redirige a GamesPage.tsx con el título del juego
   };
 
   return (
@@ -59,7 +51,7 @@ const Library: React.FC = () => {
             {games.map((game, index) => (
               <li
                 key={index}
-                onClick={() => navigate(game.path)}
+                onClick={() => goToGamePage(game.title)}
                 className="library-game-link"
               >
                 {game.title}
@@ -68,7 +60,6 @@ const Library: React.FC = () => {
           </ul>
         </aside>
         <main className="library-content">
-          <h1 className="library-title">Juegos</h1>
           <div className="library-gallery">
             {games.map((game, index) => (
               <div key={index} className="library-game-item">
@@ -76,7 +67,7 @@ const Library: React.FC = () => {
                   src={game.cover}
                   alt={game.title}
                   className="library-game-cover"
-                  onClick={() => navigate(game.path)}
+                  onClick={() => goToGamePage(game.title)}
                 />
                 <div className="library-button-container">
                   <button
