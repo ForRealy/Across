@@ -2,8 +2,10 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import pool from "../db.js";
 
+import { Session, SessionData } from "express-session";
+
 interface SessionRequest extends Request {
-  session?: {
+  session: Session & Partial<SessionData> & {
     user?: {
       username: string;
     };
@@ -63,43 +65,51 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
 
 // Función para el login del usuario.
 export const loginUser = async (req: SessionRequest, res: Response): Promise<void> => {
-  // Se extraen del cuerpo de la solicitud los campos necesarios.
   const { username, password } = req.body;
+  console.log("Intentando iniciar sesión con:", username);
 
-  // Se verifica que se hayan proporcionado ambos datos obligatorios.
   if (!username || !password) {
     res.status(400).json({ error: "Faltan datos obligatorios" });
     return;
   }
 
   try {
-    // Se realiza una consulta a la base de datos para obtener el usuario que coincida con el username.
     const [rows]: any = await pool.query("SELECT * FROM users WHERE username = ?", [username]);
-    // Si no se encuentra ningún usuario con ese username, se devuelve un error 401.
+    console.log("Resultado de query:", rows);
+
     if (rows.length === 0) {
       res.status(401).json({ error: "Usuario no encontrado" });
       return;
     }
 
     const user = rows[0];
+    console.log("Usuario encontrado:", user);
 
-    // Se utiliza bcrypt.compare para verificar que la contraseña proporcionada coincida con la contraseña hasheada almacenada.
+    if (!user.password) {
+      res.status(500).json({ error: "Contraseña no encontrada en base de datos" });
+      return;
+    }
+
     const validPassword = await bcrypt.compare(password, user.password);
+    console.log("¿Contraseña válida?:", validPassword);
 
-    // Si la contraseña no es válida, se retorna un error 401.
     if (!validPassword) {
       res.status(401).json({ error: "Contraseña incorrecta" });
       return;
     }
 
-    // Set user in session
-    req.session!.user = {
-      username: user.username
-    };
+    if (!req.session) {
+      console.log("req.session no está definido");
+      res.status(500).json({ error: "Sesión no disponible" });
+      return;
+    }
 
-    // En caso de cualquier error inesperado durante el proceso, se devuelve un error 500 con detalles.
-    res.json({ message: "Login exitoso", user });
+    req.session.user = { username: user.username };
+
+    const { email } = user;
+    res.json({ message: "Login exitoso", user: { username, email } });
   } catch (error: any) {
+    console.error("Error en loginUser:", error);
     res.status(500).json({ error: "Error en el login", details: error.message });
   }
 };

@@ -48,33 +48,42 @@ export const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, func
 });
 // Función para el login del usuario.
 export const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    // Se extraen del cuerpo de la solicitud los campos necesarios.
     const { username, password } = req.body;
-    // Se verifica que se hayan proporcionado ambos datos obligatorios.
+    console.log("Intentando iniciar sesión con:", username);
     if (!username || !password) {
         res.status(400).json({ error: "Faltan datos obligatorios" });
         return;
     }
     try {
-        // Se realiza una consulta a la base de datos para obtener el usuario que coincida con el username.
         const [rows] = yield pool.query("SELECT * FROM users WHERE username = ?", [username]);
-        // Si no se encuentra ningún usuario con ese username, se devuelve un error 401.
+        console.log("Resultado de query:", rows);
         if (rows.length === 0) {
             res.status(401).json({ error: "Usuario no encontrado" });
             return;
         }
         const user = rows[0];
-        // Se utiliza bcrypt.compare para verificar que la contraseña proporcionada coincida con la contraseña hasheada almacenada.
+        console.log("Usuario encontrado:", user);
+        if (!user.password) {
+            res.status(500).json({ error: "Contraseña no encontrada en base de datos" });
+            return;
+        }
         const validPassword = yield bcrypt.compare(password, user.password);
-        // Si la contraseña no es válida, se retorna un error 401.
+        console.log("¿Contraseña válida?:", validPassword);
         if (!validPassword) {
             res.status(401).json({ error: "Contraseña incorrecta" });
             return;
         }
-        // En caso de cualquier error inesperado durante el proceso, se devuelve un error 500 con detalles.
-        res.json({ message: "Login exitoso", user });
+        if (!req.session) {
+            console.log("req.session no está definido");
+            res.status(500).json({ error: "Sesión no disponible" });
+            return;
+        }
+        req.session.user = { username: user.username };
+        const { email } = user;
+        res.json({ message: "Login exitoso", user: { username, email } });
     }
     catch (error) {
+        console.error("Error en loginUser:", error);
         res.status(500).json({ error: "Error en el login", details: error.message });
     }
 });

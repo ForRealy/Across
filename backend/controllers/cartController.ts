@@ -2,8 +2,10 @@ import { Request, Response } from 'express';
 import pool from '../db.js';
 import { RowDataPacket, OkPacket } from 'mysql2';
 
+import { Session, SessionData } from 'express-session';
+
 interface SessionRequest extends Request {
-  session?: {
+  session: Session & Partial<SessionData> & {
     user?: {
       username: string;
     };
