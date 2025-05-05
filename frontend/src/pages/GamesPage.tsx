@@ -4,6 +4,9 @@ import axios from "axios";
 import Header from "../components/HeaderComponent";
 import "../styles/GamesPage.css";
 
+// Configure axios to include credentials
+axios.defaults.withCredentials = true;
+
 const GamesPage: React.FC = () => {
   const { title } = useParams<{ title: string }>();
   const gameTitle = title?.replace(/-/g, ' ') || "Game";
@@ -24,17 +27,23 @@ const GamesPage: React.FC = () => {
         const savedCartId = localStorage.getItem("cartId");
 
         if (savedCartId) {
-          await axios.get(`http://localhost:3000/api/carts/${savedCartId}`);
+          await axios.get(`http://localhost:3000/api/carts/${savedCartId}`, {
+            withCredentials: true
+          });
           setCartId(savedCartId);
         } else {
-          const response = await axios.post("http://localhost:3000/api/carts");
+          const response = await axios.post("http://localhost:3000/api/carts", {}, {
+            withCredentials: true
+          });
           const newCartId = response.data.id;
           localStorage.setItem("cartId", newCartId);
           setCartId(newCartId);
         }
       } catch (error) {
         console.error("Error initializing cart:", error);
-        const response = await axios.post("http://localhost:3000/api/carts");
+        const response = await axios.post("http://localhost:3000/api/carts", {}, {
+          withCredentials: true
+        });
         const newCartId = response.data.id;
         localStorage.setItem("cartId", newCartId);
         setCartId(newCartId);

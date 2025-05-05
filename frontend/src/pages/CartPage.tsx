@@ -4,6 +4,9 @@ import Header from "../components/HeaderComponent"; // Asegúrate de tener el He
 import "../styles/CartPage.css"; // Importa el archivo CSS con los estilos mencionados
 import axios from "axios";
 
+// Configure axios to include credentials
+axios.defaults.withCredentials = true;
+
 interface CartItem {
   productId: string;
   quantity: number;
@@ -29,7 +32,9 @@ const Cart: React.FC = () => {
   useEffect(() => {
     const loadCart = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/cart");
+        const response = await axios.get("http://localhost:3000/api/cart", {
+          withCredentials: true
+        });
         setCart(response.data);
       } catch (error) {
         console.error("Error al cargar el carrito:", error);
@@ -41,7 +46,9 @@ const Cart: React.FC = () => {
 
   const clearCart = async () => {
     try {
-      await axios.delete("http://localhost:3000/api/cart"); // Llamada para limpiar el carrito en el backend
+      await axios.delete("http://localhost:3000/api/cart", {
+        withCredentials: true
+      });
       setCart({ id: 'default', products: [] });
     } catch (error) {
       console.error("Error al vaciar el carrito:", error);
@@ -50,7 +57,9 @@ const Cart: React.FC = () => {
 
   const removeFromCart = async (game: string) => {
     try {
-      await axios.delete(`http://localhost:3000/api/cart/remove/${game}`);
+      await axios.delete(`http://localhost:3000/api/cart/remove/${game}`, {
+        withCredentials: true
+      });
       setCart({
         ...cart,
         products: cart.products.filter(item => item.productId !== game)
@@ -71,7 +80,10 @@ const Cart: React.FC = () => {
       setPaymentSuccess(true);
       try {
         // Enviar los juegos comprados al backend
-        await axios.post("http://localhost:3000/api/cart/checkout", { cart: cart.products });
+        await axios.post("http://localhost:3000/api/cart/checkout", 
+          { cart: cart.products },
+          { withCredentials: true }
+        );
         clearCart();
       } catch (error) {
         console.error("Error en el pago:", error);

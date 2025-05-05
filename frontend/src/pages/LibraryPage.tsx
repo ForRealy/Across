@@ -4,9 +4,14 @@ import Header from "../components/HeaderComponent";
 import "../styles/LibraryPage.css";
 import axios from "axios";
 
+// Configure axios to include credentials
+axios.defaults.withCredentials = true;
+
 interface Game {
   title: string;
   cover: string;
+  path: string;
+  rating: number;
 }
 
 const Library: React.FC = () => {
@@ -17,7 +22,9 @@ const Library: React.FC = () => {
   useEffect(() => {
     const loadGames = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/games/library");
+        const response = await axios.get("http://localhost:3000/api/games/library", {
+          withCredentials: true
+        });
         setGames(response.data);
       } catch (error) {
         console.error("Error al cargar los juegos:", error);
@@ -29,7 +36,10 @@ const Library: React.FC = () => {
 
   const addToCart = async (game: string) => {
     try {
-      await axios.post("http://localhost:3000/api/cart/add", { game });
+      await axios.post("http://localhost:3000/api/cart/add", 
+        { game },
+        { withCredentials: true }
+      );
       setAddedToCart(game);
       setTimeout(() => setAddedToCart(null), 2000);
     } catch (error) {

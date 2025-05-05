@@ -1,75 +1,248 @@
 import { Request, Response } from 'express';
+import pool from '../db.js';
+import { RowDataPacket, OkPacket } from 'mysql2';
 
-interface ProductInCart {
-  productId: string;
+interface SessionRequest extends Request {
+  session?: {
+    user?: {
+      username: string;
+    };
+  };
+}
+
+interface GameRow extends RowDataPacket {
+  idGame: number;
+  name: string;
+  price: number;
+}
+
+interface CartRow extends RowDataPacket {
+  id: number;
+  user_id: number;
+  game_id: number;
   quantity: number;
+  created_at: string;
+  game_name: string;
+  price: number;
 }
-
-interface Cart {
-  id: string;
-  products: ProductInCart[];
-}
-
-let carts: Cart[] = [];  // Almacenamiento temporal del carrito
 
 export const cartController = {
-  getCart: (req: Request, res: Response): void => {
-    const cartId = req.headers['cart-id'] || 'default';
-    const cart = carts.find(c => c.id === cartId) || { id: cartId, products: [] };
-    res.json(cart);
-  },
+  getCart: async (req: SessionRequest, res: Response): Promise<void> => {
+    try {
+      const username = req.session?.user?.username;
+      if (!username) {
+        res.status(401).json({ error: 'User not authenticated' });
+        return;
+      }
 
-  addProduct: (req: Request, res: Response): void => {
-    const { game } = req.body; // Nombre del juego
-    const cartId = req.headers['cart-id'] || 'default'; // ID del carrito, puede ser el ID de sesión o el de usuario
+      // Get user ID from username
+      const [users] = await pool.query<RowDataPacket[]>(
+        'SELECT idUser FROM users WHERE username = ?',
+        [username]
+      );
 
-    // Verifica si el carrito ya existe
-    let cart = carts.find(c => c.id === cartId);
-    if (!cart) {
-      cart = { id: cartId.toString(), products: [] };  // Crea un carrito si no existe
-      carts.push(cart);
-    }
+      if (!users.length) {
+        res.status(401).json({ error: 'User not found' });
+        return;
+      }
 
-    // Verifica si el producto ya está en el carrito
-    const existingProduct = cart.products.find(p => p.productId === game);
-    if (existingProduct) {
-      existingProduct.quantity += 1; // Si el producto está en el carrito, incrementa la cantidad
-    } else {
-      cart.products.push({ productId: game, quantity: 1 }); // Si no está, lo agrega
-    }
+      const userId = users[0].idUser;
 
-    // Responde con el carrito actualizado
-    res.status(200).json(cart);
-  },
+      const [rows] = await pool.query<CartRow[]>(
+        `SELECT c.*, g.name as game_name, g.price 
+         FROM cart c 
+         JOIN games g ON c.game_id = g.idGame 
+         WHERE c.user_id = ?`,
+        [userId]
+      );
 
-  removeProduct: (req: Request, res: Response): void => {
-    const { productId } = req.params;
-    const cartId = req.headers['cart-id'] || 'default';
-
-    const cart = carts.find(c => c.id === cartId);
-    if (!cart) {
-      res.status(404).json({ error: 'Cart not found' });
-      return;
-    }
-
-    cart.products = cart.products.filter(p => p.productId !== productId);
-    res.status(200).json(cart);
-  },
-
-  clearCart: (req: Request, res: Response): void => {
-    const cartId = req.headers['cart-id'] || 'default';
-    const cartIndex = carts.findIndex(c => c.id === cartId);
-    
-    if (cartIndex !== -1) {
-      // If cart exists, clear its products
-      carts[cartIndex].products = [];
-      res.status(200).json(carts[cartIndex]);
-    } else {
-      // If cart doesn't exist, return empty cart
-      const emptyCart = { id: cartId, products: [] };
-      res.status(200).json(emptyCart);
+      res.json({
+        id: userId,
+        products: rows.map(row => ({
+          productId: row.game_name,
+          quantity: row.quantity,
+          price: row.price
+        }))
+      });
+    } catch (error) {
+      console.error('Error getting cart:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
   },
 
-  // Aquí podrías agregar más métodos como removeProduct, clearCart, etc.
+  addProduct: async (req: SessionRequest, res: Response): Promise<void> => {
+    try {
+      const username = req.session?.user?.username;
+      if (!username) {
+        res.status(401).json({ error: 'User not authenticated' });
+        return;
+      }
+
+      // Get user ID from username
+      const [users] = await pool.query<RowDataPacket[]>(
+        'SELECT idUser FROM users WHERE username = ?',
+        [username]
+      );
+
+      if (!users.length) {
+        res.status(401).json({ error: 'User not found' });
+        return;
+      }
+
+      const userId = users[0].idUser;
+      const { game } = req.body;
+      
+      // First get the game ID from the name
+      const [games] = await pool.query<GameRow[]>(
+        'SELECT idGame FROM games WHERE name = ?',
+        [game]
+      );
+
+      if (!games.length) {
+        res.status(404).json({ error: 'Game not found' });
+        return;
+      }
+
+      const gameId = games[0].idGame;
+
+      // Check if game is already in cart
+      const [existingItems] = await pool.query<CartRow[]>(
+        'SELECT * FROM cart WHERE user_id = ? AND game_id = ?',
+        [userId, gameId]
+      );
+
+      if (existingItems.length > 0) {
+        // Update quantity
+        await pool.query<OkPacket>(
+          'UPDATE cart SET quantity = quantity + 1 WHERE user_id = ? AND game_id = ?',
+          [userId, gameId]
+        );
+      } else {
+        // Add new item
+        await pool.query<OkPacket>(
+          'INSERT INTO cart (user_id, game_id, quantity) VALUES (?, ?, 1)',
+          [userId, gameId]
+        );
+      }
+
+      // Get updated cart
+      const [updatedCart] = await pool.query<CartRow[]>(
+        `SELECT c.*, g.name as game_name, g.price 
+         FROM cart c 
+         JOIN games g ON c.game_id = g.idGame 
+         WHERE c.user_id = ?`,
+        [userId]
+      );
+
+      res.status(200).json({
+        id: userId,
+        products: updatedCart.map(row => ({
+          productId: row.game_name,
+          quantity: row.quantity,
+          price: row.price
+        }))
+      });
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  },
+
+  removeProduct: async (req: SessionRequest, res: Response): Promise<void> => {
+    try {
+      const username = req.session?.user?.username;
+      if (!username) {
+        res.status(401).json({ error: 'User not authenticated' });
+        return;
+      }
+
+      // Get user ID from username
+      const [users] = await pool.query<RowDataPacket[]>(
+        'SELECT idUser FROM users WHERE username = ?',
+        [username]
+      );
+
+      if (!users.length) {
+        res.status(401).json({ error: 'User not found' });
+        return;
+      }
+
+      const userId = users[0].idUser;
+      const { productId } = req.params;
+
+      // Get game ID from name
+      const [games] = await pool.query<GameRow[]>(
+        'SELECT idGame FROM games WHERE name = ?',
+        [productId]
+      );
+
+      if (!games.length) {
+        res.status(404).json({ error: 'Game not found' });
+        return;
+      }
+
+      const gameId = games[0].idGame;
+
+      // Remove from cart
+      await pool.query<OkPacket>(
+        'DELETE FROM cart WHERE user_id = ? AND game_id = ?',
+        [userId, gameId]
+      );
+
+      // Get updated cart
+      const [updatedCart] = await pool.query<CartRow[]>(
+        `SELECT c.*, g.name as game_name, g.price 
+         FROM cart c 
+         JOIN games g ON c.game_id = g.idGame 
+         WHERE c.user_id = ?`,
+        [userId]
+      );
+
+      res.status(200).json({
+        id: userId,
+        products: updatedCart.map(row => ({
+          productId: row.game_name,
+          quantity: row.quantity,
+          price: row.price
+        }))
+      });
+    } catch (error) {
+      console.error('Error removing from cart:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  },
+
+  clearCart: async (req: SessionRequest, res: Response): Promise<void> => {
+    try {
+      const username = req.session?.user?.username;
+      if (!username) {
+        res.status(401).json({ error: 'User not authenticated' });
+        return;
+      }
+
+      // Get user ID from username
+      const [users] = await pool.query<RowDataPacket[]>(
+        'SELECT idUser FROM users WHERE username = ?',
+        [username]
+      );
+
+      if (!users.length) {
+        res.status(401).json({ error: 'User not found' });
+        return;
+      }
+
+      const userId = users[0].idUser;
+
+      // Clear cart
+      await pool.query<OkPacket>('DELETE FROM cart WHERE user_id = ?', [userId]);
+
+      res.status(200).json({
+        id: userId,
+        products: []
+      });
+    } catch (error) {
+      console.error('Error clearing cart:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
 };

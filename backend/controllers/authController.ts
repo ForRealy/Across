@@ -2,6 +2,14 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import pool from "../db.js";
 
+interface SessionRequest extends Request {
+  session?: {
+    user?: {
+      username: string;
+    };
+  };
+}
+
 // Se define el número de "salt rounds" para bcrypt, determinando el coste computacional del hash.
 const saltRounds = 10;
 
@@ -54,7 +62,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
 };
 
 // Función para el login del usuario.
-export const loginUser = async (req: Request, res: Response): Promise<void> => {
+export const loginUser = async (req: SessionRequest, res: Response): Promise<void> => {
   // Se extraen del cuerpo de la solicitud los campos necesarios.
   const { username, password } = req.body;
 
@@ -83,10 +91,15 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
       res.status(401).json({ error: "Contraseña incorrecta" });
       return;
     }
+
+    // Set user in session
+    req.session!.user = {
+      username: user.username
+    };
+
     // En caso de cualquier error inesperado durante el proceso, se devuelve un error 500 con detalles.
     res.json({ message: "Login exitoso", user });
   } catch (error: any) {
-
     res.status(500).json({ error: "Error en el login", details: error.message });
   }
 };
