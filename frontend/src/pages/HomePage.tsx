@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+
 import Header from "../components/HeaderComponent";
 import "../styles/HomePage.css";
 import axios from "axios";
@@ -15,7 +15,6 @@ interface Game {
 }
 
 const Home: React.FC = () => {
-  const navigate = useNavigate();
   const [popularGames, setPopularGames] = useState<Game[]>([]);
   const [upcomingGames, setUpcomingGames] = useState<Game[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);

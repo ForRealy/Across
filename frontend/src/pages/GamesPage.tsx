@@ -21,31 +21,16 @@ interface GameDetails {
 
 const GamesPage: React.FC = () => {
   const { title } = useParams<{ title: string }>();
-  const gameTitle = title?.replace(/-/g, ' ') || "Game";
   const [gameDetails, setGameDetails] = useState<GameDetails | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchGameDetails = async () => {
       try {
-        // Try to fetch from both popular and library endpoints
-        const [popularResponse, libraryResponse] = await Promise.all([
-          axios.get(`http://localhost:3000/api/games/popular`, {
-            withCredentials: true
-          }),
-          axios.get(`http://localhost:3000/api/games/library`, {
-            withCredentials: true
-          })
-        ]);
-
-        // Search for the game in both responses
-        const game = [...popularResponse.data, ...libraryResponse.data].find(
-          (g: GameDetails) => g.title.toLowerCase() === gameTitle.toLowerCase()
-        );
-
-        if (game) {
-          setGameDetails(game);
-        }
+        const response = await axios.get(`http://localhost:3000/api/games/details/${title}`, {
+          withCredentials: true
+        });
+        setGameDetails(response.data);
       } catch (error) {
         console.error("Error fetching game details:", error);
       } finally {
@@ -54,7 +39,7 @@ const GamesPage: React.FC = () => {
     };
 
     fetchGameDetails();
-  }, [gameTitle]);
+  }, [title]);
 
   const addToCart = async () => {
     try {
