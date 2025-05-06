@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./AuthContext";
 import Home from "./HomePage";
-import Library from "./LibraryPage";
 import Login from "./LoginPage";
 import Register from "./RegisterPage";
+import Library from "./LibraryPage";
 import Cart from "./CartPage";
 import Downloads from "./DownloadsPage";
 import GamesPage from "./GamesPage";

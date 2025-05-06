@@ -79,12 +79,19 @@ export const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, functio
             return;
         }
         req.session.user = {
-            id: user.id,
+            id: user.idUser,
             username: user.username,
             email: user.email
         };
-        const { email } = user;
-        res.json({ message: "Login exitoso", user: { username, email } });
+        // Devuelve todos los datos necesarios incluyendo el idUser
+        res.json({
+            message: "Login exitoso",
+            user: {
+                idUser: user.idUser,
+                username: user.username,
+                email: user.email
+            }
+        });
     }
     catch (error) {
         console.error("Error en loginUser:", error);

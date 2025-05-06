@@ -108,12 +108,20 @@ export const loginUser = async (req: SessionRequest, res: Response): Promise<voi
     }
 
     req.session.user = { 
-      id: user.id,           // Suponiendo que la columna se llama "id"
+      id: user.idUser,  // Asegúrate de usar el nombre correcto de la columna (idUser o id)
       username: user.username,
       email: user.email
     };
-    const { email } = user;
-    res.json({ message: "Login exitoso", user: { username, email } });
+
+    // Devuelve todos los datos necesarios incluyendo el idUser
+    res.json({ 
+      message: "Login exitoso", 
+      user: { 
+        idUser: user.idUser,  // Asegúrate de usar el nombre correcto de la columna
+        username: user.username, 
+        email: user.email 
+      } 
+    });
   } catch (error: any) {
     console.error("Error en loginUser:", error);
     res.status(500).json({ error: "Error en el login", details: error.message });

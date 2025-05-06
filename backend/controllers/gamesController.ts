@@ -4,11 +4,9 @@ import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 
-// ——— Obtener directorio actual en ES modules ———
+// ——— Configuración de paths y variables de entorno ———
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-// ——— Cargar variables de entorno desde la raíz del proyecto ———
 dotenv.config({ path: resolve(__dirname, '../.env') });
 
 // ——— Configuración del limitador: 4 peticiones por segundo ———
@@ -24,14 +22,14 @@ export interface GameWithCover {
   cover: string;
   path?: string;
   rating?: number;
+  price?: number;
   releaseDate?: string;
   daysRemaining?: number;
   sliderImage?: string;
 }
 
 /**
- * Helper centralizado para hacer peticiones a IGDB,
- * aplicando el rate limiter y los headers comunes.
+ * Helper centralizado para hacer peticiones a IGDB
  */
 const igdbRequest = async (body: string) => {
   if (!process.env.IGDB_CLIENT_ID || !process.env.IGDB_AUTHORIZATION) {
@@ -54,7 +52,7 @@ const igdbRequest = async (body: string) => {
 };
 
 /**
- * Transforma la respuesta bruta de IGDB en un objeto con portada.
+ * Transforma la respuesta bruta de IGDB en un objeto con portada
  */
 const transformGame = (game: any): GameWithCover => ({
   id: game.id,
@@ -64,11 +62,11 @@ const transformGame = (game: any): GameWithCover => ({
     : 'https://via.placeholder.com/264x352?text=No+Cover',
   path: `/game/${game.id}`,
   rating: game.aggregated_rating || 0,
+  price: game.price || 59.99, // Precio por defecto
 });
 
 /**
- * Transforma la respuesta para juegos populares o próximos,
- * añadiendo sliderImage, releaseDate y daysRemaining.
+ * Transforma la respuesta para juegos populares o próximos
  */
 const transformPopularGame = (game: any, currentTimestamp?: number): GameWithCover => {
   const base = transformGame(game);
@@ -85,9 +83,60 @@ const transformPopularGame = (game: any, currentTimestamp?: number): GameWithCov
   };
 };
 
+// ———————————————————————————
+// ——— FUNCIONES PRINCIPALES ———
+// ———————————————————————————
+
 /**
- * Obtiene los 30 juegos mejor valorados.
- * Ahora devuelve undefined en caso de error o sin datos.
+ * Busca juegos por nombre
+ */
+export const searchGamesOptimized = async (query: string): Promise<GameWithCover[] | undefined> => {
+  try {
+    // Estrategia 1: Búsqueda exacta primero
+    let searchQuery = `
+      search "${query}";
+      fields id,name,cover.image_id;
+      where category = (0, 2, 4, 8, 9);
+      limit 5;
+    `;
+    
+    let { data } = await igdbRequest(searchQuery);
+    
+    // Estrategia 2: Si no hay resultados, intentar con términos clave
+    if (!data || data.length === 0) {
+      const keywords = query.split(':')[0]; // "The Legend of Zelda"
+      searchQuery = `
+        search "${keywords}";
+        fields id,name,cover.image_id;
+        where name ~ *"${keywords}"* & name ~ *"Breath of the Wild"*;
+        limit 5;
+      `;
+      const response = await igdbRequest(searchQuery);
+      data = response.data;
+    }
+
+    // Estrategia 3: Si sigue sin resultados, buscar solo palabras clave
+    if (!data || data.length === 0) {
+      searchQuery = `
+        fields id,name,cover.image_id;
+        where name ~ *"Zelda"* & name ~ *"Breath"*;
+        limit 5;
+      `;
+      const response = await igdbRequest(searchQuery);
+      data = response.data;
+    }
+
+    return data?.map(transformGame) || [];
+  } catch (err) {
+    console.error('Error en búsqueda optimizada:', err);
+    return undefined;
+  }
+};
+
+
+
+/**
+ * Obtiene los 30 juegos mejor valorados
  */
 export const fetchGameData = async (): Promise<GameWithCover[] | undefined> => {
   try {
@@ -100,11 +149,7 @@ export const fetchGameData = async (): Promise<GameWithCover[] | undefined> => {
       limit 30;
     `;
     const { data } = await igdbRequest(query);
-    const list = data
-      .map(transformGame)
-      .sort((a: GameWithCover, b: GameWithCover): number => b.rating! - a.rating!)
-      .slice(0, 30);
-    return list;
+    return data.map(transformGame).sort((a: GameWithCover, b: GameWithCover) => (b.rating || 0) - (a.rating || 0));
   } catch (err) {
     console.error('Error al obtener datos de juegos:', err);
     return undefined;
@@ -112,8 +157,7 @@ export const fetchGameData = async (): Promise<GameWithCover[] | undefined> => {
 };
 
 /**
- * Obtiene los próximos 6 lanzamientos futuros.
- * Ahora devuelve undefined en caso de error.
+ * Obtiene los próximos 6 lanzamientos
  */
 export const fetchUpcomingGames = async (): Promise<GameWithCover[] | undefined> => {
   try {
@@ -134,8 +178,7 @@ export const fetchUpcomingGames = async (): Promise<GameWithCover[] | undefined>
 };
 
 /**
- * Obtiene los 10 juegos más populares según 'hypes'.
- * Ahora devuelve undefined en caso de error.
+ * Obtiene los 10 juegos más populares
  */
 export const fetchPopularGames = async (): Promise<GameWithCover[] | undefined> => {
   try {
@@ -156,8 +199,7 @@ export const fetchPopularGames = async (): Promise<GameWithCover[] | undefined> 
 };
 
 /**
- * Obtiene un juego por su ID.
- * Ahora devuelve undefined si no hay datos o en caso de error.
+ * Obtiene un juego por su ID
  */
 export const fetchGameById = async (id: number): Promise<GameWithCover | undefined> => {
   try {
@@ -174,9 +216,98 @@ export const fetchGameById = async (id: number): Promise<GameWithCover | undefin
   }
 };
 
+// ———————————————————————————
+// ——— FUNCIONES DEL CARRITO ———
+// ———————————————————————————
+
 /**
- * Type guard para errores de API.
+ * Añade un juego al carrito (localStorage)
+ */
+export const addGameToCartByName = async (gameName: string): Promise<boolean> => {
+  try {
+    // Primero buscar el juego
+    const games = await searchGamesOptimized(gameName);
+    
+    if (!games || games.length === 0) {
+      console.warn('No se encontró el juego:', gameName);
+      return false;
+    }
+
+    // Buscar la mejor coincidencia (no exacta)
+    const bestMatch = games.find(game => 
+      game.title.toLowerCase().includes(gameName.toLowerCase())
+    ) || games[0];
+
+    // Añadir al carrito
+    const cart: GameWithCover[] = JSON.parse(localStorage.getItem('cart') || '[]');
+    
+    if (!cart.some(item => item.id === bestMatch.id)) {
+      cart.push(bestMatch);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      console.log(`Añadido al carrito: ${bestMatch.title}`);
+      return true;
+    }
+
+    console.warn('El juego ya está en el carrito:', bestMatch.title);
+    return false;
+  } catch (err) {
+    console.error('Error al añadir al carrito:', err);
+    return false;
+  }
+};
+
+
+/**
+ * Elimina un juego del carrito
+ */
+export const removeFromCart = (gameId: number): void => {
+  const cart: GameWithCover[] = JSON.parse(localStorage.getItem('cart') || '[]');
+  const newCart = cart.filter(game => game.id !== gameId);
+  localStorage.setItem('cart', JSON.stringify(newCart));
+};
+
+/**
+ * Obtiene todos los juegos del carrito
+ */
+export const getCartItems = (): GameWithCover[] => {
+  return JSON.parse(localStorage.getItem('cart') || '[]');
+};
+
+/**
+ * Vacía el carrito por completo
+ */
+export const clearCart = (): void => {
+  localStorage.removeItem('cart');
+};
+
+export const testIGDBConnection = async (): Promise<boolean> => {
+  try {
+    const query = `fields id,name; limit 1;`;
+    const response = await igdbRequest(query);
+    return response.status === 200;
+  } catch (err) {
+    console.error('Error de conexión con IGDB:', err);
+    return false;
+  }
+};
+
+
+/**
+ * Type guard para errores de API
  */
 function isApiError(error: unknown): error is { status: number } {
   return typeof error === 'object' && error !== null && 'status' in error;
 }
+
+export default {
+  searchGamesOptimized,
+  fetchGameData,
+  fetchUpcomingGames,
+  fetchPopularGames,
+  fetchGameById,
+  addGameToCartByName,
+  removeFromCart,
+  getCartItems,
+  clearCart,
+  testIGDBConnection,
+};

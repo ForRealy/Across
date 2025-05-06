@@ -4,58 +4,97 @@ import Header from "../components/HeaderComponent";
 import "../styles/LibraryPage.css";
 import axios from "axios";
 
-// Configure axios to include credentials
+// Configuración global de axios
 axios.defaults.withCredentials = true;
 
 interface Game {
+  id: number;
   title: string;
   cover: string;
   path: string;
   rating: number;
+  price?: number;
 }
 
 const Library: React.FC = () => {
   const navigate = useNavigate();
   const [games, setGames] = useState<Game[]>([]);
-  const [addedToCart, setAddedToCart] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [cartStatus, setCartStatus] = useState<{
+    [key: number]: 'loading' | 'success' | 'error';
+  }>({});
 
   useEffect(() => {
     const loadGames = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/games/library", {
-          withCredentials: true
-        });
+        const response = await axios.get("http://localhost:3000/api/games/library");
         setGames(response.data);
-      } catch (error) {
-        console.error("Error al cargar los juegos:", error);
+      } catch (err) {
+        setError("Error al cargar los juegos");
+        console.error("Error loading games:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
     loadGames();
   }, []);
 
-  const addToCart = async (game: string) => {
+  const addToCart = async (gameId: number) => {
+    setCartStatus(prev => ({ ...prev, [gameId]: 'loading' }));
+    
     try {
-      await axios.post("http://localhost:3000/api/cart/add", 
-        { game },
+      const response = await axios.post(
+        "http://localhost:3000/api/cart/add",
+        { productId: gameId }, // Cambiado a productId para consistencia con el backend
         { withCredentials: true }
       );
-      setAddedToCart(game);
-      setTimeout(() => setAddedToCart(null), 2000);
-    } catch (error) {
-      console.error("Error al agregar al carrito:", error);
+
+      if (response.data.success) {
+        setCartStatus(prev => ({ ...prev, [gameId]: 'success' }));
+        setTimeout(() => 
+          setCartStatus(prev => ({ ...prev, [gameId]: undefined }))
+        , 2000);
+      } else {
+        throw new Error(response.data.message || "Error al agregar al carrito");
+      }
+    } catch (err) {
+      console.error("Error adding to cart:", err);
+      setCartStatus(prev => ({ ...prev, [gameId]: 'error' }));
+      setTimeout(() => 
+        setCartStatus(prev => ({ ...prev, [gameId]: undefined }))
+      , 3000);
+      setError(err.response?.data?.message || "Error al agregar al carrito");
     }
   };
 
-  const goToGamePage = (gameTitle: string) => {
-    const slug = gameTitle
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w-]+/g, '')
-      .replace(/-+/g, '-')
-      .replace(/^-+|-+$/g, '');
-    navigate(`/${slug}`);
+  const goToGamePage = (path: string) => {
+    navigate(path);
   };
+
+  // Función para renderizar estrellas de valoración
+  const renderStars = (rating: number) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    
+    for (let i = 1; i <= 5; i++) {
+      if (i <= fullStars) {
+        stars.push(<span key={i} className="star full">★</span>);
+      } else if (i === fullStars + 1 && hasHalfStar) {
+        stars.push(<span key={i} className="star half">★</span>);
+      } else {
+        stars.push(<span key={i} className="star empty">★</span>);
+      }
+    }
+    
+    return stars;
+  };
+
+  if (loading) return <div className="loading-message">Cargando juegos...</div>;
+  if (error) return <div className="error-message">{error}</div>;
+  if (games.length === 0) return <div className="empty-message">No hay juegos disponibles</div>;
 
   return (
     <div className="library-container">
@@ -64,10 +103,10 @@ const Library: React.FC = () => {
         <aside className="library-sidebar">
           <h2 className="library-sidebar-title">Juegos</h2>
           <ul className="library-game-list">
-            {games.map((game, index) => (
+            {games.map((game) => (
               <li
-                key={index}
-                onClick={() => goToGamePage(game.title)}
+                key={game.id}
+                onClick={() => goToGamePage(game.path)}
                 className="library-game-link"
               >
                 {game.title}
@@ -77,20 +116,39 @@ const Library: React.FC = () => {
         </aside>
         <main className="library-content">
           <div className="library-gallery">
-            {games.map((game, index) => (
-              <div key={index} className="library-game-item">
+            {games.map((game) => (
+              <div key={game.id} className="library-game-item">
                 <img
                   src={game.cover}
                   alt={game.title}
                   className="library-game-cover"
-                  onClick={() => goToGamePage(game.title)}
+                  onClick={() => goToGamePage(game.path)}
                 />
+                <div className="library-game-info">
+                  <div className="star-rating">
+                    {renderStars(game.rating)}
+                    <span className="rating-value">
+                      ({game.rating?.toFixed(1) || 'N/A'})
+                    </span>
+                  </div>
+                  {game.price && (
+                    <span className="library-game-price">
+                      ${game.price.toFixed(2)}
+                    </span>
+                  )}
+                </div>
                 <div className="library-button-container">
                   <button
-                    className="library-add-button"
-                    onClick={() => addToCart(game.title)}
+                    className={`library-add-button ${
+                      cartStatus[game.id] === 'success' ? 'added' : 
+                      cartStatus[game.id] === 'error' ? 'error' : ''
+                    }`}
+                    onClick={() => addToCart(game.id)}
+                    disabled={cartStatus[game.id] === 'loading'}
                   >
-                    {addedToCart === game.title ? "Añadido" : "Añadir al carrito"}
+                    {cartStatus[game.id] === 'loading' ? 'Añadiendo...' :
+                     cartStatus[game.id] === 'success' ? '✓ Añadido' :
+                     cartStatus[game.id] === 'error' ? 'Error' : 'Añadir al carrito'}
                   </button>
                 </div>
               </div>

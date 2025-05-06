@@ -1,243 +1,173 @@
-import { Request, Response } from 'express';
-import pool from '../db.js';
-import { RowDataPacket, OkPacket } from 'mysql2';
-import { Session, SessionData } from 'express-session';
+import { Request, Response, NextFunction } from 'express';
+import { fetchGameById, GameWithCover } from './gamesController.js';
+import { AxiosError } from 'axios';
 
-interface SessionRequest extends Request {
-  session: Session & Partial<SessionData> & {
-    user?: {
-      username: string;
-    };
-  };
-}
-
-interface GameRow extends RowDataPacket {
-  idGame: number;
-  name: string;
-  price: number;
-}
-
-interface CartRow extends RowDataPacket {
-  id: number;
-  user_id: number;
-  game_id: number;
+interface CartItem {
+  productId: number;
   quantity: number;
-  created_at: string;
-  game_name: string;
-  price: number;
+  addedAt: Date;
+  gameData?: GameWithCover;
+}
+
+let cartItems: CartItem[] = [];
+
+// Type guards
+function isConnectionError(error: unknown): error is NodeJS.ErrnoException {
+  return error instanceof Error && 'code' in error;
+}
+
+function isAxiosError(error: unknown): error is AxiosError {
+  return (error as AxiosError).isAxiosError !== undefined;
 }
 
 export const cartController = {
-  // ✅ Obtener el carrito
-  getCart: async (req: SessionRequest, res: Response): Promise<void> => {
+  addProduct: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const username = req.session?.user?.username;
-      if (!username) {
-        res.status(401).json({ error: 'User not authenticated' });
-        return;
+      const { productId } = req.body;
+
+      if (!productId || typeof productId !== 'number') {
+        return res.status(400).json({
+          success: false,
+          message: 'ID de producto inválido o faltante'
+        });
       }
 
-      const [users] = await pool.query<RowDataPacket[]>(
-        'SELECT idUser FROM users WHERE username = ?',
-        [username]
-      );
-
-      if (!users.length) {
-        res.status(401).json({ error: 'User not found' });
-        return;
+      const gameData = await fetchGameById(productId);
+      if (!gameData) {
+        return res.status(404).json({
+          success: false,
+          message: 'Juego no encontrado en la base de datos'
+        });
       }
 
-      const userId = users[0].idUser;
-
-      const [rows] = await pool.query<CartRow[]>(
-        `SELECT c.*, g.name as game_name, g.price 
-         FROM addtocart c 
-         JOIN games g ON c.game_id = g.idGame 
-         WHERE c.user_id = ?`,
-        [userId]
-      );
-
-      res.json({
-        id: userId,
-        products: rows.map(row => ({
-          productId: row.game_name,
-          quantity: row.quantity,
-          price: row.price
-        }))
-      });
-    } catch (error) {
-      console.error('Error getting cart:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  },
-
-  // ✅ Agregar producto al carrito
-  addProduct: async (req: SessionRequest, res: Response): Promise<void> => {
-    try {
-      const username = req.session?.user?.username;
-      if (!username) {
-        res.status(401).json({ error: 'User not authenticated' });
-        return;
-      }
-
-      const [users] = await pool.query<RowDataPacket[]>(
-        'SELECT idUser FROM users WHERE username = ?',
-        [username]
-      );
-
-      if (!users.length) {
-        res.status(401).json({ error: 'User not found' });
-        return;
-      }
-
-      const userId = users[0].idUser;
-      const { game } = req.body;
-
-      const [games] = await pool.query<GameRow[]>(
-        'SELECT idGame FROM games WHERE name = ?',
-        [game]
-      );
-
-      if (!games.length) {
-        res.status(404).json({ error: 'Game not found' });
-        return;
-      }
-
-      const gameId = games[0].idGame;
-
-      const [existingItems] = await pool.query<CartRow[]>(
-        'SELECT * FROM addtocart WHERE user_id = ? AND game_id = ?',
-        [userId, gameId]
-      );
-
-      if (existingItems.length > 0) {
-        await pool.query<OkPacket>(
-          'UPDATE addtocart SET quantity = quantity + 1 WHERE user_id = ? AND game_id = ?',
-          [userId, gameId]
-        );
+      const existingItem = cartItems.find(item => item.productId === productId);
+      if (existingItem) {
+        existingItem.quantity += 1;
+        existingItem.addedAt = new Date();
       } else {
-        await pool.query<OkPacket>(
-          'INSERT INTO addtocart (user_id, game_id, quantity) VALUES (?, ?, 1)',
-          [userId, gameId]
-        );
+        cartItems.push({
+          productId,
+          quantity: 1,
+          addedAt: new Date(),
+          gameData
+        });
       }
 
-      const [updatedCart] = await pool.query<CartRow[]>(
-        `SELECT c.*, g.name as game_name, g.price 
-         FROM addtocart c 
-         JOIN games g ON c.game_id = g.idGame 
-         WHERE c.user_id = ?`,
-        [userId]
-      );
-
-      res.status(200).json({
-        id: userId,
-        products: updatedCart.map(row => ({
-          productId: row.game_name,
-          quantity: row.quantity,
-          price: row.price
-        }))
+      return res.status(200).json({
+        success: true,
+        message: 'Producto añadido al carrito',
+        cartItem: {
+          ...(existingItem || { productId, quantity: 1, addedAt: new Date() }),
+          gameData
+        }
       });
-    } catch (error) {
-      console.error('Error adding to cart:', error);
-      res.status(500).json({ error: 'Internal server error' });
+
+    } catch (error: unknown) {
+      console.error('Error en addProduct:', error);
+      
+      if (isConnectionError(error) && error.code === 'ECONNREFUSED') {
+        return res.status(503).json({
+          success: false,
+          message: 'Servicio de juegos no disponible'
+        });
+      }
+
+      if (isAxiosError(error)) {
+        return res.status(error.response?.status || 500).json({
+          success: false,
+          message: error.response?.data?.message || 'Error al comunicarse con IGDB'
+        });
+      }
+
+      if (error instanceof Error) {
+        return res.status(500).json({
+          success: false,
+          message: error.message
+        });
+      }
+
+      return res.status(500).json({
+        success: false,
+        message: 'Error interno desconocido'
+      });
     }
   },
 
-  // ✅ Eliminar producto del carrito
-  removeProduct: async (req: SessionRequest, res: Response): Promise<void> => {
+  getCart: async (req: Request, res: Response) => {
     try {
-      const username = req.session?.user?.username;
-      if (!username) {
-        res.status(401).json({ error: 'User not authenticated' });
-        return;
-      }
-
-      const [users] = await pool.query<RowDataPacket[]>(
-        'SELECT idUser FROM users WHERE username = ?',
-        [username]
+      const enrichedCart = await Promise.all(
+        cartItems.map(async (item) => {
+          try {
+            const gameData = await fetchGameById(item.productId);
+            return {
+              ...item,
+              gameData: gameData || null
+            };
+          } catch (error) {
+            console.error(`Error fetching game ${item.productId}:`, error);
+            return item;
+          }
+        })
       );
 
-      if (!users.length) {
-        res.status(401).json({ error: 'User not found' });
-        return;
-      }
+      res.status(200).json(enrichedCart);
+    } catch (error: unknown) {
+      console.error('Error getting cart:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error al obtener el carrito'
+      });
+    }
+  },
 
-      const userId = users[0].idUser;
+  removeProduct: async (req: Request, res: Response) => {
+    try {
       const { productId } = req.params;
+      const id = Number(productId);
 
-      const [games] = await pool.query<GameRow[]>(
-        'SELECT idGame FROM games WHERE name = ?',
-        [productId]
-      );
-
-      if (!games.length) {
-        res.status(404).json({ error: 'Game not found' });
-        return;
+      if (isNaN(id)) {
+        return res.status(400).json({
+          success: false,
+          message: 'ID de producto inválido'
+        });
       }
 
-      const gameId = games[0].idGame;
+      const initialLength = cartItems.length;
+      cartItems = cartItems.filter(item => item.productId !== id);
 
-      await pool.query<OkPacket>(
-        'DELETE FROM addtocart WHERE user_id = ? AND game_id = ?',
-        [userId, gameId]
-      );
-
-      const [updatedCart] = await pool.query<CartRow[]>(
-        `SELECT c.*, g.name as game_name, g.price 
-         FROM addtocart c 
-         JOIN games g ON c.game_id = g.idGame 
-         WHERE c.user_id = ?`,
-        [userId]
-      );
+      if (cartItems.length === initialLength) {
+        return res.status(404).json({
+          success: false,
+          message: 'Juego no encontrado en el carrito'
+        });
+      }
 
       res.status(200).json({
-        id: userId,
-        products: updatedCart.map(row => ({
-          productId: row.game_name,
-          quantity: row.quantity,
-          price: row.price
-        }))
+        success: true,
+        message: 'Juego eliminado del carrito'
       });
-    } catch (error) {
-      console.error('Error removing from cart:', error);
-      res.status(500).json({ error: 'Internal server error' });
+    } catch (error: unknown) {
+      console.error('Error removing product:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error al eliminar del carrito'
+      });
     }
   },
 
-  // ✅ Vaciar el carrito
-  clearCart: async (req: SessionRequest, res: Response): Promise<void> => {
+  clearCart: async (req: Request, res: Response) => {
     try {
-      const username = req.session?.user?.username;
-      if (!username) {
-        res.status(401).json({ error: 'User not authenticated' });
-        return;
-      }
-
-      const [users] = await pool.query<RowDataPacket[]>(
-        'SELECT idUser FROM users WHERE username = ?',
-        [username]
-      );
-
-      if (!users.length) {
-        res.status(401).json({ error: 'User not found' });
-        return;
-      }
-
-      const userId = users[0].idUser;
-
-      await pool.query<OkPacket>(
-        'DELETE FROM addtocart WHERE user_id = ?',
-        [userId]
-      );
-
+      cartItems = [];
       res.status(200).json({
-        id: userId,
-        products: []
+        success: true,
+        message: 'Carrito vaciado con éxito'
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error clearing cart:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(500).json({
+        success: false,
+        message: 'Error al vaciar el carrito'
+      });
     }
   }
 };

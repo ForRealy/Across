@@ -16,29 +16,34 @@ const Login: React.FC = () => {
       setError("Por favor, ingresa tu nombre de usuario y contraseña");
       return;
     }
-
+  
     setError("");
     try {
       const response = await fetch("http://localhost:3000/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: 'include', // Importante para las cookies de sesión
         body: JSON.stringify({ username: name, password }),
       });
-
+  
       if(response.ok){
         const data = await response.json();
         console.log("Login exitoso", data);
-
-        login({ username: data.user.username, email: data.user.email }); // Guardar el usuario en el contexto
-
+  
+        // Guarda todos los datos del usuario incluyendo el idUser
+        login({ 
+          username: data.user.username, 
+          email: data.user.email,
+          idUser: data.user.idUser // ← Esto es lo crucial para el carrito
+        });
+  
         navigate("/");
       }
       else {
         const err = await response.json();
         setError(err.message || "Error en el login");
       }
-    }
-    catch(error){
+    } catch(error) {
       console.error("Error en el login", error);
       setError("Error en el login");
     }

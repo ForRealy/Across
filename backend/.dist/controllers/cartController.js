@@ -7,153 +7,127 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import pool from '../db.js';
+import { fetchGameById } from './gamesController.js';
+// Carrito en memoria (en producción usar una base de datos)
+let cartItems = [];
 export const cartController = {
-    // ✅ Obtener el carrito
-    getCart: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        var _a, _b;
+    /**
+     * Añade un producto al carrito verificando con IGDB
+     */
+    addProduct: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            const username = (_b = (_a = req.session) === null || _a === void 0 ? void 0 : _a.user) === null || _b === void 0 ? void 0 : _b.username;
-            if (!username) {
-                res.status(401).json({ error: 'User not authenticated' });
+            const { productId } = req.body;
+            // Validación básica
+            if (!productId || isNaN(Number(productId))) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID de producto inválido'
+                });
                 return;
             }
-            const [users] = yield pool.query('SELECT idUser FROM users WHERE username = ?', [username]);
-            if (!users.length) {
-                res.status(401).json({ error: 'User not found' });
+            // Verificar con IGDB si el juego existe
+            const gameData = yield fetchGameById(Number(productId));
+            if (!gameData) {
+                res.status(404).json({
+                    success: false,
+                    message: 'Juego no encontrado en IGDB'
+                });
                 return;
             }
-            const userId = users[0].idUser;
-            const [rows] = yield pool.query(`SELECT c.*, g.name as game_name, g.price 
-         FROM addtocart c 
-         JOIN games g ON c.game_id = g.idGame 
-         WHERE c.user_id = ?`, [userId]);
-            res.json({
-                id: userId,
-                products: rows.map(row => ({
-                    productId: row.game_name,
-                    quantity: row.quantity,
-                    price: row.price
-                }))
-            });
-        }
-        catch (error) {
-            console.error('Error getting cart:', error);
-            res.status(500).json({ error: 'Internal server error' });
-        }
-    }),
-    // ✅ Agregar producto al carrito
-    addProduct: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        var _c, _d;
-        try {
-            const username = (_d = (_c = req.session) === null || _c === void 0 ? void 0 : _c.user) === null || _d === void 0 ? void 0 : _d.username;
-            if (!username) {
-                res.status(401).json({ error: 'User not authenticated' });
-                return;
-            }
-            const [users] = yield pool.query('SELECT idUser FROM users WHERE username = ?', [username]);
-            if (!users.length) {
-                res.status(401).json({ error: 'User not found' });
-                return;
-            }
-            const userId = users[0].idUser;
-            const { game } = req.body;
-            const [games] = yield pool.query('SELECT idGame FROM games WHERE name = ?', [game]);
-            if (!games.length) {
-                res.status(404).json({ error: 'Game not found' });
-                return;
-            }
-            const gameId = games[0].idGame;
-            const [existingItems] = yield pool.query('SELECT * FROM addtocart WHERE user_id = ? AND game_id = ?', [userId, gameId]);
-            if (existingItems.length > 0) {
-                yield pool.query('UPDATE addtocart SET quantity = quantity + 1 WHERE user_id = ? AND game_id = ?', [userId, gameId]);
+            // Buscar si el producto ya está en el carrito
+            const existingItemIndex = cartItems.findIndex(item => item.productId === Number(productId));
+            if (existingItemIndex >= 0) {
+                // Incrementar cantidad si ya existe
+                cartItems[existingItemIndex].quantity += 1;
+                cartItems[existingItemIndex].addedAt = new Date();
             }
             else {
-                yield pool.query('INSERT INTO addtocart (user_id, game_id, quantity) VALUES (?, ?, 1)', [userId, gameId]);
+                // Añadir nuevo item al carrito
+                cartItems.push({
+                    productId: Number(productId),
+                    quantity: 1,
+                    addedAt: new Date(),
+                    gameData // Almacenamos los datos del juego
+                });
             }
-            const [updatedCart] = yield pool.query(`SELECT c.*, g.name as game_name, g.price 
-         FROM addtocart c 
-         JOIN games g ON c.game_id = g.idGame 
-         WHERE c.user_id = ?`, [userId]);
             res.status(200).json({
-                id: userId,
-                products: updatedCart.map(row => ({
-                    productId: row.game_name,
-                    quantity: row.quantity,
-                    price: row.price
-                }))
+                success: true,
+                message: 'Juego añadido al carrito',
+                game: gameData,
+                cart: cartItems
             });
         }
         catch (error) {
-            console.error('Error adding to cart:', error);
-            res.status(500).json({ error: 'Internal server error' });
+            next(error); // Pasa el error al middleware de errores
         }
     }),
-    // ✅ Eliminar producto del carrito
-    removeProduct: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        var _e, _f;
+    /**
+     * Obtiene todos los items del carrito
+     */
+    getCart: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            const username = (_f = (_e = req.session) === null || _e === void 0 ? void 0 : _e.user) === null || _f === void 0 ? void 0 : _f.username;
-            if (!username) {
-                res.status(401).json({ error: 'User not authenticated' });
-                return;
-            }
-            const [users] = yield pool.query('SELECT idUser FROM users WHERE username = ?', [username]);
-            if (!users.length) {
-                res.status(401).json({ error: 'User not found' });
-                return;
-            }
-            const userId = users[0].idUser;
+            // Enriquecer los items con datos actualizados de IGDB
+            const enrichedCart = yield Promise.all(cartItems.map((item) => __awaiter(void 0, void 0, void 0, function* () {
+                try {
+                    const gameData = yield fetchGameById(item.productId);
+                    return Object.assign(Object.assign({}, item), { gameData: gameData || null });
+                }
+                catch (error) {
+                    console.error(`Error fetching game ${item.productId}:`, error);
+                    return item; // Mantenemos el item aunque falle la actualización
+                }
+            })));
+            res.status(200).json(enrichedCart);
+        }
+        catch (error) {
+            next(error);
+        }
+    }),
+    /**
+     * Elimina un producto del carrito
+     */
+    removeProduct: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
             const { productId } = req.params;
-            const [games] = yield pool.query('SELECT idGame FROM games WHERE name = ?', [productId]);
-            if (!games.length) {
-                res.status(404).json({ error: 'Game not found' });
+            if (!productId || isNaN(Number(productId))) {
+                res.status(400).json({
+                    success: false,
+                    message: 'ID de producto inválido'
+                });
                 return;
             }
-            const gameId = games[0].idGame;
-            yield pool.query('DELETE FROM addtocart WHERE user_id = ? AND game_id = ?', [userId, gameId]);
-            const [updatedCart] = yield pool.query(`SELECT c.*, g.name as game_name, g.price 
-         FROM addtocart c 
-         JOIN games g ON c.game_id = g.idGame 
-         WHERE c.user_id = ?`, [userId]);
+            const initialCount = cartItems.length;
+            cartItems = cartItems.filter(item => item.productId !== Number(productId));
+            if (cartItems.length === initialCount) {
+                res.status(404).json({
+                    success: false,
+                    message: 'Juego no encontrado en el carrito'
+                });
+                return;
+            }
             res.status(200).json({
-                id: userId,
-                products: updatedCart.map(row => ({
-                    productId: row.game_name,
-                    quantity: row.quantity,
-                    price: row.price
-                }))
+                success: true,
+                message: 'Juego eliminado del carrito',
+                cart: cartItems
             });
         }
         catch (error) {
-            console.error('Error removing from cart:', error);
-            res.status(500).json({ error: 'Internal server error' });
+            next(error);
         }
     }),
-    // ✅ Vaciar el carrito
-    clearCart: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        var _g, _h;
+    /**
+     * Vacía el carrito completamente
+     */
+    clearCart: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            const username = (_h = (_g = req.session) === null || _g === void 0 ? void 0 : _g.user) === null || _h === void 0 ? void 0 : _h.username;
-            if (!username) {
-                res.status(401).json({ error: 'User not authenticated' });
-                return;
-            }
-            const [users] = yield pool.query('SELECT idUser FROM users WHERE username = ?', [username]);
-            if (!users.length) {
-                res.status(401).json({ error: 'User not found' });
-                return;
-            }
-            const userId = users[0].idUser;
-            yield pool.query('DELETE FROM addtocart WHERE user_id = ?', [userId]);
+            cartItems = [];
             res.status(200).json({
-                id: userId,
-                products: []
+                success: true,
+                message: 'Carrito vaciado con éxito'
             });
         }
         catch (error) {
-            console.error('Error clearing cart:', error);
-            res.status(500).json({ error: 'Internal server error' });
+            next(error);
         }
     })
 };
