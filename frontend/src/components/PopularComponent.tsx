@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 
 interface Game {
+  id: number;
   title: string;
   cover: string;
   sliderImage: string;
@@ -25,14 +26,9 @@ const PopularGames: React.FC<PopularGamesProps> = ({ popularGames, currentSlide,
           <div
             className="slider-container"
             onClick={() => {
-              const slug = popularGames[currentSlide].title
-                .toLowerCase()
-                .replace(/\s+/g, '-')
-                .replace(/[^\w-]+/g, '')
-                .replace(/-+/g, '-')
-                .replace(/^-+|-+$/g, '');
-            
-              navigate(`/${slug}`);
+              // ✅ Navegar usando el ID del juego actual
+              const gameId = popularGames[currentSlide].id;
+              navigate(`/details/${gameId}`);
             }}
           >
             <img

@@ -7,44 +7,52 @@ import "../styles/GamesPage.css";
 // Configure axios to include credentials
 axios.defaults.withCredentials = true;
 
+/**
+ * Ahora usamos sólo los campos que nuestro endpoint realmente devuelve:
+ */
 interface GameDetails {
+  id?: number;
   title: string;
   cover: string;
-  sliderImage: string;
-  rating: number;
+  sliderImage?: string;  // Hacer opcional
+  rating?: number;
   releaseDate?: string;
-  description?: string;
-  developer?: string;
-  publisher?: string;
-  tags?: string[];
+  daysRemaining?: number;
 }
 
 const GamesPage: React.FC = () => {
-  const { title } = useParams<{ title: string }>();
+  // Antes teníamos `title`, ahora recogemos `id`
+  const { id } = useParams<{ id: string }>();
   const [gameDetails, setGameDetails] = useState<GameDetails | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchGameDetails = async () => {
+      if (!id) {
+        setLoading(false);
+        return;
+      }
+
       try {
-        const response = await axios.get(`http://localhost:3000/api/games/details/${title}`, {
-          withCredentials: true
-        });
+        // Llamamos al endpoint /details/:id
+        const response = await axios.get<GameDetails>(`http://localhost:3000/api/games/details/${id}`);
         setGameDetails(response.data);
       } catch (error) {
         console.error("Error fetching game details:", error);
+        setGameDetails(null);
       } finally {
         setLoading(false);
       }
     };
 
     fetchGameDetails();
-  }, [title]);
+  }, [id]);
 
   const addToCart = async () => {
     try {
-      await axios.post("http://localhost:3000/api/cart/add", 
-        { game: gameDetails?.title },
+      await axios.post(
+        "http://localhost:3000/api/cart/add",
+        { gameId: gameDetails?.id },
         { withCredentials: true }
       );
       alert("Producto añadido al carrito correctamente");
@@ -54,13 +62,8 @@ const GamesPage: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!gameDetails) {
-    return <div>Game not found</div>;
-  }
+  if (loading) return <div>Loading...</div>;
+  if (!gameDetails) return <div>Game not found</div>;
 
   return (
     <div className="gamepage-container">
@@ -80,36 +83,42 @@ const GamesPage: React.FC = () => {
       <div className="gamepage-main-content">
         <div className="gamepage-left-column">
           <div className="gamepage-media-section">
-            <img src={gameDetails.sliderImage} alt={gameDetails.title} className="gamepage-main-image" />
+            <img
+              src={gameDetails.sliderImage}
+              alt={gameDetails.title}
+              className="gamepage-main-image"
+            />
             <div className="gamepage-cart-buttons">
-              <button onClick={addToCart} className="btn-cart">Add to cart</button>
+              <button onClick={addToCart} className="btn-cart">
+                Add to cart
+              </button>
             </div>
-          </div>
-
-          <div className="gamepage-edition-info">
-            <p><strong>{gameDetails.title}</strong></p>
-            <p>WEEKEND DEAL! Offer ends 19 October</p>
-
-            <p><strong>{gameDetails.title} Deluxe Edition</strong></p>
-            <p>WEEKEND DEAL! Offer ends 19 October</p>
-
-            <p><strong>Includes:</strong></p>
-            <p>{gameDetails.title} (full game)</p>
-            <p>Digital Artbook & Original Soundtrack</p>
           </div>
         </div>
 
         <div className="gamepage-right-column">
-          <img src={gameDetails.cover} alt={gameDetails.title} className="gamepage-side-image" />
-          <p className="gamepage-description">
-            {gameDetails.description || `THE NEW FANTASY ACTION RPG. Rise, Tarnished, and be guided by grace to brandish the power of the ${gameDetails.title}.`}
-          </p>
+          <img
+            src={gameDetails.cover}
+            alt={gameDetails.title}
+            className="gamepage-side-image"
+          />
           <div className="gamepage-info-panel">
-            <p><strong>Reviews:</strong> {gameDetails.rating ? `Very Positive (${gameDetails.rating.toFixed(1)}/100)` : 'No reviews yet'}</p>
-            <p><strong>Release Date:</strong> {gameDetails.releaseDate || 'Coming Soon'}</p>
-            <p><strong>Developer:</strong> {gameDetails.developer || 'Unknown'}</p>
-            <p><strong>Publisher:</strong> {gameDetails.publisher || 'Unknown'}</p>
-            <p><strong>Tags:</strong> {gameDetails.tags?.join(', ') || 'Action, RPG'}</p>
+            <p>
+              <strong>Rating:</strong>{" "}
+              {gameDetails.rating
+                ? `${gameDetails.rating.toFixed(1)}/100`
+                : "No reviews yet"}
+            </p>
+            <p>
+              <strong>Release Date:</strong>{" "}
+              {gameDetails.releaseDate || "Coming Soon"}
+            </p>
+            {gameDetails.daysRemaining !== undefined && (
+              <p>
+                <strong>Días para lanzamiento:</strong>{" "}
+                {gameDetails.daysRemaining}
+              </p>
+            )}
           </div>
         </div>
       </div>

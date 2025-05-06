@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
-
 import Header from "../components/HeaderComponent";
 import "../styles/HomePage.css";
 import axios from "axios";
-import PopularGames from "../components/PopularComponent";  // Importa el componente PopularGames
-import UpcomingGames from "../components/UpcomingComponent";  // Importa el componente UpcomingGames
+import PopularGames from "../components/PopularComponent";
+import UpcomingGames from "../components/UpcomingComponent";
 
+// Asegúrate de que Game tiene un campo id
 interface Game {
+  id: number;
   title: string;
   cover: string;
   sliderImage: string;
@@ -53,7 +54,6 @@ const Home: React.FC = () => {
           currentSlide={currentSlide}
           setCurrentSlide={setCurrentSlide}
         />
-        
         <UpcomingGames upcomingGames={upcomingGames} />
       </main>
     </div>

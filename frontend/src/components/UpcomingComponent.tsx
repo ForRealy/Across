@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 
 interface Game {
+  id: number;
   title: string;
   cover: string;
   releaseDate?: string;
@@ -15,6 +16,7 @@ const UpcomingGames: React.FC<UpcomingGamesProps> = ({ upcomingGames }) => {
   const navigate = useNavigate();
 
   return (
+    
     <section className="upcoming-section">
       <h2 className="section-title">Próximos Lanzamientos</h2>
       <div className="upcoming-games">
@@ -23,14 +25,8 @@ const UpcomingGames: React.FC<UpcomingGamesProps> = ({ upcomingGames }) => {
             key={index}
             className="upcoming-game-card"
             onClick={() => {
-              const slug = game.title
-              .toLowerCase()
-                .replace(/\s+/g, '-')
-                .replace(/[^\w\-]+/g, '')
-                .replace(/\-\-+/g, '-')
-                .replace(/^-+|-+$/g, '');
-            
-              navigate(`/${slug}`);
+              const id = game.id
+              navigate(`/details/${id}`);
             }}
           >
             <img
