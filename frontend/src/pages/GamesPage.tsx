@@ -23,19 +23,26 @@ const GamesPage: React.FC = () => {
   const { title } = useParams<{ title: string }>();
   const gameTitle = title?.replace(/-/g, ' ') || "Game";
   const [gameDetails, setGameDetails] = useState<GameDetails | null>(null);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [cartId, setCartId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchGameDetails = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/games/popular`, {
-          withCredentials: true
-        });
-        const game = response.data.find((g: GameDetails) => 
-          g.title.toLowerCase() === gameTitle.toLowerCase()
+        // Try to fetch from both popular and library endpoints
+        const [popularResponse, libraryResponse] = await Promise.all([
+          axios.get(`http://localhost:3000/api/games/popular`, {
+            withCredentials: true
+          }),
+          axios.get(`http://localhost:3000/api/games/library`, {
+            withCredentials: true
+          })
+        ]);
+
+        // Search for the game in both responses
+        const game = [...popularResponse.data, ...libraryResponse.data].find(
+          (g: GameDetails) => g.title.toLowerCase() === gameTitle.toLowerCase()
         );
+
         if (game) {
           setGameDetails(game);
         }
@@ -49,47 +56,12 @@ const GamesPage: React.FC = () => {
     fetchGameDetails();
   }, [gameTitle]);
 
-  useEffect(() => {
-    const initializeCart = async () => {
-      try {
-        const savedCartId = localStorage.getItem("cartId");
-
-        if (savedCartId) {
-          await axios.get(`http://localhost:3000/api/carts/${savedCartId}`, {
-            withCredentials: true
-          });
-          setCartId(savedCartId);
-        } else {
-          const response = await axios.post("http://localhost:3000/api/carts", {}, {
-            withCredentials: true
-          });
-          const newCartId = response.data.id;
-          localStorage.setItem("cartId", newCartId);
-          setCartId(newCartId);
-        }
-      } catch (error) {
-        console.error("Error initializing cart:", error);
-        const response = await axios.post("http://localhost:3000/api/carts", {}, {
-          withCredentials: true
-        });
-        const newCartId = response.data.id;
-        localStorage.setItem("cartId", newCartId);
-        setCartId(newCartId);
-      }
-    };
-
-    initializeCart();
-  }, []);
-
   const addToCart = async () => {
-    if (!cartId) return;
-
     try {
-      const productId = title || "";
-      await axios.post(`http://localhost:3000/api/carts/${cartId}/product/${productId}`, {
-        quantity: 1
-      });
-
+      await axios.post("http://localhost:3000/api/cart/add", 
+        { game: gameDetails?.title },
+        { withCredentials: true }
+      );
       alert("Producto añadido al carrito correctamente");
     } catch (error) {
       console.error("Error adding to cart:", error);
@@ -104,11 +76,6 @@ const GamesPage: React.FC = () => {
   if (!gameDetails) {
     return <div>Game not found</div>;
   }
-
-  const images = [
-    gameDetails.sliderImage,
-    gameDetails.cover
-  ];
 
   return (
     <div className="gamepage-container">
@@ -128,15 +95,9 @@ const GamesPage: React.FC = () => {
       <div className="gamepage-main-content">
         <div className="gamepage-left-column">
           <div className="gamepage-media-section">
-            <img src={images[currentImageIndex]} alt={gameDetails.title} className="gamepage-main-image" />
+            <img src={gameDetails.sliderImage} alt={gameDetails.title} className="gamepage-main-image" />
             <div className="gamepage-cart-buttons">
               <button onClick={addToCart} className="btn-cart">Add to cart</button>
-            </div>
-          </div>
-
-          <div className="gamepage-thumbnails-section">
-            <div className="gamepage-thumbnail-row">
-              
             </div>
           </div>
 

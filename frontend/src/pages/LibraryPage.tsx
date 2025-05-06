@@ -48,7 +48,13 @@ const Library: React.FC = () => {
   };
 
   const goToGamePage = (gameTitle: string) => {
-    navigate(`/games`);  // Redirige a GamesPage.tsx con el título del juego
+    const slug = gameTitle
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w-]+/g, '')
+      .replace(/-+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    navigate(`/${slug}`);
   };
 
   return (
