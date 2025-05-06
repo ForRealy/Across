@@ -1,4 +1,3 @@
-import apicalypse from 'apicalypse';
 import Bottleneck from 'bottleneck';
 import axios from "axios";
 import dotenv from 'dotenv';

@@ -7,10 +7,13 @@ import { Session, SessionData } from "express-session";
 interface SessionRequest extends Request {
   session: Session & Partial<SessionData> & {
     user?: {
+      id: number;
       username: string;
+      email: string;
     };
   };
 }
+
 
 // Se define el número de "salt rounds" para bcrypt, determinando el coste computacional del hash.
 const saltRounds = 10;
@@ -104,8 +107,11 @@ export const loginUser = async (req: SessionRequest, res: Response): Promise<voi
       return;
     }
 
-    req.session.user = { username: user.username };
-
+    req.session.user = { 
+      id: user.id,           // Suponiendo que la columna se llama "id"
+      username: user.username,
+      email: user.email
+    };
     const { email } = user;
     res.json({ message: "Login exitoso", user: { username, email } });
   } catch (error: any) {

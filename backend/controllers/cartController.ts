@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import pool from '../db.js';
 import { RowDataPacket, OkPacket } from 'mysql2';
-
 import { Session, SessionData } from 'express-session';
 
 interface SessionRequest extends Request {
@@ -29,6 +28,7 @@ interface CartRow extends RowDataPacket {
 }
 
 export const cartController = {
+  // ✅ Obtener el carrito
   getCart: async (req: SessionRequest, res: Response): Promise<void> => {
     try {
       const username = req.session?.user?.username;
@@ -37,7 +37,6 @@ export const cartController = {
         return;
       }
 
-      // Get user ID from username
       const [users] = await pool.query<RowDataPacket[]>(
         'SELECT idUser FROM users WHERE username = ?',
         [username]
@@ -52,7 +51,7 @@ export const cartController = {
 
       const [rows] = await pool.query<CartRow[]>(
         `SELECT c.*, g.name as game_name, g.price 
-         FROM cart c 
+         FROM addtocart c 
          JOIN games g ON c.game_id = g.idGame 
          WHERE c.user_id = ?`,
         [userId]
@@ -72,6 +71,7 @@ export const cartController = {
     }
   },
 
+  // ✅ Agregar producto al carrito
   addProduct: async (req: SessionRequest, res: Response): Promise<void> => {
     try {
       const username = req.session?.user?.username;
@@ -80,7 +80,6 @@ export const cartController = {
         return;
       }
 
-      // Get user ID from username
       const [users] = await pool.query<RowDataPacket[]>(
         'SELECT idUser FROM users WHERE username = ?',
         [username]
@@ -93,8 +92,7 @@ export const cartController = {
 
       const userId = users[0].idUser;
       const { game } = req.body;
-      
-      // First get the game ID from the name
+
       const [games] = await pool.query<GameRow[]>(
         'SELECT idGame FROM games WHERE name = ?',
         [game]
@@ -107,30 +105,26 @@ export const cartController = {
 
       const gameId = games[0].idGame;
 
-      // Check if game is already in cart
       const [existingItems] = await pool.query<CartRow[]>(
-        'SELECT * FROM cart WHERE user_id = ? AND game_id = ?',
+        'SELECT * FROM addtocart WHERE user_id = ? AND game_id = ?',
         [userId, gameId]
       );
 
       if (existingItems.length > 0) {
-        // Update quantity
         await pool.query<OkPacket>(
-          'UPDATE cart SET quantity = quantity + 1 WHERE user_id = ? AND game_id = ?',
+          'UPDATE addtocart SET quantity = quantity + 1 WHERE user_id = ? AND game_id = ?',
           [userId, gameId]
         );
       } else {
-        // Add new item
         await pool.query<OkPacket>(
-          'INSERT INTO cart (user_id, game_id, quantity) VALUES (?, ?, 1)',
+          'INSERT INTO addtocart (user_id, game_id, quantity) VALUES (?, ?, 1)',
           [userId, gameId]
         );
       }
 
-      // Get updated cart
       const [updatedCart] = await pool.query<CartRow[]>(
         `SELECT c.*, g.name as game_name, g.price 
-         FROM cart c 
+         FROM addtocart c 
          JOIN games g ON c.game_id = g.idGame 
          WHERE c.user_id = ?`,
         [userId]
@@ -150,6 +144,7 @@ export const cartController = {
     }
   },
 
+  // ✅ Eliminar producto del carrito
   removeProduct: async (req: SessionRequest, res: Response): Promise<void> => {
     try {
       const username = req.session?.user?.username;
@@ -158,7 +153,6 @@ export const cartController = {
         return;
       }
 
-      // Get user ID from username
       const [users] = await pool.query<RowDataPacket[]>(
         'SELECT idUser FROM users WHERE username = ?',
         [username]
@@ -172,7 +166,6 @@ export const cartController = {
       const userId = users[0].idUser;
       const { productId } = req.params;
 
-      // Get game ID from name
       const [games] = await pool.query<GameRow[]>(
         'SELECT idGame FROM games WHERE name = ?',
         [productId]
@@ -185,16 +178,14 @@ export const cartController = {
 
       const gameId = games[0].idGame;
 
-      // Remove from cart
       await pool.query<OkPacket>(
-        'DELETE FROM cart WHERE user_id = ? AND game_id = ?',
+        'DELETE FROM addtocart WHERE user_id = ? AND game_id = ?',
         [userId, gameId]
       );
 
-      // Get updated cart
       const [updatedCart] = await pool.query<CartRow[]>(
         `SELECT c.*, g.name as game_name, g.price 
-         FROM cart c 
+         FROM addtocart c 
          JOIN games g ON c.game_id = g.idGame 
          WHERE c.user_id = ?`,
         [userId]
@@ -214,6 +205,7 @@ export const cartController = {
     }
   },
 
+  // ✅ Vaciar el carrito
   clearCart: async (req: SessionRequest, res: Response): Promise<void> => {
     try {
       const username = req.session?.user?.username;
@@ -222,7 +214,6 @@ export const cartController = {
         return;
       }
 
-      // Get user ID from username
       const [users] = await pool.query<RowDataPacket[]>(
         'SELECT idUser FROM users WHERE username = ?',
         [username]
@@ -235,8 +226,10 @@ export const cartController = {
 
       const userId = users[0].idUser;
 
-      // Clear cart
-      await pool.query<OkPacket>('DELETE FROM cart WHERE user_id = ?', [userId]);
+      await pool.query<OkPacket>(
+        'DELETE FROM addtocart WHERE user_id = ?',
+        [userId]
+      );
 
       res.status(200).json({
         id: userId,

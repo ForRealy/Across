@@ -78,7 +78,11 @@ export const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, functio
             res.status(500).json({ error: "Sesión no disponible" });
             return;
         }
-        req.session.user = { username: user.username };
+        req.session.user = {
+            id: user.id,
+            username: user.username,
+            email: user.email
+        };
         const { email } = user;
         res.json({ message: "Login exitoso", user: { username, email } });
     }
