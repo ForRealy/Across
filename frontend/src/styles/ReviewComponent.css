@@ -1,0 +1,114 @@
+/* For the whole review section */
+.gamepage-reviews-section {
+    margin-top: 20px;
+    background-color: #444;
+    padding: 20px;
+    border-radius: 10px; /* Rounded corners */
+  }
+
+.gamepage-reviews-section h2{
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+  
+  /* Review form styling */
+  .review-form {
+    margin-bottom: 20px;
+    background: #666; /* Same background for the form */
+    padding: 20px;
+    border-radius: 8px;
+  }
+
+  .review-form h3{
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    color: black;
+  }
+  
+  .review-form label {
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  select {
+    padding: 2px;
+    font-size: 16px;
+    border-radius: 5px;
+    transition: border-color 0.3s ease;
+  }
+
+  .review-form textarea {
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    width: 100%;
+    padding: 8px;
+    border-radius: 5px; /* Rounded edges for text area */
+    box-sizing: border-box;
+  }
+  
+  .review-form button {
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    padding: 10px 20px;
+    background-color: orangered;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .review-form button:hover {
+    background-color: #e43b00; /* Darker blue on hover */
+  }
+  
+  /* Reviews list container */
+  .reviews-list {
+    margin-top: 20px;
+  }
+  
+  /* Each review card styling */
+  .review-card {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.85); /* Same background for each review card */
+  }
+  
+  /* Styling for the review header (author and type) */
+  .review-header {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .review-author {
+    font-weight: bold;
+  }
+  
+  .review-type {
+    padding: 3px 6px;
+    border-radius: 4px;
+  }
+  
+  .review-type.Positive {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  .review-type.Negative {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  /* Description of the review */
+  .review-description {
+    margin: 10px 0;
+  }
+  
+  /* Footer with recommendation status */
+  .review-footer {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .review-recommendation {
+    font-weight: bold;
+  }
+  

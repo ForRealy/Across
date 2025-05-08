@@ -60,11 +60,12 @@
 }
 
 .gamepage-right-column {
-  flex: 1;
-  padding-left: 20px;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  justify-content: space-between;
+  height: 100%;
+  flex: 1;
+  padding-left: 20px;
 }
 
 .gamepage-main-image {
@@ -143,7 +144,9 @@
 .gamepage-side-image {
   width: 100%;
   max-width: 300px;
+  height: auto;
   border-radius: 8px;
+  object-fit: cover;
 }
 
 /* Descripción del juego */
@@ -156,125 +159,29 @@
 
 /* Info adicional del juego */
 .gamepage-info-panel {
+  font-family: monospace;
+  font-size: 17px;
   margin-top: 10px;
   background-color: #444;
   padding: 10px;
   border-radius: 5px;
   width: 100%;
+  max-height: 300px; /* Default height for smaller screens */
+  overflow-y: auto; /* Allows scrolling if content exceeds the max-height */
 }
-
-/* Reviews Section Styles */
-.gamepage-reviews-section {
-  margin-top: 2rem;
-  padding: 1rem;
-  background-color: #1b2838;
-  border-radius: 4px;
-}
-
-.gamepage-reviews-section h2 {
-  color: #fff;
-  margin-bottom: 1.5rem;
-}
-
-.review-form {
-  background-color: #2a475e;
-  padding: 1.5rem;
-  border-radius: 4px;
-  margin-bottom: 2rem;
-}
-
-.review-form-group {
-  margin-bottom: 1rem;
-}
-
-.review-form-group label {
-  display: block;
-  color: #fff;
-  margin-bottom: 0.5rem;
-}
-
-.review-form-group select,
-.review-form-group textarea {
-  width: 100%;
-  padding: 0.5rem;
-  background-color: #1b2838;
-  border: 1px solid #66c0f4;
-  color: #fff;
-  border-radius: 3px;
-}
-
-.review-form-group textarea {
-  min-height: 100px;
-  resize: vertical;
-}
-
-.btn-submit-review {
-  background-color: #66c0f4;
-  color: #fff;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 3px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.btn-submit-review:hover {
-  background-color: #1999ff;
-}
-
-.reviews-list {
+/* Loading and Error Message Centering */
+.loading-message, .error-message {
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.review-card {
-  background-color: #2a475e;
-  padding: 1rem;
-  border-radius: 4px;
-}
-
-.review-header {
-  display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.review-author {
-  color: #66c0f4;
-  font-weight: bold;
-}
-
-.review-type {
-  padding: 0.25rem 0.5rem;
-  border-radius: 3px;
-  font-size: 0.9rem;
-}
-
-.review-type.positive {
-  background-color: #4caf50;
+  height: 100vh;
+  font-size: 1.5rem;
   color: #fff;
 }
+/* For larger screens (like PCs or laptops) */
 
-.review-type.negative {
-  background-color: #f44336;
-  color: #fff;
-}
-
-.review-type.neutral {
-  background-color: #9e9e9e;
-  color: #fff;
-}
-
-.review-description {
-  color: #c7d5e0;
-  margin: 0.5rem 0;
-  line-height: 1.5;
-}
-
-.review-footer {
-  margin-top: 0.5rem;
-  color: #66c0f4;
-  font-size: 0.9rem;
+@media (min-width: 1024px) {
+  .gamepage-info-panel {
+    max-width: 280px; /* Smaller max-height on larger screens */
+  }
 }

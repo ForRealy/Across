@@ -19,7 +19,7 @@ dotenv.config({ path: resolve(__dirname, '.env') });
 // Create connection pool
 const pool = mysql.createPool({
     host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'usuario',
+    user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || 'usuario',
     database: process.env.DB_NAME || 'across',
     waitForConnections: true,
