@@ -1,117 +1,131 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { fetchGameById, GameWithCover } from './gamesController.js';
-import { AxiosError } from 'axios';
-
-interface CartItem {
-  productId: number;
-  quantity: number;
-  addedAt: Date;
-  gameData?: GameWithCover;
-}
-
-let cartItems: CartItem[] = [];
-
-// Type guards
-function isConnectionError(error: unknown): error is NodeJS.ErrnoException {
-  return error instanceof Error && 'code' in error;
-}
-
-function isAxiosError(error: unknown): error is AxiosError {
-  return (error as AxiosError).isAxiosError !== undefined;
-}
+import Cart from '../models/Cart.js';
 
 export const cartController = {
-  addProduct: async (req: Request, res: Response, next: NextFunction) => {
+  addProduct: async (req: Request, res: Response) => {
     try {
       const { productId } = req.body;
+      const userId = req.user?.idUser;
+
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          message: 'Usuario no autenticado'
+        });
+        return;
+      }
 
       if (!productId || typeof productId !== 'number') {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'ID de producto inválido o faltante'
         });
+        return;
       }
 
+      // Fetch game data from IGDB
       const gameData = await fetchGameById(productId);
       if (!gameData) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
-          message: 'Juego no encontrado en la base de datos'
+          message: 'Juego no encontrado'
         });
+        return;
       }
 
-      const existingItem = cartItems.find(item => item.productId === productId);
-      if (existingItem) {
-        existingItem.quantity += 1;
-        existingItem.addedAt = new Date();
-      } else {
-        cartItems.push({
-          productId,
-          quantity: 1,
-          addedAt: new Date(),
-          gameData
-        });
-      }
+      // Set a default price if not provided by IGDB
+      const price = gameData.price || 59.99;
 
-      return res.status(200).json({
-        success: true,
-        message: 'Producto añadido al carrito',
-        cartItem: {
-          ...(existingItem || { productId, quantity: 1, addedAt: new Date() }),
-          gameData
+      // Check if the product is already in the cart
+      const [cartItem, created] = await Cart.findOrCreate({
+        where: {
+          user_id: userId,
+          game_id: productId
+        },
+        defaults: {
+          quantity: 1
         }
       });
 
-    } catch (error: unknown) {
+      if (!created) {
+        // If the product already exists, increment the quantity
+        cartItem.quantity += 1;
+        await cartItem.save();
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Producto añadido al carrito',
+        cartItem: {
+          ...cartItem.toJSON(),
+          gameData: {
+            ...gameData,
+            price
+          }
+        }
+      });
+
+    } catch (error) {
       console.error('Error en addProduct:', error);
-      
-      if (isConnectionError(error) && error.code === 'ECONNREFUSED') {
-        return res.status(503).json({
-          success: false,
-          message: 'Servicio de juegos no disponible'
-        });
-      }
-
-      if (isAxiosError(error)) {
-        return res.status(error.response?.status || 500).json({
-          success: false,
-          message: error.response?.data?.message || 'Error al comunicarse con IGDB'
-        });
-      }
-
-      if (error instanceof Error) {
-        return res.status(500).json({
-          success: false,
-          message: error.message
-        });
-      }
-
-      return res.status(500).json({
+      res.status(500).json({
         success: false,
-        message: 'Error interno desconocido'
+        message: 'Error al añadir producto al carrito'
       });
     }
   },
 
   getCart: async (req: Request, res: Response) => {
     try {
+      const userId = req.user?.idUser;
+
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          message: 'Usuario no autenticado'
+        });
+        return;
+      }
+
+      const cartItems = await Cart.findAll({
+        where: { user_id: userId }
+      });
+
       const enrichedCart = await Promise.all(
         cartItems.map(async (item) => {
           try {
-            const gameData = await fetchGameById(item.productId);
+            const gameData = await fetchGameById(item.game_id);
+            if (!gameData) {
+              return {
+                ...item.toJSON(),
+                gameData: null
+              };
+            }
             return {
-              ...item,
-              gameData: gameData || null
+              ...item.toJSON(),
+              gameData: {
+                ...gameData,
+                price: gameData.price || 59.99
+              }
             };
           } catch (error) {
-            console.error(`Error fetching game ${item.productId}:`, error);
-            return item;
+            console.error(`Error fetching game ${item.game_id}:`, error);
+            return item.toJSON();
           }
         })
       );
 
-      res.status(200).json(enrichedCart);
-    } catch (error: unknown) {
+      // Calculate total
+      const total = enrichedCart.reduce((sum, item) => {
+        const price = item.gameData?.price || 59.99;
+        return sum + (price * item.quantity);
+      }, 0);
+
+      res.status(200).json({
+        items: enrichedCart,
+        total: total.toFixed(2)
+      });
+    } catch (error) {
       console.error('Error getting cart:', error);
       res.status(500).json({
         success: false,
@@ -123,30 +137,45 @@ export const cartController = {
   removeProduct: async (req: Request, res: Response) => {
     try {
       const { productId } = req.params;
-      const id = Number(productId);
+      const userId = req.user?.idUser;
 
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          message: 'Usuario no autenticado'
+        });
+        return;
+      }
+
+      const id = Number(productId);
       if (isNaN(id)) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: 'ID de producto inválido'
         });
+        return;
       }
 
-      const initialLength = cartItems.length;
-      cartItems = cartItems.filter(item => item.productId !== id);
+      const deleted = await Cart.destroy({
+        where: {
+          user_id: userId,
+          game_id: id
+        }
+      });
 
-      if (cartItems.length === initialLength) {
-        return res.status(404).json({
+      if (!deleted) {
+        res.status(404).json({
           success: false,
           message: 'Juego no encontrado en el carrito'
         });
+        return;
       }
 
       res.status(200).json({
         success: true,
         message: 'Juego eliminado del carrito'
       });
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('Error removing product:', error);
       res.status(500).json({
         success: false,
@@ -157,12 +186,25 @@ export const cartController = {
 
   clearCart: async (req: Request, res: Response) => {
     try {
-      cartItems = [];
+      const userId = req.user?.idUser;
+
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          message: 'Usuario no autenticado'
+        });
+        return;
+      }
+
+      await Cart.destroy({
+        where: { user_id: userId }
+      });
+
       res.status(200).json({
         success: true,
         message: 'Carrito vaciado con éxito'
       });
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('Error clearing cart:', error);
       res.status(500).json({
         success: false,

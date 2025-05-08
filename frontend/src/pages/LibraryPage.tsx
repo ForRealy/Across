@@ -53,10 +53,20 @@ const Library: React.FC = () => {
     setCartStatus(prev => ({ ...prev, [gameId]: 'loading' }));
     
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
       const response = await axios.post(
         "http://localhost:3000/api/cart/add",
-        { gameId },
-        { withCredentials: true }
+        { productId: gameId },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
       );
 
       if (response.data.success) {

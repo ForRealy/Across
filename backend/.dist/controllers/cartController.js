@@ -8,90 +8,104 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { fetchGameById } from './gamesController.js';
-let cartItems = [];
-// Type guards
-function isConnectionError(error) {
-    return error instanceof Error && 'code' in error;
-}
-function isAxiosError(error) {
-    return error.isAxiosError !== undefined;
-}
+import Cart from '../models/Cart.js';
 export const cartController = {
-    addProduct: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-        var _a, _b, _c;
+    addProduct: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a;
         try {
             const { productId } = req.body;
+            const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.idUser;
+            if (!userId) {
+                res.status(401).json({
+                    success: false,
+                    message: 'Usuario no autenticado'
+                });
+                return;
+            }
             if (!productId || typeof productId !== 'number') {
-                return res.status(400).json({
+                res.status(400).json({
                     success: false,
                     message: 'ID de producto inválido o faltante'
                 });
+                return;
             }
+            // Fetch game data from IGDB
             const gameData = yield fetchGameById(productId);
             if (!gameData) {
-                return res.status(404).json({
+                res.status(404).json({
                     success: false,
-                    message: 'Juego no encontrado en la base de datos'
+                    message: 'Juego no encontrado'
                 });
+                return;
             }
-            const existingItem = cartItems.find(item => item.productId === productId);
-            if (existingItem) {
-                existingItem.quantity += 1;
-                existingItem.addedAt = new Date();
+            // Set a default price if not provided by IGDB
+            const price = gameData.price || 59.99;
+            // Check if the product is already in the cart
+            const [cartItem, created] = yield Cart.findOrCreate({
+                where: {
+                    user_id: userId,
+                    game_id: productId
+                },
+                defaults: {
+                    quantity: 1
+                }
+            });
+            if (!created) {
+                // If the product already exists, increment the quantity
+                cartItem.quantity += 1;
+                yield cartItem.save();
             }
-            else {
-                cartItems.push({
-                    productId,
-                    quantity: 1,
-                    addedAt: new Date(),
-                    gameData
-                });
-            }
-            return res.status(200).json({
+            res.status(200).json({
                 success: true,
                 message: 'Producto añadido al carrito',
-                cartItem: Object.assign(Object.assign({}, (existingItem || { productId, quantity: 1, addedAt: new Date() })), { gameData })
+                cartItem: Object.assign(Object.assign({}, cartItem.toJSON()), { gameData: Object.assign(Object.assign({}, gameData), { price }) })
             });
         }
         catch (error) {
             console.error('Error en addProduct:', error);
-            if (isConnectionError(error) && error.code === 'ECONNREFUSED') {
-                return res.status(503).json({
-                    success: false,
-                    message: 'Servicio de juegos no disponible'
-                });
-            }
-            if (isAxiosError(error)) {
-                return res.status(((_a = error.response) === null || _a === void 0 ? void 0 : _a.status) || 500).json({
-                    success: false,
-                    message: ((_c = (_b = error.response) === null || _b === void 0 ? void 0 : _b.data) === null || _c === void 0 ? void 0 : _c.message) || 'Error al comunicarse con IGDB'
-                });
-            }
-            if (error instanceof Error) {
-                return res.status(500).json({
-                    success: false,
-                    message: error.message
-                });
-            }
-            return res.status(500).json({
+            res.status(500).json({
                 success: false,
-                message: 'Error interno desconocido'
+                message: 'Error al añadir producto al carrito'
             });
         }
     }),
     getCart: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        var _b;
         try {
+            const userId = (_b = req.user) === null || _b === void 0 ? void 0 : _b.idUser;
+            if (!userId) {
+                res.status(401).json({
+                    success: false,
+                    message: 'Usuario no autenticado'
+                });
+                return;
+            }
+            const cartItems = yield Cart.findAll({
+                where: { user_id: userId }
+            });
             const enrichedCart = yield Promise.all(cartItems.map((item) => __awaiter(void 0, void 0, void 0, function* () {
                 try {
-                    const gameData = yield fetchGameById(item.productId);
-                    return Object.assign(Object.assign({}, item), { gameData: gameData || null });
+                    const gameData = yield fetchGameById(item.game_id);
+                    if (!gameData) {
+                        return Object.assign(Object.assign({}, item.toJSON()), { gameData: null });
+                    }
+                    return Object.assign(Object.assign({}, item.toJSON()), { gameData: Object.assign(Object.assign({}, gameData), { price: gameData.price || 59.99 }) });
                 }
                 catch (error) {
-                    console.error(`Error fetching game ${item.productId}:`, error);
-                    return item;
+                    console.error(`Error fetching game ${item.game_id}:`, error);
+                    return item.toJSON();
                 }
             })));
-            res.status(200).json(enrichedCart);
+            // Calculate total
+            const total = enrichedCart.reduce((sum, item) => {
+                var _a;
+                const price = ((_a = item.gameData) === null || _a === void 0 ? void 0 : _a.price) || 59.99;
+                return sum + (price * item.quantity);
+            }, 0);
+            res.status(200).json({
+                items: enrichedCart,
+                total: total.toFixed(2)
+            });
         }
         catch (error) {
             console.error('Error getting cart:', error);
@@ -102,22 +116,37 @@ export const cartController = {
         }
     }),
     removeProduct: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        var _c;
         try {
             const { productId } = req.params;
+            const userId = (_c = req.user) === null || _c === void 0 ? void 0 : _c.idUser;
+            if (!userId) {
+                res.status(401).json({
+                    success: false,
+                    message: 'Usuario no autenticado'
+                });
+                return;
+            }
             const id = Number(productId);
             if (isNaN(id)) {
-                return res.status(400).json({
+                res.status(400).json({
                     success: false,
                     message: 'ID de producto inválido'
                 });
+                return;
             }
-            const initialLength = cartItems.length;
-            cartItems = cartItems.filter(item => item.productId !== id);
-            if (cartItems.length === initialLength) {
-                return res.status(404).json({
+            const deleted = yield Cart.destroy({
+                where: {
+                    user_id: userId,
+                    game_id: id
+                }
+            });
+            if (!deleted) {
+                res.status(404).json({
                     success: false,
                     message: 'Juego no encontrado en el carrito'
                 });
+                return;
             }
             res.status(200).json({
                 success: true,
@@ -133,8 +162,19 @@ export const cartController = {
         }
     }),
     clearCart: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        var _d;
         try {
-            cartItems = [];
+            const userId = (_d = req.user) === null || _d === void 0 ? void 0 : _d.idUser;
+            if (!userId) {
+                res.status(401).json({
+                    success: false,
+                    message: 'Usuario no autenticado'
+                });
+                return;
+            }
+            yield Cart.destroy({
+                where: { user_id: userId }
+            });
             res.status(200).json({
                 success: true,
                 message: 'Carrito vaciado con éxito'

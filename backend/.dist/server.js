@@ -33,6 +33,6 @@ app.use(session({
 // Monta las rutas
 app.use("/api", authRoutes);
 app.use("/api/games", gamesRoutes);
-app.use("/api", cartRoutes);
+app.use("/api/cart", cartRoutes);
 app.use("/api", reviewRoutes);
 export default app;

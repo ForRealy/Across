@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios, { AxiosError } from "axios";
 import Header from "../components/HeaderComponent";
 import "../styles/GamesPage.css";
@@ -40,6 +40,7 @@ const GamesPage: React.FC = () => {
     description: "",
     recommended: true
   });
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchGameDetails = async () => {
@@ -121,10 +122,20 @@ const GamesPage: React.FC = () => {
     if (!gameDetails?.id) return;
     
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
       await axios.post(
         "http://localhost:3000/api/cart/add",
-        { gameId: gameDetails.id },
-        { withCredentials: true }
+        { productId: gameDetails.id },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
       );
       alert("Producto añadido al carrito correctamente");
     } catch (error) {

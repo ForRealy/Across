@@ -1,25 +1,32 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "../components/HeaderComponent"; // Asegúrate de tener el Header correctamente importado
-import "../styles/CartPage.css"; // Importa el archivo CSS con los estilos mencionados
+import Header from "../components/HeaderComponent";
+import "../styles/CartPage.css";
 import axios from "axios";
 
 // Configure axios to include credentials
 axios.defaults.withCredentials = true;
 
 interface CartItem {
-  productId: string;
+  id: number;
+  game_id: number;
   quantity: number;
+  gameData?: {
+    title: string;
+    cover: string;
+    price?: number;
+  };
 }
 
-interface Cart {
-  id: string;
-  products: CartItem[];
+interface CartResponse {
+  items: CartItem[];
+  total: string;
 }
 
 const Cart: React.FC = () => {
   const navigate = useNavigate();
-  const [cart, setCart] = useState<Cart>({ id: 'default', products: [] });
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [total, setTotal] = useState<string>("0.00");
   const [paymentData, setPaymentData] = useState({
     cardNumber: "",
     expirationDate: "",
@@ -28,44 +35,83 @@ const Cart: React.FC = () => {
   });
   const [paymentSuccess, setPaymentSuccess] = useState(false);
 
-  // Cargar el carrito desde el backend (o almacenamiento local)
+  // Cargar el carrito desde el backend
   useEffect(() => {
     const loadCart = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/cart", {
-          withCredentials: true
+        const token = localStorage.getItem('token');
+        if (!token) {
+          navigate('/login');
+          return;
+        }
+
+        const response = await axios.get<CartResponse>("http://localhost:3000/api/cart", {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
         });
-        setCart(response.data);
+        setCartItems(response.data.items);
+        setTotal(response.data.total);
       } catch (error) {
         console.error("Error al cargar el carrito:", error);
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          navigate('/login');
+        }
       }
     };
 
     loadCart();
-  }, []);
+  }, [navigate]);
 
   const clearCart = async () => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
       await axios.delete("http://localhost:3000/api/cart", {
-        withCredentials: true
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
-      setCart({ id: 'default', products: [] });
+      setCartItems([]);
+      setTotal("0.00");
     } catch (error) {
       console.error("Error al vaciar el carrito:", error);
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        navigate('/login');
+      }
     }
   };
 
-  const removeFromCart = async (game: string) => {
+  const removeFromCart = async (gameId: number) => {
     try {
-      await axios.delete(`http://localhost:3000/api/cart/remove/${game}`, {
-        withCredentials: true
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      await axios.delete(`http://localhost:3000/api/cart/remove/${gameId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
-      setCart({
-        ...cart,
-        products: cart.products.filter(item => item.productId !== game)
+      setCartItems(prevItems => prevItems.filter(item => item.game_id !== gameId));
+      // Reload cart to get updated total
+      const response = await axios.get<CartResponse>("http://localhost:3000/api/cart", {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
+      setTotal(response.data.total);
     } catch (error) {
       console.error("Error al eliminar juego del carrito:", error);
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        navigate('/login');
+      }
     }
   };
 
@@ -79,14 +125,27 @@ const Cart: React.FC = () => {
     if (cardNumber && expirationDate && cvv && name) {
       setPaymentSuccess(true);
       try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          navigate('/login');
+          return;
+        }
+
         // Enviar los juegos comprados al backend
         await axios.post("http://localhost:3000/api/cart/checkout", 
-          { cart: cart.products },
-          { withCredentials: true }
+          { cart: cartItems },
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
         );
         clearCart();
       } catch (error) {
         console.error("Error en el pago:", error);
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          navigate('/login');
+        }
       }
     } else {
       alert("Por favor, completa todos los campos de pago.");
@@ -101,16 +160,21 @@ const Cart: React.FC = () => {
           <main className="cart-content">
             <h1 className="cart-title">Carrito de Compras</h1>
 
-            {cart.products.length === 0 ? (
+            {cartItems.length === 0 ? (
               <p className="cart-empty-message">Tu carrito está vacío.</p>
             ) : (
               <div className="cart-list-section">
                 <ol className="cart-list">
-                  {cart.products.map((item, index) => (
-                    <li key={index} className="cart-game-item">
-                      {item.productId} (x{item.quantity})
+                  {cartItems.map((item) => (
+                    <li key={item.id} className="cart-game-item">
+                      {item.gameData?.title || `Juego #${item.game_id}`} (x{item.quantity})
+                      {item.gameData?.price && (
+                        <span className="cart-item-price">
+                          ${item.gameData.price * item.quantity}
+                        </span>
+                      )}
                       <button
-                        onClick={() => removeFromCart(item.productId)}
+                        onClick={() => removeFromCart(item.game_id)}
                         className="cart-remove-button"
                       >
                         Eliminar
@@ -118,6 +182,9 @@ const Cart: React.FC = () => {
                     </li>
                   ))}
                 </ol>
+                <div className="cart-total">
+                  <span>Total: ${total}</span>
+                </div>
                 <button className="cart-clear-button" onClick={clearCart}>
                   Vaciar Carrito
                 </button>
@@ -151,36 +218,39 @@ const Cart: React.FC = () => {
                     required
                   />
                 </div>
-                <div className="cart-form-group">
-                  <label htmlFor="expirationDate">Fecha de expiración</label>
-                  <input
-                    type="text"
-                    id="expirationDate"
-                    name="expirationDate"
-                    value={paymentData.expirationDate}
-                    onChange={handleInputChange}
-                    placeholder="MM/AA"
-                    required
-                  />
-                </div>
-                <div className="cart-form-group">
-                  <label htmlFor="cvv">CVV</label>
-                  <input
-                    type="text"
-                    id="cvv"
-                    name="cvv"
-                    value={paymentData.cvv}
-                    onChange={handleInputChange}
-                    placeholder="***"
-                    required
-                  />
+                <div className="cart-form-row">
+                  <div className="cart-form-group">
+                    <label htmlFor="expirationDate">Fecha de expiración</label>
+                    <input
+                      type="text"
+                      id="expirationDate"
+                      name="expirationDate"
+                      value={paymentData.expirationDate}
+                      onChange={handleInputChange}
+                      placeholder="MM/AA"
+                      required
+                    />
+                  </div>
+                  <div className="cart-form-group">
+                    <label htmlFor="cvv">CVV</label>
+                    <input
+                      type="text"
+                      id="cvv"
+                      name="cvv"
+                      value={paymentData.cvv}
+                      onChange={handleInputChange}
+                      placeholder="123"
+                      required
+                    />
+                  </div>
                 </div>
                 <button
                   type="button"
-                  className="cart-pay-button"
+                  className="cart-payment-button"
                   onClick={handlePayment}
+                  disabled={cartItems.length === 0}
                 >
-                  Pagar
+                  Pagar ${total}
                 </button>
               </form>
             </div>
@@ -192,7 +262,7 @@ const Cart: React.FC = () => {
               </div>
             )}
 
-            <button className="cart-back-button" onClick={() => navigate("/home")}>
+            <button className="cart-back-button" onClick={() => navigate("/library")}>
               Volver a la Biblioteca
             </button>
           </main>
@@ -202,4 +272,4 @@ const Cart: React.FC = () => {
   );
 };
 
-export default Cart;
+export default Cart; 
