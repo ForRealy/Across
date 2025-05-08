@@ -21,8 +21,13 @@ const Login: React.FC = () => {
     try {
       const response = await fetch("http://localhost:3000/api/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: 'include', // Importante para las cookies de sesión
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Origin": "http://localhost:5173"
+        },
+        credentials: 'include',
+        mode: 'cors',
         body: JSON.stringify({ username: name, password }),
       });
   
@@ -39,18 +44,19 @@ const Login: React.FC = () => {
         login({ 
           username: data.user.username, 
           email: data.user.email,
-          idUser: data.user.idUser // ← Esto es lo crucial para el carrito
+          idUser: data.user.idUser
         });
   
         navigate("/");
       }
       else {
         const err = await response.json();
-        setError(err.message || "Error en el login");
+        console.error("Error en la respuesta:", err);
+        setError(err.error || err.message || "Error en el login");
       }
     } catch(error) {
-      console.error("Error en el login", error);
-      setError("Error en el login");
+      console.error("Error en el login:", error);
+      setError("Error al conectar con el servidor. Por favor, intenta de nuevo.");
     }
   };
 

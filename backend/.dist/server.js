@@ -7,13 +7,18 @@ import cartRoutes from "./routes/cartRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 const app = express();
 const corsOptions = {
-    origin: 'http://localhost:5173',
+    origin: true,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'cart-id']
+    allowedHeaders: ['Content-Type', 'Authorization', 'cart-id', 'Accept', 'Origin', 'X-Requested-With'],
+    exposedHeaders: ['Set-Cookie'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204
 };
+// Configurar CORS antes de otras middleware
 app.use(cors(corsOptions));
 app.use(express.json());
+// Configurar las cookies de sesión
 app.use(session({
     secret: "tu_secreto_super_seguro",
     resave: false,
@@ -21,6 +26,7 @@ app.use(session({
     cookie: {
         httpOnly: true,
         secure: false,
+        sameSite: 'lax',
         maxAge: 1000 * 60 * 60 * 24 // 1 día
     }
 }));
