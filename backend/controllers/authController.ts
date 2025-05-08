@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import pool from "../db.js";
+import jwt from 'jsonwebtoken';
 
 import { Session, SessionData } from "express-session";
 
@@ -107,17 +108,28 @@ export const loginUser = async (req: SessionRequest, res: Response): Promise<voi
       return;
     }
 
+    // Generate JWT token
+    const token = jwt.sign(
+      { 
+        idUser: user.idUser,
+        username: user.username,
+        email: user.email
+      },
+      'tu_secreto_super_seguro',
+      { expiresIn: '24h' }
+    );
+
     req.session.user = { 
-      id: user.idUser,  // Asegúrate de usar el nombre correcto de la columna (idUser o id)
+      id: user.idUser,
       username: user.username,
       email: user.email
     };
 
-    // Devuelve todos los datos necesarios incluyendo el idUser
     res.json({ 
       message: "Login exitoso", 
+      token,
       user: { 
-        idUser: user.idUser,  // Asegúrate de usar el nombre correcto de la columna
+        idUser: user.idUser,
         username: user.username, 
         email: user.email 
       } 

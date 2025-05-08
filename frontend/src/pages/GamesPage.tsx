@@ -1,11 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import Header from "../components/HeaderComponent";
 import "../styles/GamesPage.css";
 
 // Configure axios to include credentials
 axios.defaults.withCredentials = true;
+
+interface Review {
+  idReview: number;
+  idUser: number;
+  review_type: string;
+  description: string;
+  recommended: boolean;
+  profile_name?: string;
+}
 
 /**
  * Ahora usamos sólo los campos que nuestro endpoint realmente devuelve:
@@ -25,6 +34,12 @@ const GamesPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [gameDetails, setGameDetails] = useState<GameDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [newReview, setNewReview] = useState({
+    review_type: "positive",
+    description: "",
+    recommended: true
+  });
 
   useEffect(() => {
     const fetchGameDetails = async () => {
@@ -37,6 +52,9 @@ const GamesPage: React.FC = () => {
         // Llamamos al endpoint /details/:id
         const response = await axios.get<GameDetails>(`http://localhost:3000/api/games/details/${id}`);
         setGameDetails(response.data);
+        // Fetch reviews for the game
+        const reviewsResponse = await axios.get<Review[]>(`http://localhost:3000/api/games/${id}/reviews`);
+        setReviews(reviewsResponse.data);
       } catch (error) {
         console.error("Error fetching game details:", error);
         setGameDetails(null);
@@ -47,6 +65,57 @@ const GamesPage: React.FC = () => {
 
     fetchGameDetails();
   }, [id]);
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('You must be logged in to submit a review');
+            return;
+        }
+
+        console.log('Submitting review:', {
+            review_type: newReview.review_type,
+            description: newReview.description,
+            recommended: newReview.recommended
+        });
+
+        const response = await axios.post(
+            `http://localhost:3000/api/games/${id}/reviews`,
+            newReview,
+            { 
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
+        console.log('Review submission response:', response.data);
+
+        // Refresh reviews after submission
+        const reviewsResponse = await axios.get<Review[]>(`http://localhost:3000/api/games/${id}/reviews`);
+        setReviews(reviewsResponse.data);
+        
+        // Reset form
+        setNewReview({
+            review_type: "positive",
+            description: "",
+            recommended: true
+        });
+
+        alert('Review submitted successfully!');
+    } catch (error) {
+        console.error("Error submitting review:", error);
+        if (error instanceof AxiosError) {
+            const errorMessage = error.response?.data?.message || 'Error submitting review';
+            alert(errorMessage);
+        } else {
+            alert('An unexpected error occurred');
+        }
+    }
+  };
 
   const addToCart = async () => {
     try {
@@ -120,6 +189,68 @@ const GamesPage: React.FC = () => {
               </p>
             )}
           </div>
+        </div>
+      </div>
+
+      <div className="gamepage-reviews-section">
+        <h2>Reviews</h2>
+        
+        {/* Review Form */}
+        <form onSubmit={handleReviewSubmit} className="review-form">
+          <div className="review-form-group">
+            <label>Review Type:</label>
+            <select
+              value={newReview.review_type}
+              onChange={(e) => setNewReview({...newReview, review_type: e.target.value})}
+            >
+              <option value="positive">Positive</option>
+              <option value="negative">Negative</option>
+              <option value="neutral">Neutral</option>
+            </select>
+          </div>
+          
+          <div className="review-form-group">
+            <label>Description:</label>
+            <textarea
+              value={newReview.description}
+              onChange={(e) => setNewReview({...newReview, description: e.target.value})}
+              required
+              placeholder="Write your review here..."
+            />
+          </div>
+          
+          <div className="review-form-group">
+            <label>
+              <input
+                type="checkbox"
+                checked={newReview.recommended}
+                onChange={(e) => setNewReview({...newReview, recommended: e.target.checked})}
+              />
+              Recommend this game
+            </label>
+          </div>
+          
+          <button type="submit" className="btn-submit-review">Submit Review</button>
+        </form>
+
+        {/* Reviews List */}
+        <div className="reviews-list">
+          {reviews.map((review) => (
+            <div key={review.idReview} className="review-card">
+              <div className="review-header">
+                <span className="review-author">{review.profile_name || 'Anonymous'}</span>
+                <span className={`review-type ${review.review_type}`}>
+                  {review.review_type}
+                </span>
+              </div>
+              <p className="review-description">{review.description}</p>
+              <div className="review-footer">
+                <span className="review-recommendation">
+                  {review.recommended ? '✓ Recommended' : '✗ Not Recommended'}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

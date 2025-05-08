@@ -8,65 +8,79 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { fetchGameById } from './gamesController.js';
-// Carrito en memoria (en producción usar una base de datos)
 let cartItems = [];
+// Type guards
+function isConnectionError(error) {
+    return error instanceof Error && 'code' in error;
+}
+function isAxiosError(error) {
+    return error.isAxiosError !== undefined;
+}
 export const cartController = {
-    /**
-     * Añade un producto al carrito verificando con IGDB
-     */
     addProduct: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a, _b, _c;
         try {
             const { productId } = req.body;
-            // Validación básica
-            if (!productId || isNaN(Number(productId))) {
-                res.status(400).json({
+            if (!productId || typeof productId !== 'number') {
+                return res.status(400).json({
                     success: false,
-                    message: 'ID de producto inválido'
+                    message: 'ID de producto inválido o faltante'
                 });
-                return;
             }
-            // Verificar con IGDB si el juego existe
-            const gameData = yield fetchGameById(Number(productId));
+            const gameData = yield fetchGameById(productId);
             if (!gameData) {
-                res.status(404).json({
+                return res.status(404).json({
                     success: false,
-                    message: 'Juego no encontrado en IGDB'
+                    message: 'Juego no encontrado en la base de datos'
                 });
-                return;
             }
-            // Buscar si el producto ya está en el carrito
-            const existingItemIndex = cartItems.findIndex(item => item.productId === Number(productId));
-            if (existingItemIndex >= 0) {
-                // Incrementar cantidad si ya existe
-                cartItems[existingItemIndex].quantity += 1;
-                cartItems[existingItemIndex].addedAt = new Date();
+            const existingItem = cartItems.find(item => item.productId === productId);
+            if (existingItem) {
+                existingItem.quantity += 1;
+                existingItem.addedAt = new Date();
             }
             else {
-                // Añadir nuevo item al carrito
                 cartItems.push({
-                    productId: Number(productId),
+                    productId,
                     quantity: 1,
                     addedAt: new Date(),
-                    gameData // Almacenamos los datos del juego
+                    gameData
                 });
             }
-            res.status(200).json({
+            return res.status(200).json({
                 success: true,
-                message: 'Juego añadido al carrito',
-                game: gameData,
-                cart: cartItems
+                message: 'Producto añadido al carrito',
+                cartItem: Object.assign(Object.assign({}, (existingItem || { productId, quantity: 1, addedAt: new Date() })), { gameData })
             });
         }
         catch (error) {
-            next(error); // Pasa el error al middleware de errores
+            console.error('Error en addProduct:', error);
+            if (isConnectionError(error) && error.code === 'ECONNREFUSED') {
+                return res.status(503).json({
+                    success: false,
+                    message: 'Servicio de juegos no disponible'
+                });
+            }
+            if (isAxiosError(error)) {
+                return res.status(((_a = error.response) === null || _a === void 0 ? void 0 : _a.status) || 500).json({
+                    success: false,
+                    message: ((_c = (_b = error.response) === null || _b === void 0 ? void 0 : _b.data) === null || _c === void 0 ? void 0 : _c.message) || 'Error al comunicarse con IGDB'
+                });
+            }
+            if (error instanceof Error) {
+                return res.status(500).json({
+                    success: false,
+                    message: error.message
+                });
+            }
+            return res.status(500).json({
+                success: false,
+                message: 'Error interno desconocido'
+            });
         }
     }),
-    /**
-     * Obtiene todos los items del carrito
-     */
-    getCart: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    getCart: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            // Enriquecer los items con datos actualizados de IGDB
             const enrichedCart = yield Promise.all(cartItems.map((item) => __awaiter(void 0, void 0, void 0, function* () {
                 try {
                     const gameData = yield fetchGameById(item.productId);
@@ -74,51 +88,51 @@ export const cartController = {
                 }
                 catch (error) {
                     console.error(`Error fetching game ${item.productId}:`, error);
-                    return item; // Mantenemos el item aunque falle la actualización
+                    return item;
                 }
             })));
             res.status(200).json(enrichedCart);
         }
         catch (error) {
-            next(error);
+            console.error('Error getting cart:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error al obtener el carrito'
+            });
         }
     }),
-    /**
-     * Elimina un producto del carrito
-     */
-    removeProduct: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    removeProduct: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const { productId } = req.params;
-            if (!productId || isNaN(Number(productId))) {
-                res.status(400).json({
+            const id = Number(productId);
+            if (isNaN(id)) {
+                return res.status(400).json({
                     success: false,
                     message: 'ID de producto inválido'
                 });
-                return;
             }
-            const initialCount = cartItems.length;
-            cartItems = cartItems.filter(item => item.productId !== Number(productId));
-            if (cartItems.length === initialCount) {
-                res.status(404).json({
+            const initialLength = cartItems.length;
+            cartItems = cartItems.filter(item => item.productId !== id);
+            if (cartItems.length === initialLength) {
+                return res.status(404).json({
                     success: false,
                     message: 'Juego no encontrado en el carrito'
                 });
-                return;
             }
             res.status(200).json({
                 success: true,
-                message: 'Juego eliminado del carrito',
-                cart: cartItems
+                message: 'Juego eliminado del carrito'
             });
         }
         catch (error) {
-            next(error);
+            console.error('Error removing product:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error al eliminar del carrito'
+            });
         }
     }),
-    /**
-     * Vacía el carrito completamente
-     */
-    clearCart: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    clearCart: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             cartItems = [];
             res.status(200).json({
@@ -127,7 +141,11 @@ export const cartController = {
             });
         }
         catch (error) {
-            next(error);
+            console.error('Error clearing cart:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error al vaciar el carrito'
+            });
         }
     })
 };

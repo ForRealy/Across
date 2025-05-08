@@ -3,6 +3,9 @@ import axios from 'axios';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
+import { Request, Response } from 'express';
+import pool from '../db.js';
+import { RowDataPacket } from 'mysql2';
 
 // ——— Configuración de paths y variables de entorno ———
 const __filename = fileURLToPath(import.meta.url);
@@ -133,8 +136,6 @@ export const searchGamesOptimized = async (query: string): Promise<GameWithCover
   }
 };
 
-
-
 /**
  * Obtiene los 30 juegos mejor valorados
  */
@@ -256,7 +257,6 @@ export const addGameToCartByName = async (gameName: string): Promise<boolean> =>
   }
 };
 
-
 /**
  * Elimina un juego del carrito
  */
@@ -291,13 +291,133 @@ export const testIGDBConnection = async (): Promise<boolean> => {
   }
 };
 
+export const cacheGameInDatabase = async (game: any) => {
+    try {
+        const gameId = parseInt(game.id);
+        console.log('Attempting to cache game:', gameId);
 
-/**
- * Type guard para errores de API
- */
-function isApiError(error: unknown): error is { status: number } {
-  return typeof error === 'object' && error !== null && 'status' in error;
-}
+        // Validate required fields
+        if (!game.name) {
+            console.error('Game name is required but was not provided');
+            throw new Error('Game name is required');
+        }
+
+        // Check if game already exists
+        const [existingGames] = await pool.query<RowDataPacket[]>(
+            'SELECT idGame FROM games WHERE idGame = ?',
+            [gameId]
+        );
+
+        if (existingGames.length === 0) {
+            // Insert new game with validated data
+            await pool.query(`
+                INSERT INTO games (
+                    idGame,
+                    name,
+                    releaseDate,
+                    publisher,
+                    developer,
+                    description,
+                    price,
+                    idLanguage
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `, [
+                gameId,
+                game.name,
+                game.first_release_date ? new Date(game.first_release_date * 1000) : new Date(),
+                game.publisher?.name || null,
+                game.developer?.name || null,
+                game.summary || null,
+                game.price || 59.99,
+                1 // Default to Spanish (idLanguage = 1)
+            ]);
+            console.log('Game successfully cached in database:', gameId);
+        } else {
+            console.log('Game already exists in database:', gameId);
+        }
+    } catch (error) {
+        console.error('Error caching game:', error);
+        throw error;
+    }
+};
+
+export const getGameDetails = async (req: Request, res: Response) => {
+    try {
+        const gameId = parseInt(req.params.id);
+        console.log('Fetching game details for ID:', gameId);
+        
+        // First check if game exists in our database
+        const [existingGames] = await pool.query<RowDataPacket[]>(
+            'SELECT * FROM games WHERE idGame = ?',
+            [gameId]
+        );
+
+        if (existingGames.length > 0) {
+            // Game exists in our database, return it
+            const game = existingGames[0];
+            console.log('Game found in database:', gameId);
+            res.json({
+                id: game.idGame,
+                title: game.name,
+                cover: game.cover?.image_id ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg` : null,
+                sliderImage: game.screenshots?.[0]?.image_id ? `https://images.igdb.com/igdb/image/upload/t_screenshot_big/${game.screenshots[0].image_id}.jpg` : null,
+                releaseDate: game.releaseDate,
+                description: game.description,
+                publisher: game.publisher,
+                developer: game.developer,
+                price: game.price
+            });
+            return;
+        }
+
+        // Game not in database, fetch from IGDB
+        console.log('Game not found in database, fetching from IGDB:', gameId);
+        const query = `
+            fields id,name,first_release_date,summary,cover.image_id,screenshots.image_id,publisher.name,developer.name,price;
+            where id = ${gameId};
+        `;
+        
+        try {
+            const { data } = await igdbRequest(query);
+            
+            if (data && data.length > 0) {
+                const game = data[0];
+                
+                // Cache the game in our database
+                await cacheGameInDatabase(game);
+
+                // Format the response
+                const formattedGame = {
+                    id: parseInt(game.id),
+                    title: game.name,
+                    cover: game.cover?.image_id ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg` : null,
+                    sliderImage: game.screenshots?.[0]?.image_id ? `https://images.igdb.com/igdb/image/upload/t_screenshot_big/${game.screenshots[0].image_id}.jpg` : null,
+                    releaseDate: game.first_release_date ? new Date(game.first_release_date * 1000).toISOString() : null,
+                    description: game.summary,
+                    publisher: game.publisher?.name,
+                    developer: game.developer?.name,
+                    price: game.price || 59.99
+                };
+
+                res.json(formattedGame);
+            } else {
+                res.status(404).json({ message: 'Game not found in IGDB' });
+            }
+        } catch (error) {
+            console.error('Error fetching from IGDB:', error);
+            res.status(500).json({ 
+                message: 'Error fetching game from IGDB',
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching game details:', error);
+        res.status(500).json({ 
+            message: 'Error fetching game details',
+            error: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
+};
 
 export default {
   searchGamesOptimized,
@@ -310,4 +430,5 @@ export default {
   getCartItems,
   clearCart,
   testIGDBConnection,
+  getGameDetails,
 };

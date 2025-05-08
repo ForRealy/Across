@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import bcrypt from "bcrypt";
 import pool from "../db.js";
+import jwt from 'jsonwebtoken';
 // Se define el número de "salt rounds" para bcrypt, determinando el coste computacional del hash.
 const saltRounds = 10;
 // Función para registrar un nuevo usuario.
@@ -78,14 +79,20 @@ export const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, functio
             res.status(500).json({ error: "Sesión no disponible" });
             return;
         }
+        // Generate JWT token
+        const token = jwt.sign({
+            idUser: user.idUser,
+            username: user.username,
+            email: user.email
+        }, 'tu_secreto_super_seguro', { expiresIn: '24h' });
         req.session.user = {
             id: user.idUser,
             username: user.username,
             email: user.email
         };
-        // Devuelve todos los datos necesarios incluyendo el idUser
         res.json({
             message: "Login exitoso",
+            token,
             user: {
                 idUser: user.idUser,
                 username: user.username,

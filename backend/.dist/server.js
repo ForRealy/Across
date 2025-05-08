@@ -4,6 +4,7 @@ import session from "express-session"; // <-- AÑADIDO
 import authRoutes from "./routes/authRoutes.js";
 import gamesRoutes from "./routes/gamesRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
 const app = express();
 const corsOptions = {
     origin: 'http://localhost:5173',
@@ -27,4 +28,5 @@ app.use(session({
 app.use("/api", authRoutes);
 app.use("/api/games", gamesRoutes);
 app.use("/api", cartRoutes);
+app.use("/api", reviewRoutes);
 export default app;

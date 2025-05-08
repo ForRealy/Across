@@ -30,6 +30,11 @@ const Login: React.FC = () => {
         const data = await response.json();
         console.log("Login exitoso", data);
   
+        // Save the token
+        if (data.token) {
+          localStorage.setItem('token', data.token);
+        }
+  
         // Guarda todos los datos del usuario incluyendo el idUser
         login({ 
           username: data.user.username, 
