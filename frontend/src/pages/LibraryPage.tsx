@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/HeaderComponent";
 import "../styles/LibraryPage.css";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 // Configuración global de axios
 axios.defaults.withCredentials = true;
@@ -11,6 +11,7 @@ interface Game {
   id: number;
   title: string;
   cover: string;
+  sliderImage?: string;
   path: string;
   rating: number;
   price?: number;
@@ -22,17 +23,24 @@ const Library: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cartStatus, setCartStatus] = useState<{
-    [key: number]: 'loading' | 'success' | 'error';
+    [key: number]: 'loading' | 'success' | 'error' | undefined;
   }>({});
 
   useEffect(() => {
     const loadGames = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/games/library");
+        const response = await axios.get("http://localhost:3000/api/games/library", {
+          withCredentials: true,
+          params: {
+            includeCover: true
+          }
+        });
         setGames(response.data);
       } catch (err) {
-        setError("Error al cargar los juegos");
-        console.error("Error loading games:", err);
+        if (err instanceof AxiosError) {
+          setError(err.response?.data?.message || "Error al cargar los juegos");
+          console.error("Error loading games:", err);
+        }
       } finally {
         setLoading(false);
       }
@@ -47,7 +55,7 @@ const Library: React.FC = () => {
     try {
       const response = await axios.post(
         "http://localhost:3000/api/cart/add",
-        { productId: gameId }, // Cambiado a productId para consistencia con el backend
+        { gameId },
         { withCredentials: true }
       );
 
@@ -60,17 +68,19 @@ const Library: React.FC = () => {
         throw new Error(response.data.message || "Error al agregar al carrito");
       }
     } catch (err) {
-      console.error("Error adding to cart:", err);
-      setCartStatus(prev => ({ ...prev, [gameId]: 'error' }));
-      setTimeout(() => 
-        setCartStatus(prev => ({ ...prev, [gameId]: undefined }))
-      , 3000);
-      setError(err.response?.data?.message || "Error al agregar al carrito");
+      if (err instanceof AxiosError) {
+        console.error("Error adding to cart:", err);
+        setCartStatus(prev => ({ ...prev, [gameId]: 'error' }));
+        setTimeout(() => 
+          setCartStatus(prev => ({ ...prev, [gameId]: undefined }))
+        , 3000);
+        setError(err.response?.data?.message || "Error al agregar al carrito");
+      }
     }
   };
 
-  const goToGamePage = (path: string) => {
-    navigate(path);
+  const goToGamePage = (gameId: number) => {
+    navigate(`/details/${gameId}`);
   };
 
   // Función para renderizar estrellas de valoración
@@ -106,7 +116,7 @@ const Library: React.FC = () => {
             {games.map((game) => (
               <li
                 key={game.id}
-                onClick={() => goToGamePage(game.path)}
+                onClick={() => goToGamePage(game.id)}
                 className="library-game-link"
               >
                 {game.title}
@@ -122,7 +132,7 @@ const Library: React.FC = () => {
                   src={game.cover}
                   alt={game.title}
                   className="library-game-cover"
-                  onClick={() => goToGamePage(game.path)}
+                  onClick={() => goToGamePage(game.id)}
                 />
                 <div className="library-game-info">
                   <div className="star-rating">

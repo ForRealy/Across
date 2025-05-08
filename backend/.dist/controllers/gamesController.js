@@ -40,17 +40,20 @@ const igdbRequest = (body) => __awaiter(void 0, void 0, void 0, function* () {
  * Transforma la respuesta bruta de IGDB en un objeto con portada
  */
 const transformGame = (game) => {
-    var _a;
-    return ({
+    var _a, _b, _c;
+    return {
         id: game.id,
         title: game.name,
         cover: ((_a = game.cover) === null || _a === void 0 ? void 0 : _a.image_id)
             ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg`
             : 'https://via.placeholder.com/264x352?text=No+Cover',
-        path: `/game/${game.id}`,
+        sliderImage: ((_c = (_b = game.screenshots) === null || _b === void 0 ? void 0 : _b[0]) === null || _c === void 0 ? void 0 : _c.image_id)
+            ? `https://images.igdb.com/igdb/image/upload/t_1080p/${game.screenshots[0].image_id}.jpg`
+            : undefined,
+        path: `/details/${game.id}`,
         rating: game.aggregated_rating || 0,
         price: game.price || 59.99, // Precio por defecto
-    });
+    };
 };
 /**
  * Transforma la respuesta para juegos populares o próximos
@@ -116,10 +119,11 @@ export const searchGamesOptimized = (query) => __awaiter(void 0, void 0, void 0,
 export const fetchGameData = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const query = `
-      fields id,name,cover.image_id,aggregated_rating,first_release_date;
+      fields id,name,cover.image_id,aggregated_rating,first_release_date,screenshots.image_id;
       where aggregated_rating > 0
         & first_release_date > 0
-        & aggregated_rating_count > 10;
+        & aggregated_rating_count > 10
+        & cover != null;
       sort aggregated_rating desc;
       limit 30;
     `;

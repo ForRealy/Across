@@ -49,11 +49,16 @@ const GamesPage: React.FC = () => {
       }
 
       try {
-        // Llamamos al endpoint /details/:id
-        const response = await axios.get<GameDetails>(`http://localhost:3000/api/games/details/${id}`);
-        setGameDetails(response.data);
-        // Fetch reviews for the game
-        const reviewsResponse = await axios.get<Review[]>(`http://localhost:3000/api/games/${id}/reviews`);
+        const [gameResponse, reviewsResponse] = await Promise.all([
+          axios.get<GameDetails>(`http://localhost:3000/api/games/details/${id}`, {
+            withCredentials: true
+          }),
+          axios.get<Review[]>(`http://localhost:3000/api/games/${id}/reviews`, {
+            withCredentials: true
+          })
+        ]);
+        
+        setGameDetails(gameResponse.data);
         setReviews(reviewsResponse.data);
       } catch (error) {
         console.error("Error fetching game details:", error);
@@ -75,27 +80,22 @@ const GamesPage: React.FC = () => {
             return;
         }
 
-        console.log('Submitting review:', {
-            review_type: newReview.review_type,
-            description: newReview.description,
-            recommended: newReview.recommended
-        });
-
-        const response = await axios.post(
+        await axios.post(
             `http://localhost:3000/api/games/${id}/reviews`,
             newReview,
             { 
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
-                }
+                },
+                withCredentials: true
             }
         );
 
-        console.log('Review submission response:', response.data);
-
         // Refresh reviews after submission
-        const reviewsResponse = await axios.get<Review[]>(`http://localhost:3000/api/games/${id}/reviews`);
+        const reviewsResponse = await axios.get<Review[]>(`http://localhost:3000/api/games/${id}/reviews`, {
+            withCredentials: true
+        });
         setReviews(reviewsResponse.data);
         
         // Reset form
@@ -118,16 +118,22 @@ const GamesPage: React.FC = () => {
   };
 
   const addToCart = async () => {
+    if (!gameDetails?.id) return;
+    
     try {
       await axios.post(
         "http://localhost:3000/api/cart/add",
-        { gameId: gameDetails?.id },
+        { gameId: gameDetails.id },
         { withCredentials: true }
       );
       alert("Producto añadido al carrito correctamente");
     } catch (error) {
       console.error("Error adding to cart:", error);
-      alert("Error al añadir al carrito");
+      if (error instanceof AxiosError) {
+        alert(error.response?.data?.message || "Error al añadir al carrito");
+      } else {
+        alert("Error al añadir al carrito");
+      }
     }
   };
 
