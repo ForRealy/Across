@@ -21,14 +21,9 @@ interface GameDetails {
 
 const GamesPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [gameDetails, setGameDetails] = useState<GameDetails | null>(null);
   const [loading, setLoading] = useState(true);
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [newReview, setNewReview] = useState({
-    review_type: "positive",
-    description: "",
-    recommended: true
-  });
 
   useEffect(() => {
     const fetchGameDetails = async () => {
@@ -38,17 +33,14 @@ const GamesPage: React.FC = () => {
       }
 
       try {
-        const [gameResponse, reviewsResponse] = await Promise.all([
-          axios.get<GameDetails>(`http://localhost:3000/api/games/details/${id}`, {
+        const gameResponse = await axios.get<GameDetails>(
+          `http://localhost:3000/api/games/details/${id}`,
+          {
             withCredentials: true
-          }),
-          axios.get<Review[]>(`http://localhost:3000/api/games/${id}/reviews`, {
-            withCredentials: true
-          })
-        ]);
+          }
+        );
         
         setGameDetails(gameResponse.data);
-        setReviews(reviewsResponse.data);
       } catch (error) {
         console.error("Error fetching game details:", error);
         setGameDetails(null);
@@ -59,57 +51,6 @@ const GamesPage: React.FC = () => {
 
     fetchGameDetails();
   }, [id]);
-
-  const handleReviewSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            alert('You must be logged in to submit a review');
-            return;
-        }
-
-        console.log('Submitting review:', {
-            review_type: newReview.review_type,
-            description: newReview.description,
-            recommended: newReview.recommended
-        });
-
-        const response = await axios.post(
-            `http://localhost:3000/api/games/${id}/reviews`,
-            newReview,
-            { 
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            }
-        );
-
-        console.log('Review submission response:', response.data);
-
-        // Refresh reviews after submission
-        const reviewsResponse = await axios.get<Review[]>(`http://localhost:3000/api/games/${id}/reviews`);
-        setReviews(reviewsResponse.data);
-        
-        // Reset form
-        setNewReview({
-            review_type: "positive",
-            description: "",
-            recommended: true
-        });
-
-        alert('Review submitted successfully!');
-    } catch (error) {
-        console.error("Error submitting review:", error);
-        if (error instanceof AxiosError) {
-            const errorMessage = error.response?.data?.message || 'Error submitting review';
-            alert(errorMessage);
-        } else {
-            alert('An unexpected error occurred');
-        }
-    }
-  };
 
   const addToCart = async () => {
     if (!gameDetails?.id) return;
