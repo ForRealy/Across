@@ -1,100 +1,176 @@
-PRAGMA foreign_keys = ON;
+-- (1) ensure InnoDB and FK checks are on
+SET storage_engine = 'InnoDB';
+SET FOREIGN_KEY_CHECKS = 1;
 
 -- languages
 CREATE TABLE IF NOT EXISTS languages (
-  idLanguage INTEGER PRIMARY KEY AUTOINCREMENT,
-  language_name TEXT NOT NULL UNIQUE
-);
+  idLanguage   INT       	NOT NULL AUTO_INCREMENT,
+  language_name VARCHAR(100) NOT NULL,
+  PRIMARY KEY (idLanguage),
+  UNIQUE KEY uk_languages_name (language_name)
+) ENGINE=InnoDB;
 
 -- users
 CREATE TABLE IF NOT EXISTS users (
-  idUser        INTEGER PRIMARY KEY AUTOINCREMENT,
-  profile_name  TEXT    NOT NULL,
-  email         TEXT    NOT NULL UNIQUE,
-  password      TEXT    NOT NULL,
-  real_name     TEXT,
-  username      TEXT    NOT NULL UNIQUE,
-  number_phone  TEXT,
-  idLanguage    INTEGER,
-  biography     TEXT,
-  foto          TEXT,
-  FOREIGN KEY(idLanguage) REFERENCES languages(idLanguage)
-);
+  idUser    	INT       	NOT NULL AUTO_INCREMENT,
+  profile_name  VARCHAR(100)  NOT NULL,
+  email     	VARCHAR(255)  NOT NULL,
+  password  	VARCHAR(255)  NOT NULL,
+  real_name 	VARCHAR(150),
+  username  	VARCHAR(100)  NOT NULL,
+  number_phone  VARCHAR(50),
+  idLanguage	INT,
+  biography 	TEXT,
+  foto      	VARCHAR(255),
+  PRIMARY KEY (idUser),
+  UNIQUE KEY uk_users_email	(email),
+  UNIQUE KEY uk_users_username (username),
+  INDEX ix_users_language  	(idLanguage),
+  CONSTRAINT fk_users_language FOREIGN KEY (idLanguage)
+ 	REFERENCES languages(idLanguage)
+ 	ON DELETE SET NULL
+ 	ON UPDATE CASCADE
+) ENGINE=InnoDB;
 
 -- games
 CREATE TABLE IF NOT EXISTS games (
-  idGame       INTEGER PRIMARY KEY AUTOINCREMENT,
-  name         TEXT    NOT NULL,
-  releaseDate  DATE    NOT NULL,
-  publisher    TEXT,
-  developer    TEXT,
+  idGame   	INT       	NOT NULL AUTO_INCREMENT,
+  name     	VARCHAR(200)  NOT NULL,
+  releaseDate  DATE      	NOT NULL,
+  publisher	VARCHAR(150),
+  developer	VARCHAR(150),
   description  TEXT,
-  price        REAL    NOT NULL,
-  idLanguage   INTEGER,
-  FOREIGN KEY(idLanguage) REFERENCES languages(idLanguage)
-);
+  price    	DECIMAL(10,2) NOT NULL,
+  idLanguage   INT,
+  PRIMARY KEY (idGame),
+  INDEX ix_games_language  (idLanguage),
+  CONSTRAINT fk_games_language FOREIGN KEY (idLanguage)
+ 	REFERENCES languages(idLanguage)
+ 	ON DELETE SET NULL
+ 	ON UPDATE CASCADE
+) ENGINE=InnoDB;
 
--- review
+-- reviews
 CREATE TABLE IF NOT EXISTS review (
-  idReview     INTEGER PRIMARY KEY AUTOINCREMENT,
-  idGame       INTEGER,
-  idUser       INTEGER,
-  review_type  TEXT,
+  idReview 	INT       	NOT NULL AUTO_INCREMENT,
+  idGame   	INT,
+  idUser   	INT,
+  review_type  VARCHAR(50),
   description  TEXT,
-  recommended  BOOLEAN,
-  FOREIGN KEY(idGame) REFERENCES games(idGame),
-  FOREIGN KEY(idUser) REFERENCES users(idUser)
-);
+  recommended  TINYINT(1)	DEFAULT 0,
+  PRIMARY KEY (idReview),
+  INDEX ix_review_game (idGame),
+  INDEX ix_review_user (idUser),
+  CONSTRAINT fk_review_game FOREIGN KEY (idGame)
+	REFERENCES games(idGame)
+	ON DELETE CASCADE
+	ON UPDATE CASCADE,
+  CONSTRAINT fk_review_user FOREIGN KEY (idUser)
+	REFERENCES users(idUser)
+	ON DELETE CASCADE
+	ON UPDATE CASCADE
+) ENGINE=InnoDB;
 
 -- minimal requirements
 CREATE TABLE IF NOT EXISTS minim (
-  idRegMin   INTEGER PRIMARY KEY AUTOINCREMENT,
-  idGame     INTEGER,
-  OS         TEXT,
-  processor  TEXT,
-  memory     TEXT,
-  graphics   TEXT,
-  directX    TEXT,
-  soundCard  TEXT,
-  FOREIGN KEY(idGame) REFERENCES games(idGame)
-);
+  idRegMin	INT       	NOT NULL AUTO_INCREMENT,
+  idGame  	INT,
+  OS      	VARCHAR(100),
+  processor   VARCHAR(150),
+  memory  	VARCHAR(100),
+  graphics	VARCHAR(150),
+  directX 	VARCHAR(50),
+  soundCard   VARCHAR(100),
+  PRIMARY KEY (idRegMin),
+  INDEX ix_minim_game (idGame),
+  CONSTRAINT fk_minim_game FOREIGN KEY (idGame)
+	REFERENCES games(idGame)
+	ON DELETE CASCADE
+	ON UPDATE CASCADE
+) ENGINE=InnoDB;
 
 -- recommended requirements
 CREATE TABLE IF NOT EXISTS recommended (
-  idRegReco  INTEGER PRIMARY KEY AUTOINCREMENT,
-  idGame     INTEGER,
-  OS         TEXT,
-  processor  TEXT,
-  memory     TEXT,
-  graphics   TEXT,
-  directX    TEXT,
-  soundCard  TEXT,
-  FOREIGN KEY(idGame) REFERENCES games(idGame)
-);
+  idRegReco   INT       	NOT NULL AUTO_INCREMENT,
+  idGame  	INT,
+  OS      	VARCHAR(100),
+  processor   VARCHAR(150),
+  memory  	VARCHAR(100),
+  graphics	VARCHAR(150),
+  directX 	VARCHAR(50),
+  soundCard   VARCHAR(100),
+  PRIMARY KEY (idRegReco),
+  INDEX ix_reco_game (idGame),
+  CONSTRAINT fk_reco_game FOREIGN KEY (idGame)
+	REFERENCES games(idGame)
+	ON DELETE CASCADE
+	ON UPDATE CASCADE
+) ENGINE=InnoDB;
 
 -- wish list
 CREATE TABLE IF NOT EXISTS wish (
-  idUser  INTEGER NOT NULL,
-  idGame  INTEGER NOT NULL,
-  PRIMARY KEY(idUser, idGame),
-  FOREIGN KEY(idUser) REFERENCES users(idUser),
-  FOREIGN KEY(idGame) REFERENCES games(idGame)
-);
+  idUser  INT NOT NULL,
+  idGame  INT NOT NULL,
+  PRIMARY KEY (idUser, idGame),
+  INDEX ix_wish_user (idUser),
+  INDEX ix_wish_game (idGame),
+  CONSTRAINT fk_wish_user FOREIGN KEY (idUser)
+	REFERENCES users(idUser)
+	ON DELETE CASCADE
+	ON UPDATE CASCADE,
+  CONSTRAINT fk_wish_game FOREIGN KEY (idGame)
+	REFERENCES games(idGame)
+	ON DELETE CASCADE
+	ON UPDATE CASCADE
+) ENGINE=InnoDB;
 
--- shopping cart (updated schema)
+-- shopping cart
 CREATE TABLE IF NOT EXISTS cart (
-  id         INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id    INTEGER NOT NULL,
-  game_id    INTEGER NOT NULL,
-  quantity   INTEGER DEFAULT 1,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(user_id, game_id),
-  FOREIGN KEY(user_id) REFERENCES users(idUser),
-  FOREIGN KEY(game_id) REFERENCES games(idGame)
-);
+  id     	INT       	NOT NULL AUTO_INCREMENT,
+  user_id	INT       	NOT NULL,
+  game_id	INT       	NOT NULL,
+  quantity   INT       	NOT NULL DEFAULT 1,
+  created_at TIMESTAMP 	NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_cart_user_game (user_id, game_id),
+  INDEX ix_cart_user (user_id),
+  INDEX ix_cart_game (game_id),
+  CONSTRAINT fk_cart_user FOREIGN KEY (user_id)
+	REFERENCES users(idUser)
+	ON DELETE CASCADE
+	ON UPDATE CASCADE,
+  CONSTRAINT fk_cart_game FOREIGN KEY (game_id)
+	REFERENCES games(idGame)
+	ON DELETE CASCADE
+	ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- downloads
+CREATE TABLE IF NOT EXISTS downloads (
+  idDownload	INT       	NOT NULL AUTO_INCREMENT,
+  idUser    	INT       	NOT NULL,
+  idGame    	INT       	NOT NULL,
+  download_date TIMESTAMP 	NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  status    	ENUM('pending','downloading','completed','failed')
+                          	NOT NULL DEFAULT 'pending',
+  download_path VARCHAR(255),
+  PRIMARY KEY (idDownload),
+  INDEX ix_downloads_user (idUser),
+  INDEX ix_downloads_game (idGame),
+  CONSTRAINT fk_downloads_user FOREIGN KEY (idUser)
+	REFERENCES users(idUser)
+	ON DELETE CASCADE
+	ON UPDATE CASCADE,
+  CONSTRAINT fk_downloads_game FOREIGN KEY (idGame)
+	REFERENCES games(idGame)
+	ON DELETE CASCADE
+	ON UPDATE CASCADE
+) ENGINE=InnoDB;
 
 -- seed languages
-INSERT OR IGNORE INTO languages (language_name) VALUES
+INSERT IGNORE INTO languages (language_name) VALUES
   ('español'),
   ('inglés'),
   ('catalán');
+
+
