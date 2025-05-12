@@ -1,7 +1,7 @@
-html, body{
-    background-color: #600000
-}
+body, html{
+    background-color: #600000;
 
+}
 .home-main{
     display: flex;
     flex-direction: column;
@@ -90,14 +90,14 @@ html, body{
     transform: scale(1.05);
   }
 
-  @media (max-width: 1024px) {
+@media (max-width: 1024px) {
     .home-featured {
       margin-top: 1%; /* Reducido para pantallas medianas */
     }
   }
 
 .upcoming-section {
-  width: 100%;
+  width: 90%;
   max-width: 1200px;
   margin: 40px auto;
   padding: 0 20px;
@@ -151,7 +151,7 @@ html, body{
 }
 
 .popular-section {
-  width: 100%;
+  width: 90%;
   max-width: 1200px;
   margin: 40px auto;
   padding: 0 20px;

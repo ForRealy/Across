@@ -216,7 +216,7 @@ checkout: async (req: Request, res: Response) => {
         message: 'Carrito inválido'
       });
       return;
-    }
+    }    
 
     // Guardar cada juego comprado en la tabla `downloads`
     const downloadEntries = cart.map(item => ({

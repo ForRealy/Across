@@ -142,19 +142,11 @@
 
 /* Imagen lateral */
 .gamepage-side-image {
-  width: 100%;
+  width: 90%;
   max-width: 300px;
   height: auto;
   border-radius: 8px;
   object-fit: cover;
-}
-
-/* Descripción del juego */
-.gamepage-description {
-  margin-top: 15px;
-  background-color: #333;
-  padding: 10px;
-  border-radius: 5px;
 }
 
 /* Info adicional del juego */
@@ -164,8 +156,8 @@
   margin-top: 10px;
   background-color: #444;
   padding: 10px;
-  border-radius: 5px;
-  width: 100%;
+  border-radius: 8px;
+  width: 83%;
   max-height: 300px; /* Default height for smaller screens */
   overflow-y: auto; /* Allows scrolling if content exceeds the max-height */
 }

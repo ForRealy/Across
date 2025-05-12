@@ -1,7 +1,7 @@
 // src/pages/GamesPage.tsx
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import axios, { AxiosError } from "axios";
+import { useParams } from "react-router-dom";
+import axios from "axios";
 import Header from "../components/HeaderComponent";
 import GameHeader from "../components/GameHeaderComponent";
 import ReviewsSection from "../components/ReviewComponent";
@@ -21,7 +21,6 @@ interface GameDetails {
 
 const GamesPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const [gameDetails, setGameDetails] = useState<GameDetails | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -52,36 +51,6 @@ const GamesPage: React.FC = () => {
     fetchGameDetails();
   }, [id]);
 
-  const addToCart = async () => {
-    if (!gameDetails?.id) return;
-    
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-
-      await axios.post(
-        "http://localhost:3000/api/cart/add",
-        { productId: gameDetails.id },
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-      alert("Producto añadido al carrito correctamente");
-    } catch (error) {
-      console.error("Error adding to cart:", error);
-      if (error instanceof AxiosError) {
-        alert(error.response?.data?.message || "Error al añadir al carrito");
-      } else {
-        alert("Error al añadir al carrito");
-      }
-    }
-  };
-
   if (loading) return <div>Loading...</div>;
   if (!gameDetails) return <div>Game not found</div>;
 
@@ -90,7 +59,7 @@ const GamesPage: React.FC = () => {
       <Header />
 
       {/* Game Header Section */}
-      <GameHeader title={gameDetails.title} />
+      <GameHeader title={gameDetails.title} gameId={gameDetails.id} />
 
       <div className="gamepage-main-content">
         <div className="gamepage-left-column">
@@ -100,11 +69,6 @@ const GamesPage: React.FC = () => {
               alt={gameDetails.title}
               className="gamepage-main-image"
             />
-            <div className="gamepage-cart-buttons">
-              <button onClick={addToCart} className="btn-cart">
-                Add to cart
-              </button>
-            </div>
           </div>
         </div>
 

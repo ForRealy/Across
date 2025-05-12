@@ -59,7 +59,7 @@ export const createReview = async (req: Request, res: Response): Promise<void> =
     try {
         const gameId = parseInt(req.params.id);
         const { review_type, description, recommended } = req.body;
-        const userId = req.user?.idUser; // ✅ Verificación de usuario autenticado
+        const userId = req.user?.idUser;
 
         console.log("Incoming review data:", { gameId, userId, review_type, description, recommended });
 
@@ -73,10 +73,21 @@ export const createReview = async (req: Request, res: Response): Promise<void> =
             return;
         }
 
-        // ✅ Eliminamos la validación de existencia del juego en la base de datos
+        // 🔍 Verificar si el usuario ya ha reseñado este juego
+        const [existingReview] = await pool.query<Review[]>(
+            `SELECT idReview FROM review WHERE idGame = ? AND idUser = ?`,
+            [gameId, userId]
+        );
+
+        if (existingReview.length > 0) {
+            res.status(409).json({ message: "User has already reviewed this game" });
+            return;
+        }
+
+        // ✅ Crear la reseña si no existe una previa
         const [result] = await pool.query<ResultSetHeader>(
             `INSERT INTO review (idGame, idUser, review_type, description, recommended)
-            VALUES (?, ?, ?, ?, ?)`,
+             VALUES (?, ?, ?, ?, ?)`,
             [gameId, userId, review_type, description, recommended ? 1 : 0]
         );
 
@@ -91,3 +102,4 @@ export const createReview = async (req: Request, res: Response): Promise<void> =
         res.status(500).json({ message: "Error creating review", error });
     }
 };
+

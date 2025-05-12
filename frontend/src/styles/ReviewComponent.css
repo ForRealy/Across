@@ -65,11 +65,11 @@
   
   /* Each review card styling */
   .review-card {
-    border: 1px solid #ddd;
+    background-color: #666;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     padding: 15px;
     margin-bottom: 10px;
     border-radius: 5px;
-    background: rgba(255, 255, 255, 0.85); /* Same background for each review card */
   }
   
   /* Styling for the review header (author and type) */

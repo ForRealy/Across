@@ -118,15 +118,6 @@ const ReviewComponent: React.FC<ReviewComponentProps> = ({ gameId }) => {
           />
         </label>
 
-        <label>
-          <input
-            type="checkbox"
-            checked={recommended}
-            onChange={(e) => setRecommended(e.target.checked)}
-          />
-          Recommend this game
-        </label>
-
         <button type="submit" className="btn-submit-review">
           Submit Review
         </button>
@@ -146,9 +137,6 @@ const ReviewComponent: React.FC<ReviewComponentProps> = ({ gameId }) => {
             </div>
             <p className="review-description">{review.description}</p>
             <div className="review-footer">
-              <span className="review-recommendation">
-                {review.recommended ? "✓ Recommended" : "✗ Not Recommended"}
-              </span>
             </div>
           </div>
         ))}

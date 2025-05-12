@@ -46,17 +46,17 @@ const Home: React.FC = () => {
   }, [popularGames.length]);
 
   return (
-    <div>
-      <Header />
-      <main className="home-main">
-        <PopularGames
-          popularGames={popularGames}
-          currentSlide={currentSlide}
-          setCurrentSlide={setCurrentSlide}
-        />
-        <UpcomingGames upcomingGames={upcomingGames} />
-      </main>
-    </div>
+  <div className="home-page-wrapper">
+    <Header />
+    <main className="home-main">
+      <PopularGames
+        popularGames={popularGames}
+        currentSlide={currentSlide}
+        setCurrentSlide={setCurrentSlide}
+      />
+      <UpcomingGames upcomingGames={upcomingGames} />
+    </main>
+  </div>
   );
 };
 

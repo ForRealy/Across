@@ -39,7 +39,7 @@ export const createReview = (req, res) => __awaiter(void 0, void 0, void 0, func
     try {
         const gameId = parseInt(req.params.id);
         const { review_type, description, recommended } = req.body;
-        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.idUser; // ✅ Verificación de usuario autenticado
+        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.idUser;
         console.log("Incoming review data:", { gameId, userId, review_type, description, recommended });
         if (!review_type || !description || recommended === undefined) {
             res.status(400).json({ message: "Missing required fields" });
@@ -49,9 +49,15 @@ export const createReview = (req, res) => __awaiter(void 0, void 0, void 0, func
             res.status(401).json({ message: "User not authenticated" });
             return;
         }
-        // ✅ Eliminamos la validación de existencia del juego en la base de datos
+        // 🔍 Verificar si el usuario ya ha reseñado este juego
+        const [existingReview] = yield pool.query(`SELECT idReview FROM review WHERE idGame = ? AND idUser = ?`, [gameId, userId]);
+        if (existingReview.length > 0) {
+            res.status(409).json({ message: "User has already reviewed this game" });
+            return;
+        }
+        // ✅ Crear la reseña si no existe una previa
         const [result] = yield pool.query(`INSERT INTO review (idGame, idUser, review_type, description, recommended)
-            VALUES (?, ?, ?, ?, ?)`, [gameId, userId, review_type, description, recommended ? 1 : 0]);
+             VALUES (?, ?, ?, ?, ?)`, [gameId, userId, review_type, description, recommended ? 1 : 0]);
         console.log("Review successfully inserted with ID:", result.insertId);
         res.status(201).json({
             message: "Review created successfully",

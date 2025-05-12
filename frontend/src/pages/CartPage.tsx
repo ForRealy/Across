@@ -256,7 +256,7 @@ const Cart: React.FC = () => {
                 </div>
                 <button
                   type="button"
-                  className="cart-payment-button"
+                  className="cart-pay-button"
                   onClick={handlePayment}
                   disabled={cartItems.length === 0}
                 >

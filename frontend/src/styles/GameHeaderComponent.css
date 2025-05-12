@@ -1,0 +1,37 @@
+/* Estilos para botones de acción en GameHeader */
+.gamepage-action-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+/* Botón de volver */
+.btn-back {
+  background-color: #555;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.btn-back:hover {
+  background-color: #777;
+}
+
+/* Botón de añadir al carrito */
+.btn-cart {
+  background-color: #10b981;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.btn-cart:hover {
+  background-color: #059669;
+}
