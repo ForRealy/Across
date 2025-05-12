@@ -1,6 +1,7 @@
 # Backend
 /node_modules
 backend/node_modules
+backend/public/downloads
 backend/.env
 backend/db.ts
 backend/dist/db.js
