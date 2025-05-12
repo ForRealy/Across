@@ -6,6 +6,7 @@ import authRoutes from "./routes/authRoutes.js";
 import gamesRoutes from "./routes/gamesRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
+import downloadsRoutes from "./routes/downloadsRoutes.js";
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use(session({
 app.use("/api", authRoutes);
 app.use("/api/games", gamesRoutes);
 app.use("/api/cart", cartRoutes);
-app.use("/api", reviewRoutes);
+app.use("/api/reviews", reviewRoutes);
+app.use("/api/downloads", downloadsRoutes);
 
 export default app;

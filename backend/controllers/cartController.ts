@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { fetchGameById, GameWithCover } from './gamesController.js';
 import Cart from '../models/Cart.js';
+import Download from '../models/Download.js';
 
 export const cartController = {
   addProduct: async (req: Request, res: Response) => {
@@ -192,6 +193,56 @@ export const cartController = {
     res.status(500).json({
       success: false,
       message: 'Error al eliminar del carrito'
+    });
+  }
+},
+
+checkout: async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.idUser;
+
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: 'Usuario no autenticado'
+      });
+      return;
+    }
+
+    const { cart } = req.body;
+    if (!cart || !Array.isArray(cart)) {
+      res.status(400).json({
+        success: false,
+        message: 'Carrito inválido'
+      });
+      return;
+    }
+
+    // Guardar cada juego comprado en la tabla `downloads`
+    const downloadEntries = cart.map(item => ({
+      idUser: userId,
+      idGame: item.game_id,
+      status: 'pending',
+      download_date: new Date(),
+      download_path: null // Puedes actualizar esto cuando haya un enlace de descarga disponible
+    }));
+
+    await Download.bulkCreate(downloadEntries);
+
+    // Vaciar el carrito después del pago exitoso
+    await Cart.destroy({
+      where: { user_id: userId }
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Pago realizado con éxito y juegos guardados en descargas"
+    });
+  } catch (error) {
+    console.error("Error en checkout:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error al procesar el pago"
     });
   }
 },

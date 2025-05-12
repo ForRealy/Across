@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import Header from "../components/HeaderComponent";
 import "../styles/DownloadsPage.css";
 
@@ -6,19 +7,30 @@ const Downloads: React.FC = () => {
   const [games, setGames] = useState<any[]>([]);
 
   useEffect(() => {
-    // Cargar los juegos comprados desde localStorage
-    const purchasedGames = JSON.parse(localStorage.getItem("purchasedGames") || "[]");
-    if (purchasedGames.length > 0) {
-      setGames(
-        purchasedGames.map((game: string) => ({
-          name: game,
-          status: "UPDATING", // Estado inicial de descarga
-          buttonLabel: "Pause", // El botón inicial será "Pausar"
-          cancelLabel: "Cancel", // El botón de cancelación estará disponible
-        }))
-      );
+  const fetchDownloads = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      console.error("Usuario no autenticado.");
+      return;
     }
-  }, []);
+
+    const response = await axios.get("http://localhost:3000/api/downloads", {
+      headers: {
+        Authorization: `Bearer ${token}`, // ✅ Aquí debe estar el token
+      },
+      withCredentials: true, // ✅ Envía las cookies de sesión si es necesario
+    });
+
+    setGames(response.data);
+  } catch (error) {
+    console.error("Error al obtener descargas:", error);
+    }
+  };
+
+  fetchDownloads();
+}, []);
 
   // Función para manejar clics en el botón principal (Pausar / Reanudar / Descargar)
   const handlePrimaryButtonClick = (index: number) => {
@@ -53,14 +65,25 @@ const Downloads: React.FC = () => {
   };
 
   // Función para eliminar un juego de la lista
-  const handleDeleteButtonClick = (index: number) => {
-    const updatedGames = games.filter((_, i) => i !== index);
-    setGames(updatedGames);
+  const handleDeleteButtonClick = async (index: number) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("Usuario no autenticado.");
+        return;
+      }
 
-    // Actualizar el localStorage eliminando el juego
-    const purchasedGames = JSON.parse(localStorage.getItem("purchasedGames") || "[]");
-    purchasedGames.splice(index, 1);
-    localStorage.setItem("purchasedGames", JSON.stringify(purchasedGames));
+      await axios.delete(`http://localhost:3000/api/downloads/${games[index].id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const updatedGames = games.filter((_, i) => i !== index);
+      setGames(updatedGames);
+    } catch (error) {
+      console.error("Error al eliminar la descarga:", error);
+    }
   };
 
   // Simular el cambio a "COMPLETED" después de 5 segundos
@@ -88,10 +111,10 @@ const Downloads: React.FC = () => {
       <Header />
       {/* Verificamos si hay juegos para descargar */}
       {games.length === 0 ? (
-        <p className="no-games-message">No tienes juego para descargar.</p>
+        <p className="no-games-message">No tienes juegos para descargar.</p>
       ) : (
         games.map((game, index) => (
-          <div className="downloads" key={index}>
+          <div className="downloads" key={game.id}>
             <h1>{game.name}</h1>
             <p><strong>CURRENT</strong> 12MBps</p> {/* Ejemplo de velocidad actual */}
             <p><strong>PEAK</strong> 48MBps</p> {/* Ejemplo de velocidad máxima */}
