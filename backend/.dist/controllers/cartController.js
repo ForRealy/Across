@@ -135,22 +135,33 @@ export const cartController = {
                 });
                 return;
             }
-            const deleted = yield Cart.destroy({
+            // Buscar el producto en el carrito
+            const cartItem = yield Cart.findOne({
                 where: {
                     user_id: userId,
                     game_id: id
                 }
             });
-            if (!deleted) {
+            if (!cartItem) {
                 res.status(404).json({
                     success: false,
                     message: 'Juego no encontrado en el carrito'
                 });
                 return;
             }
+            // Si hay más de uno, reducir la cantidad en uno
+            if (cartItem.quantity > 1) {
+                cartItem.quantity -= 1;
+                yield cartItem.save();
+            }
+            else {
+                // Si solo hay uno, eliminar el producto completamente
+                yield cartItem.destroy();
+            }
             res.status(200).json({
                 success: true,
-                message: 'Juego eliminado del carrito'
+                message: 'Cantidad reducida/eliminado del carrito',
+                cartItem
             });
         }
         catch (error) {

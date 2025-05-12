@@ -135,54 +135,66 @@ export const cartController = {
   },
 
   removeProduct: async (req: Request, res: Response) => {
-    try {
-      const { productId } = req.params;
-      const userId = req.user?.idUser;
+  try {
+    const { productId } = req.params;
+    const userId = req.user?.idUser;
 
-      if (!userId) {
-        res.status(401).json({
-          success: false,
-          message: 'Usuario no autenticado'
-        });
-        return;
-      }
-
-      const id = Number(productId);
-      if (isNaN(id)) {
-        res.status(400).json({
-          success: false,
-          message: 'ID de producto inválido'
-        });
-        return;
-      }
-
-      const deleted = await Cart.destroy({
-        where: {
-          user_id: userId,
-          game_id: id
-        }
-      });
-
-      if (!deleted) {
-        res.status(404).json({
-          success: false,
-          message: 'Juego no encontrado en el carrito'
-        });
-        return;
-      }
-
-      res.status(200).json({
-        success: true,
-        message: 'Juego eliminado del carrito'
-      });
-    } catch (error) {
-      console.error('Error removing product:', error);
-      res.status(500).json({
+    if (!userId) {
+      res.status(401).json({
         success: false,
-        message: 'Error al eliminar del carrito'
+        message: 'Usuario no autenticado'
       });
+      return;
     }
-  },
+
+    const id = Number(productId);
+    if (isNaN(id)) {
+      res.status(400).json({
+        success: false,
+        message: 'ID de producto inválido'
+      });
+      return;
+    }
+
+    // Buscar el producto en el carrito
+    const cartItem = await Cart.findOne({
+      where: {
+        user_id: userId,
+        game_id: id
+      }
+    });
+
+    if (!cartItem) {
+      res.status(404).json({
+        success: false,
+        message: 'Juego no encontrado en el carrito'
+      });
+      return;
+    }
+
+    // Si hay más de uno, reducir la cantidad en uno
+    if (cartItem.quantity > 1) {
+      cartItem.quantity -= 1;
+      await cartItem.save();
+    } else {
+      // Si solo hay uno, eliminar el producto completamente
+      await cartItem.destroy();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Cantidad reducida/eliminado del carrito',
+      cartItem
+    });
+
+  } catch (error) {
+    console.error('Error removing product:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al eliminar del carrito'
+    });
+  }
+},
 
   clearCart: async (req: Request, res: Response) => {
     try {

@@ -87,33 +87,43 @@ const Cart: React.FC = () => {
   };
 
   const removeFromCart = async (gameId: number) => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-
-      await axios.delete(`http://localhost:3000/api/cart/remove/${gameId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      setCartItems(prevItems => prevItems.filter(item => item.game_id !== gameId));
-      // Reload cart to get updated total
-      const response = await axios.get<CartResponse>("http://localhost:3000/api/cart", {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      setTotal(response.data.total);
-    } catch (error) {
-      console.error("Error al eliminar juego del carrito:", error);
-      if (axios.isAxiosError(error) && error.response?.status === 401) {
-        navigate('/login');
-      }
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login');
+      return;
     }
-  };
+
+    await axios.delete(`http://localhost:3000/api/cart/remove/${gameId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    setCartItems(prevItems => {
+      return prevItems.map(item => 
+        item.game_id === gameId 
+          ? { ...item, quantity: item.quantity - 1 } 
+          : item
+      ).filter(item => item.quantity > 0);
+    });
+
+    // Obtener el carrito actualizado
+    const response = await axios.get<CartResponse>("http://localhost:3000/api/cart", {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    setTotal(response.data.total);
+
+  } catch (error) {
+    console.error("Error al eliminar juego del carrito:", error);
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      navigate('/login');
+    }
+  }
+};
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
