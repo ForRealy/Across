@@ -18,7 +18,6 @@ interface Game {
   status: 'pending' | 'downloading' | 'completed' | 'failed';
   buttonLabel: string;
   cancelLabel: string;
-  progress?: number;
 }
 
 interface Download {
@@ -31,23 +30,19 @@ const Downloads: React.FC = () => {
   const [games, setGames] = useState<Game[]>([]);
   const [downloadProgress, setDownloadProgress] = useState<{ [key: number]: number }>({});
   const [downloadIntervals, setDownloadIntervals] = useState<{ [key: number]: number }>({});
+  const [downloadControllers, setDownloadControllers] = useState<{ [key: number]: AbortController }>({});
 
   const simulateDownload = (gameId: number) => {
-    // Clear any existing interval for this game
     if (downloadIntervals[gameId]) {
       clearInterval(downloadIntervals[gameId]);
     }
-
-    // Start progress at 0
     setDownloadProgress(prev => ({ ...prev, [gameId]: 0 }));
 
-    // Simulate download progress
     const interval = window.setInterval(() => {
       setDownloadProgress(prev => {
-        const newProgress = prev[gameId] + Math.random() * 5; // Random progress between 0-5%
+        const newProgress = prev[gameId] + Math.random() * 5;
         if (newProgress >= 100) {
           clearInterval(interval);
-          // Update game status to completed
           setGames(prevGames =>
             prevGames.map(game =>
               game.id === gameId
@@ -61,86 +56,104 @@ const Downloads: React.FC = () => {
       });
     }, 1000);
 
-    // Store the interval ID
     setDownloadIntervals(prev => ({ ...prev, [gameId]: interval }));
   };
 
   const cancelDownload = (gameId: number) => {
+    // Abort the HTTP request
+    const controller = downloadControllers[gameId];
+    if (controller) {
+      controller.abort();
+      setDownloadControllers(prev => {
+        const c = { ...prev };
+        delete c[gameId];
+        return c;
+      });
+    }
+
+    // Clear simulated progress
     if (downloadIntervals[gameId]) {
       clearInterval(downloadIntervals[gameId]);
       setDownloadIntervals(prev => {
-        const newIntervals = { ...prev };
-        delete newIntervals[gameId];
-        return newIntervals;
+        const ints = { ...prev };
+        delete ints[gameId];
+        return ints;
       });
     }
+
+    // Remove progress UI
     setDownloadProgress(prev => {
-      const newProgress = { ...prev };
-      delete newProgress[gameId];
-      return newProgress;
+      const prog = { ...prev };
+      delete prog[gameId];
+      return prog;
     });
+
+    // Reset status & label
+    setGames(prev =>
+      prev.map(g =>
+        g.id === gameId
+          ? { ...g, status: "pending", buttonLabel: "Download" }
+          : g
+      )
+    );
   };
-  
+
   const fetchDownloads = useCallback(async () => {
-  try {
-    const token = localStorage.getItem("token");
-    console.log("Token actual:", token);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("Usuario no autenticado.");
+        return;
+      }
 
-    if (!token) {
-      console.error("Usuario no autenticado.");
-      return;
-    }
-
-    const response = await axios.get("http://localhost:3000/api/downloads", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      withCredentials: true,
-    });
+      const response = await axios.get("http://localhost:3000/api/downloads", {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      });
 
       const gamesWithDetails = await Promise.all(
         response.data.map(async (download: Download) => {
+          const normalizedStatus = download.status.toLowerCase() as Game['status'];
           try {
-            const gameResponse = await axios.get(`http://localhost:3000/api/games/details/${download.idGame}`, {
-              withCredentials: true,
-              params: {
-                includeCover: true
+            const gameRes = await axios.get(
+              `http://localhost:3000/api/games/details/${download.idGame}`,
+              {
+                withCredentials: true,
+                params: { includeCover: true },
               }
-            });
-
+            );
             return {
               id: download.idDownload,
               gameId: download.idGame,
-              title: gameResponse.data.title,
-              cover: gameResponse.data.cover,
-              status: download.status,
-              buttonLabel: download.status === "COMPLETED" ? "Play" : "Download",
+              title: gameRes.data.title,
+              cover: gameRes.data.cover,
+              status: normalizedStatus,
+              buttonLabel: normalizedStatus === "completed" ? "Play" : "Download",
               cancelLabel: "Cancel",
             };
-          } catch (error) {
-            console.error(`Error fetching details for game ${download.idGame}:`, error);
+          } catch {
             return {
-        id: download.idDownload,
+              id: download.idDownload,
               gameId: download.idGame,
               title: `Juego #${download.idGame}`,
               cover: "",
-        status: download.status,
-              buttonLabel: download.status === "COMPLETED" ? "Play" : "Download",
-        cancelLabel: "Cancel",
+              status: normalizedStatus,
+              buttonLabel: normalizedStatus === "completed" ? "Play" : "Download",
+              cancelLabel: "Cancel",
             };
           }
         })
-    );
+      );
 
       setGames(gamesWithDetails);
-    } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      console.error("Error al obtener descargas:", error.response?.data || error.message);
-    } else {
-      console.error("Error desconocido:", error);
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        console.error("Error al obtener descargas:", err.response?.data || err.message);
+      } else {
+        console.error("Error desconocido:", err);
+      }
     }
-  }
-}, []);
+  }, []);
 
   useEffect(() => {
     fetchDownloads();
@@ -149,110 +162,89 @@ const Downloads: React.FC = () => {
   const handlePrimaryButtonClick = (index: number) => {
     const game = games[index];
     if (game.status === "completed") {
-      // Handle play action
       console.log("Playing game:", game.title);
-    } else {
-      // Start download
-    setGames(prevGames =>
-        prevGames.map((g, i) =>
-        i === index
-            ? { ...g, status: "downloading", buttonLabel: "Cancel" }
-            : g
-        )
-      );
-      
-      // Start the actual download
-      const token = localStorage.getItem("token");
-      if (!token) {
-        console.error("Usuario no autenticado.");
-        return;
-      }
-
-      // Create a hidden link to trigger the download
-      const link = document.createElement('a');
-      link.href = `http://localhost:3000/api/downloads/file/${game.gameId}`;
-      link.setAttribute('download', `game-${game.gameId}.iso`);
-      
-      // Add authorization header
-      const headers = new Headers();
-      headers.append('Authorization', `Bearer ${token}`);
-      
-      // Start the download
-      fetch(link.href, {
-        headers: headers,
-        credentials: 'include'
-      })
-      .then(response => {
-        if (!response.ok) throw new Error('Download failed');
-        return response.blob();
-      })
-      .then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        link.href = url;
-        link.click();
-        window.URL.revokeObjectURL(url);
-        
-        // Update status to completed
-        setGames(prevGames =>
-          prevGames.map((g, i) =>
-            i === index
-              ? { ...g, status: "completed", buttonLabel: "Play" }
-              : g
-          )
-        );
-      })
-      .catch(error => {
-        console.error('Error downloading file:', error);
-        // Update status to failed
-        setGames(prevGames =>
-          prevGames.map((g, i) =>
-            i === index
-              ? { ...g, status: "failed", buttonLabel: "Retry" }
-              : g
-      )
-    );
-      });
-
-      // Simulate progress while downloading
-      simulateDownload(game.id);
+      return;
     }
-  };
 
-  const handleCancelButtonClick = (index: number) => {
-    const game = games[index];
-    cancelDownload(game.id);
-    setGames(prevGames =>
-      prevGames.map((g, i) =>
-        i === index
-          ? { ...g, status: "pending", buttonLabel: "Download" }
-          : g
+    // Mark as downloading
+    setGames(prev =>
+      prev.map((g, i) =>
+        i === index ? { ...g, status: "downloading", buttonLabel: "Cancel" } : g
       )
     );
-  };
 
-  const handleDeleteButtonClick = async (index: number) => {
-  try {
     const token = localStorage.getItem("token");
     if (!token) {
       console.error("Usuario no autenticado.");
       return;
     }
 
-    await axios.delete(`http://localhost:3000/api/downloads/${games[index].id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    // Setup AbortController
+    const controller = new AbortController();
+    setDownloadControllers(prev => ({ ...prev, [game.id]: controller }));
 
-    setGames(prevGames => prevGames.filter((_, i) => i !== index));
-    } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      console.error("Error al eliminar la descarga:", error.response?.data || error.message);
-    } else {
-      console.error("Error desconocido:", error);
+    // Create download link
+    const link = document.createElement("a");
+    link.href = `http://localhost:3000/api/downloads/file/${game.gameId}`;
+    link.setAttribute("download", `game-${game.gameId}.iso`);
+
+    const headers = new Headers();
+    headers.append("Authorization", `Bearer ${token}`);
+
+    fetch(link.href, {
+      headers,
+      credentials: "include",
+      signal: controller.signal,
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Download failed");
+        return res.blob();
+      })
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        link.href = url;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        setGames(prev =>
+          prev.map((g, i) =>
+            i === index ? { ...g, status: "completed", buttonLabel: "Play" } : g
+          )
+        );
+      })
+      .catch(error => {
+        if ((error as any).name === "AbortError") {
+          console.log("Download aborted by user");
+          return;
+        }
+        console.error("Error downloading file:", error);
+        setGames(prev =>
+          prev.map((g, i) =>
+            i === index ? { ...g, status: "failed", buttonLabel: "Retry" } : g
+          )
+        );
+      });
+
+    simulateDownload(game.id);
+  };
+
+  const handleDeleteButtonClick = async (index: number) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      await axios.delete(
+        `http://localhost:3000/api/downloads/${games[index].id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setGames(prev => prev.filter((_, i) => i !== index));
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        console.error("Error al eliminar la descarga:", err.response?.data || err.message);
+      } else {
+        console.error("Error desconocido:", err);
+      }
     }
-  }
-};
+  };
 
   return (
     <div className="container">
@@ -262,50 +254,48 @@ const Downloads: React.FC = () => {
       ) : (
         games.map((game, index) => (
           <div className="downloads" key={game.id}>
-            {game.cover && (
-              <img src={game.cover} alt={game.title} className="game-cover" />
-            )}
+            {game.cover && <img src={game.cover} alt={game.title} className="game-cover" />}
             <div className="download-info">
-            <h1>{game.title}</h1>
-              
+              <h1>{game.title}</h1>
               <div className="download-status">
-                <p>Estado: <strong className={`status-${game.status}`}>{game.status}</strong></p>
+                <p>
+                  Estado: <strong className={`status-${game.status}`}>{game.status}</strong>
+                </p>
                 {game.status === "downloading" && (
                   <div className="progress-bar">
-                    <div 
+                    <div
                       className="progress-fill"
                       style={{ width: `${downloadProgress[game.id] || 0}%` }}
                     />
-                    <span className="progress-text">{Math.round(downloadProgress[game.id] || 0)}%</span>
+                    <span className="progress-text">
+                      {Math.round(downloadProgress[game.id] || 0)}%
+                    </span>
                   </div>
                 )}
               </div>
-
               <div className="button-group">
-                <button 
-                  className="primary-button" 
+                <button
+                  className="primary-button"
                   onClick={() => handlePrimaryButtonClick(index)}
                 >
-              {game.buttonLabel}
-            </button>
-
-            {game.status === "downloading" && (
-                  <button 
-                    className="cancel-button" 
-                    onClick={() => handleCancelButtonClick(index)}
+                  {game.buttonLabel}
+                </button>
+                {game.status === "downloading" && (
+                  <button
+                    className="cancel-button"
+                    onClick={() => cancelDownload(game.id)}
                   >
-                {game.cancelLabel}
-              </button>
-            )}
-            
-            {(game.status === "pending" || game.status === "completed") && (
-                  <button 
-                    className="delete-button" 
+                    {game.cancelLabel}
+                  </button>
+                )}
+                {(game.status === "pending" || game.status === "completed") && (
+                  <button
+                    className="delete-button"
                     onClick={() => handleDeleteButtonClick(index)}
                   >
-                Delete
-              </button>
-            )}
+                    Delete
+                  </button>
+                )}
               </div>
             </div>
           </div>
