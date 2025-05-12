@@ -15,7 +15,7 @@ interface Game {
   gameId: number;
   title: string;
   cover: string;
-  status: 'pending' | 'downloading' | 'completed' | 'failed';
+  status: 'Pending' | 'downloading' | 'Completed' | 'failed';
   buttonLabel: string;
   cancelLabel: string;
 }
@@ -43,11 +43,11 @@ const Downloads: React.FC = () => {
         const newProgress = prev[gameId] + Math.random() * 5;
         if (newProgress >= 100) {
           clearInterval(interval);
-          setGames(prevGames =>
-            prevGames.map(game =>
-              game.id === gameId
-                ? { ...game, status: "completed", buttonLabel: "Play" }
-                : game
+          setGames(prev =>
+            prev.map(g =>
+              g.id === gameId
+                ? { ...g, status: "Completed", buttonLabel: "Play" }
+                : g
             )
           );
           return { ...prev, [gameId]: 100 };
@@ -92,7 +92,7 @@ const Downloads: React.FC = () => {
     setGames(prev =>
       prev.map(g =>
         g.id === gameId
-          ? { ...g, status: "pending", buttonLabel: "Download" }
+          ? { ...g, status: "Pending", buttonLabel: "Download" }
           : g
       )
     );
@@ -101,10 +101,7 @@ const Downloads: React.FC = () => {
   const fetchDownloads = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) {
-        console.error("Usuario no autenticado.");
-        return;
-      }
+      if (!token) return console.error("Usuario no autenticado.");
 
       const response = await axios.get("http://localhost:3000/api/downloads", {
         headers: { Authorization: `Bearer ${token}` },
@@ -113,22 +110,19 @@ const Downloads: React.FC = () => {
 
       const gamesWithDetails = await Promise.all(
         response.data.map(async (download: Download) => {
-          const normalizedStatus = download.status.toLowerCase() as Game['status'];
+          const status = download.status.toLowerCase() as Game['status'];
           try {
-            const gameRes = await axios.get(
+            const res = await axios.get(
               `http://localhost:3000/api/games/details/${download.idGame}`,
-              {
-                withCredentials: true,
-                params: { includeCover: true },
-              }
+              { withCredentials: true, params: { includeCover: true } }
             );
             return {
               id: download.idDownload,
               gameId: download.idGame,
-              title: gameRes.data.title,
-              cover: gameRes.data.cover,
-              status: normalizedStatus,
-              buttonLabel: normalizedStatus === "completed" ? "Play" : "Download",
+              title: res.data.title,
+              cover: res.data.cover,
+              status,
+              buttonLabel: status === "Completed" ? "Play" : "Download",
               cancelLabel: "Cancel",
             };
           } catch {
@@ -137,8 +131,8 @@ const Downloads: React.FC = () => {
               gameId: download.idGame,
               title: `Juego #${download.idGame}`,
               cover: "",
-              status: normalizedStatus,
-              buttonLabel: normalizedStatus === "completed" ? "Play" : "Download",
+              status,
+              buttonLabel: status === "Completed" ? "Play" : "Download",
               cancelLabel: "Cancel",
             };
           }
@@ -161,7 +155,7 @@ const Downloads: React.FC = () => {
 
   const handlePrimaryButtonClick = (index: number) => {
     const game = games[index];
-    if (game.status === "completed") {
+    if (game.status === "Completed") {
       console.log("Playing game:", game.title);
       return;
     }
@@ -169,15 +163,12 @@ const Downloads: React.FC = () => {
     // Mark as downloading
     setGames(prev =>
       prev.map((g, i) =>
-        i === index ? { ...g, status: "downloading", buttonLabel: "Cancel" } : g
+        i === index ? { ...g, status: "downloading", buttonLabel: "" } : g
       )
     );
 
     const token = localStorage.getItem("token");
-    if (!token) {
-      console.error("Usuario no autenticado.");
-      return;
-    }
+    if (!token) return console.error("Usuario no autenticado.");
 
     // Setup AbortController
     const controller = new AbortController();
@@ -207,7 +198,7 @@ const Downloads: React.FC = () => {
         window.URL.revokeObjectURL(url);
         setGames(prev =>
           prev.map((g, i) =>
-            i === index ? { ...g, status: "completed", buttonLabel: "Play" } : g
+            i === index ? { ...g, status: "Completed", buttonLabel: "Play" } : g
           )
         );
       })
@@ -231,11 +222,9 @@ const Downloads: React.FC = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
-
-      await axios.delete(
-        `http://localhost:3000/api/downloads/${games[index].id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await axios.delete(`http://localhost:3000/api/downloads/${games[index].id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setGames(prev => prev.filter((_, i) => i !== index));
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
@@ -273,28 +262,33 @@ const Downloads: React.FC = () => {
                   </div>
                 )}
               </div>
+
               <div className="button-group">
-                <button
-                  className="primary-button"
-                  onClick={() => handlePrimaryButtonClick(index)}
-                >
-                  {game.buttonLabel}
-                </button>
-                {game.status === "downloading" && (
+                {game.status === "downloading" ? (
+                  // Only show this one Cancel button while downloading
                   <button
                     className="cancel-button"
                     onClick={() => cancelDownload(game.id)}
                   >
                     {game.cancelLabel}
                   </button>
-                )}
-                {(game.status === "pending" || game.status === "completed") && (
-                  <button
-                    className="delete-button"
-                    onClick={() => handleDeleteButtonClick(index)}
-                  >
-                    Delete
-                  </button>
+                ) : (
+                  <>
+                    <button
+                      className="primary-button"
+                      onClick={() => handlePrimaryButtonClick(index)}
+                    >
+                      {game.buttonLabel}
+                    </button>
+                    {(game.status === "Pending" || game.status === "Completed") && (
+                      <button
+                        className="delete-button"
+                        onClick={() => handleDeleteButtonClick(index)}
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
             </div>
