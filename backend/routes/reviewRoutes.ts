@@ -1,15 +1,11 @@
-import express, { Request, Response } from 'express';
-import { getGameReviews, createReview } from '../controllers/reviewController.js';
-import { authenticateToken } from '../middleware/auth.js';
+import express from "express";
+import { getGameReviews, createReview } from "../controllers/reviewController.js";
+import { authenticateToken } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// Get reviews for a game
-router.get('/games/:id/reviews', getGameReviews);
+// ✅ Esto debe coincidir con la URL usada en el frontend
+router.get("/games/:id/reviews", getGameReviews);
+router.post("/games/:id/reviews", authenticateToken, createReview);
 
-// Create a review for a game
-router.post('/games/:id/reviews', authenticateToken, async (req: Request, res: Response) => {
-    await createReview(req, res);
-});
-
-export default router; 
+export default router;

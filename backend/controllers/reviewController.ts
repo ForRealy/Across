@@ -1,8 +1,6 @@
 import { Request, Response } from 'express';
 import pool from '../db.js';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
-import { fetchGameById, cacheGameInDatabase } from './gamesController.js';
-import { igdbRequest } from '../utils/igdbRequest.js';
 
 interface Review extends RowDataPacket {
     idReview: number;
@@ -10,24 +8,17 @@ interface Review extends RowDataPacket {
     idUser: number;
     review_type: string;
     description: string;
-    recommended: number; // MySQL uses TINYINT(1) for boolean
+    recommended: number;
     profile_name: string;
     created_at: Date;
     updated_at: Date;
 }
 
-interface InvolvedCompany {
-    company: {
-        name: string;
-    };
-    developer: boolean;
-}
-
-// Extend Express Request type to include user
+// Extend Express Request type to include user authentication
 declare global {
     namespace Express {
         interface Request {
-            user: {
+            user?: {
                 idUser: number;
                 [key: string]: any;
             };
@@ -35,7 +26,7 @@ declare global {
     }
 }
 
-// Get all reviews for a game
+// ✅ Obtener todas las reseñas de un juego
 export const getGameReviews = async (req: Request, res: Response): Promise<void> => {
     try {
         const gameId = parseInt(req.params.id);
@@ -49,123 +40,54 @@ export const getGameReviews = async (req: Request, res: Response): Promise<void>
             ORDER BY r.idReview DESC
         `, [gameId]);
 
-        // Convert MySQL boolean (0/1) to JavaScript boolean
-        const formattedReviews = reviews.map(review => ({
-            ...review,
-            recommended: Boolean(review.recommended)
-        }));
+        // ✅ Devuelve un array vacío si no hay reseñas en lugar de `404`
+        if (reviews.length === 0) {
+            console.log(`No reviews found for game ${gameId}`);
+            res.status(200).json([]); 
+            return;
+        }
 
-        console.log('Reviews fetched:', formattedReviews);
-        res.json(formattedReviews);
+        res.json(reviews);
     } catch (error) {
-        console.error('Detailed error in getGameReviews:', error);
-        res.status(500).json({ 
-            message: 'Error fetching reviews',
-            error: error instanceof Error ? error.message : 'Unknown error'
-        });
+        console.error("Error fetching reviews:", error);
+        res.status(500).json({ message: "Internal server error", error });
     }
 };
 
-// Create a new review
+// ✅ Crear una nueva reseña
 export const createReview = async (req: Request, res: Response): Promise<void> => {
     try {
         const gameId = parseInt(req.params.id);
         const { review_type, description, recommended } = req.body;
-        const userId = req.user.idUser;
+        const userId = req.user?.idUser; // ✅ Verificación de usuario autenticado
+
+        console.log("Incoming review data:", { gameId, userId, review_type, description, recommended });
 
         if (!review_type || !description || recommended === undefined) {
-            res.status(400).json({ message: 'Missing required fields' });
+            res.status(400).json({ message: "Missing required fields" });
             return;
         }
 
-        console.log('Creating review:', {
-            gameId,
-            userId,
-            review_type,
-            description,
-            recommended
-        });
-
-        // First check if game exists in our database
-        const [existingGames] = await pool.query<RowDataPacket[]>(
-            'SELECT idGame FROM games WHERE idGame = ?',
-            [gameId]
-        );
-
-        if (existingGames.length === 0) {
-            // Game doesn't exist in our database, fetch from IGDB
-            console.log('Game not found in database, fetching from IGDB:', gameId);
-            const query = `fields name,first_release_date,summary,cover.image_id,screenshots.image_id,involved_companies.company.name,involved_companies.developer; where id = ${gameId}; limit 1;`;
-            
-            try {
-                const response = await igdbRequest(query);
-                const data = response.data;
-                
-                if (!data || data.length === 0) {
-                    res.status(404).json({ message: 'Game not found in IGDB' });
-                    return;
-                }
-
-                const game = data[0];
-                if (!game.name) {
-                    res.status(400).json({ message: 'Invalid game data from IGDB' });
-                    return;
-                }
-
-                // Extract publisher and developer from involved_companies
-                const publisher = game.involved_companies?.find((ic: InvolvedCompany) => !ic.developer)?.company?.name;
-                const developer = game.involved_companies?.find((ic: InvolvedCompany) => ic.developer)?.company?.name;
-
-                // Cache the game in our database
-                await cacheGameInDatabase({
-                    id: gameId,
-                    name: game.name,
-                    first_release_date: game.first_release_date,
-                    summary: game.summary,
-                    cover: game.cover,
-                    screenshots: game.screenshots,
-                    publisher: publisher,
-                    developer: developer,
-                    price: 59.99 // Default price since IGDB doesn't provide it
-                });
-                console.log('Game cached in database:', gameId);
-            } catch (error) {
-                console.error('Error fetching game from IGDB:', error);
-                res.status(500).json({ 
-                    message: 'Error fetching game from IGDB',
-                    error: error instanceof Error ? error.message : 'Unknown error'
-                });
-                return;
-            }
-        }
-
-        // Check if user already reviewed this game
-        const [existingReviews] = await pool.query<RowDataPacket[]>(
-            'SELECT * FROM review WHERE idGame = ? AND idUser = ?',
-            [gameId, userId]
-        );
-
-        if (existingReviews.length > 0) {
-            res.status(400).json({ message: 'You have already reviewed this game' });
+        if (!userId) {
+            res.status(401).json({ message: "User not authenticated" });
             return;
         }
 
-        // Create the review
+        // ✅ Eliminamos la validación de existencia del juego en la base de datos
         const [result] = await pool.query<ResultSetHeader>(
             `INSERT INTO review (idGame, idUser, review_type, description, recommended)
             VALUES (?, ?, ?, ?, ?)`,
             [gameId, userId, review_type, description, recommended ? 1 : 0]
         );
 
+        console.log("Review successfully inserted with ID:", result.insertId);
+
         res.status(201).json({
-            message: 'Review created successfully',
+            message: "Review created successfully",
             reviewId: result.insertId
         });
     } catch (error) {
-        console.error('Detailed error in createReview:', error);
-        res.status(500).json({
-            message: 'Error creating review',
-            error: error instanceof Error ? error.message : 'Unknown error'
-        });
+        console.error("Detailed error in createReview:", error);
+        res.status(500).json({ message: "Error creating review", error });
     }
-}; 
+};

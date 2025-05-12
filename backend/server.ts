@@ -41,7 +41,7 @@ app.use(session({
 app.use("/api", authRoutes);
 app.use("/api/games", gamesRoutes);
 app.use("/api/cart", cartRoutes);
-app.use("/api/reviews", reviewRoutes);
+app.use("/api", reviewRoutes);
 app.use("/api/downloads", downloadsRoutes);
 
 export default app;

@@ -25,15 +25,15 @@ const ReviewComponent: React.FC<ReviewComponentProps> = ({ gameId }) => {
   // Fetch reviews when the component loads or when gameId changes
   useEffect(() => {
     const fetchReviews = async () => {
-      try {
-        const response = await axios.get<Review[]>(
-          `http://localhost:3000/api/games/${gameId}/reviews`
-        );
-        setReviews(response.data);
-      } catch (error) {
-        console.error("Error fetching reviews:", error);
-      }
-    };
+  try {
+    console.log("Fetching reviews from:", `http://localhost:3000/api/games/${gameId}/reviews`);
+    const response = await axios.get(`http://localhost:3000/api/games/${gameId}/reviews`);
+    setReviews(response.data);
+  } catch (error) {
+    console.error("Error fetching reviews:", error);
+  }
+};
+
 
     fetchReviews();
   }, [gameId]);
