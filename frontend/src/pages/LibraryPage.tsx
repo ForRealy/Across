@@ -90,7 +90,7 @@ const Library: React.FC = () => {
   };
 
   const goToGamePage = (gameId: number) => {
-    navigate(`/details/${gameId}`);
+    window.location.href = `/details/${gameId}`; 
   };
 
   // Función para renderizar estrellas de valoración

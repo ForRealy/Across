@@ -34,11 +34,8 @@ const GamesPage: React.FC = () => {
       try {
         const gameResponse = await axios.get<GameDetails>(
           `http://localhost:3000/api/games/details/${id}`,
-          {
-            withCredentials: true
-          }
+          { withCredentials: true }
         );
-        
         setGameDetails(gameResponse.data);
       } catch (error) {
         console.error("Error fetching game details:", error);
@@ -51,8 +48,8 @@ const GamesPage: React.FC = () => {
     fetchGameDetails();
   }, [id]);
 
-  if (loading) return <div>Loading...</div>;
-  if (!gameDetails) return <div>Game not found</div>;
+  if (loading) return <div className="loading-message">Loading...</div>;
+  if (!gameDetails) return <div className="error-message">Game not found</div>;
 
   return (
     <div className="gamepage-container">
