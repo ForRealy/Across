@@ -35,11 +35,34 @@ export const getDownloads = (req, res) => __awaiter(void 0, void 0, void 0, func
         res.status(500).json({ success: false, message: "Error al obtener descargas" });
     }
 });
-// DELETE /downloads/:id - Delete a download for the authenticated user
-export const deleteDownload = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// GET /downloads/check/:gameId - Verifica si un juego ya está en descargas
+export const checkDownload = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _b;
     try {
         const userId = (_b = req.user) === null || _b === void 0 ? void 0 : _b.idUser;
+        const { gameId } = req.params;
+        if (!userId) {
+            res.status(401).json({ success: false, message: "Usuario no autenticado" });
+            return;
+        }
+        const existingDownload = yield Download.findOne({ where: { idUser: userId, idGame: gameId } });
+        if (existingDownload) {
+            res.status(200).json({ isDownloaded: true });
+        }
+        else {
+            res.status(200).json({ isDownloaded: false });
+        }
+    }
+    catch (error) {
+        console.error("Error checking downloads:", error);
+        res.status(500).json({ success: false, message: "Error al verificar descargas" });
+    }
+});
+// DELETE /downloads/:id - Delete a download for the authenticated user
+export const deleteDownload = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _c;
+    try {
+        const userId = (_c = req.user) === null || _c === void 0 ? void 0 : _c.idUser;
         if (!userId) {
             res.status(401).json({ success: false, message: "Usuario no autenticado" });
             return;
@@ -58,10 +81,10 @@ export const deleteDownload = (req, res) => __awaiter(void 0, void 0, void 0, fu
 });
 // GET /download/:id - Download a game and update status
 export const downloadGame = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _c;
+    var _d;
     try {
         const gameId = req.params.id;
-        const userId = (_c = req.user) === null || _c === void 0 ? void 0 : _c.idUser;
+        const userId = (_d = req.user) === null || _d === void 0 ? void 0 : _d.idUser;
         if (!userId) {
             res.status(401).json({ message: "Usuario no autenticado" });
             return;

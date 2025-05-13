@@ -31,6 +31,30 @@ export const getDownloads = async (req: Request, res: Response): Promise<void> =
   }
 };
 
+// GET /downloads/check/:gameId - Verifica si un juego ya está en descargas
+export const checkDownload = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.idUser;
+    const { gameId } = req.params;
+
+    if (!userId) {
+      res.status(401).json({ success: false, message: "Usuario no autenticado" });
+      return;
+    }
+
+    const existingDownload = await Download.findOne({ where: { idUser: userId, idGame: gameId } });
+
+    if (existingDownload) {
+      res.status(200).json({ isDownloaded: true });
+    } else {
+      res.status(200).json({ isDownloaded: false });
+    }
+  } catch (error) {
+    console.error("Error checking downloads:", error);
+    res.status(500).json({ success: false, message: "Error al verificar descargas" });
+  }
+};
+
 // DELETE /downloads/:id - Delete a download for the authenticated user
 export const deleteDownload = async (req: Request, res: Response): Promise<void> => {
   try {

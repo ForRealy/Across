@@ -1,11 +1,14 @@
 import express from "express";
-import { getDownloads, deleteDownload, downloadGame } from "../controllers/downloadsController.js";
+import { checkDownload, getDownloads, deleteDownload, downloadGame } from "../controllers/downloadsController.js";
 import { authenticateToken } from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.get("/", authenticateToken, getDownloads); // ✅ Esto debe estar aquí
-router.delete("/:id", authenticateToken, deleteDownload);
-router.get("/file/:id", authenticateToken, downloadGame);
+router.use(authenticateToken);
+
+router.get("/", getDownloads);
+router.get("/check/:gameId", checkDownload);
+router.get("/:id", downloadGame);
+router.delete("/:id", deleteDownload);
 
 export default router;

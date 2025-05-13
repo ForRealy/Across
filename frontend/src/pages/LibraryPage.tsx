@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import Header from "../components/HeaderComponent";
+import AddToCartButton from "../components/AddToCartButtonComponent";
 import "../styles/LibraryPage.css";
 import axios, { AxiosError } from "axios";
 
@@ -18,7 +18,6 @@ interface Game {
 }
 
 const Library: React.FC = () => {
-  const navigate = useNavigate();
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,51 +48,14 @@ const Library: React.FC = () => {
     loadGames();
   }, []);
 
-  const addToCart = async (gameId: number) => {
-    setCartStatus(prev => ({ ...prev, [gameId]: 'loading' }));
-    
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-
-      const response = await axios.post(
-        "http://localhost:3000/api/cart/add",
-        { productId: gameId },
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-
-      if (response.data.success) {
-        setCartStatus(prev => ({ ...prev, [gameId]: 'success' }));
-        setTimeout(() => 
-          setCartStatus(prev => ({ ...prev, [gameId]: undefined }))
-        , 2000);
-      } else {
-        throw new Error(response.data.message || "Error al agregar al carrito");
-      }
-    } catch (err) {
-      if (err instanceof AxiosError) {
-        console.error("Error adding to cart:", err);
-        setCartStatus(prev => ({ ...prev, [gameId]: 'error' }));
-        setTimeout(() => 
-          setCartStatus(prev => ({ ...prev, [gameId]: undefined }))
-        , 3000);
-        setError(err.response?.data?.message || "Error al agregar al carrito");
-      }
-    }
+  const updateCartStatus = (gameId: number, status: 'loading' | 'success' | 'error' | undefined) => {
+    setCartStatus(prev => ({ ...prev, [gameId]: status }));
   };
 
   const goToGamePage = (gameId: number) => {
     window.location.href = `/details/${gameId}`; 
   };
 
-  // Función para renderizar estrellas de valoración
   const renderStars = (rating: number) => {
     const stars = [];
     const fullStars = Math.floor(rating);
@@ -158,18 +120,12 @@ const Library: React.FC = () => {
                   )}
                 </div>
                 <div className="library-button-container">
-                  <button
-                    className={`library-add-button ${
-                      cartStatus[game.id] === 'success' ? 'added' : 
-                      cartStatus[game.id] === 'error' ? 'error' : ''
-                    }`}
-                    onClick={() => addToCart(game.id)}
-                    disabled={cartStatus[game.id] === 'loading'}
-                  >
-                    {cartStatus[game.id] === 'loading' ? 'Añadiendo...' :
-                     cartStatus[game.id] === 'success' ? '✓ Añadido' :
-                     cartStatus[game.id] === 'error' ? 'Error' : 'Añadir al carrito'}
-                  </button>
+                  <AddToCartButton 
+                    gameId={game.id}
+                    status={cartStatus[game.id]}
+                    setStatus={(status) => updateCartStatus(game.id, status)}
+                    setError={setError}
+                  />
                 </div>
               </div>
             ))}
