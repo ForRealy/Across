@@ -8,7 +8,7 @@ router.use(authenticateToken);
 
 router.get("/", getDownloads);
 router.get("/check/:gameId", checkDownload);
-router.get("/:id", downloadGame);
+router.get("/file/:id", downloadGame);
 router.delete("/:id", deleteDownload);
 
 export default router;

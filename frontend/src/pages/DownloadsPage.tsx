@@ -168,34 +168,52 @@ const Downloads: React.FC = () => {
     );
 
     const token = localStorage.getItem("token");
-    if (!token) return console.error("Usuario no autenticado.");
+    if (!token) {
+      console.error("Usuario no autenticado.");
+      setGames(prev =>
+        prev.map((g, i) =>
+          i === index ? { ...g, status: "failed", buttonLabel: "Retry" } : g
+        )
+      );
+      return;
+    }
 
     // Setup AbortController
     const controller = new AbortController();
     setDownloadControllers(prev => ({ ...prev, [game.id]: controller }));
 
-    // Create download link
-    const link = document.createElement("a");
-    link.href = `http://localhost:3000/api/downloads/file/${game.gameId}`;
-    link.setAttribute("download", `game-${game.gameId}.iso`);
-
-    const headers = new Headers();
-    headers.append("Authorization", `Bearer ${token}`);
-
-    fetch(link.href, {
-      headers,
+    // Start the download
+    fetch(`http://localhost:3000/api/downloads/file/${game.gameId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
       credentials: "include",
-      signal: controller.signal,
+      signal: controller.signal
     })
-      .then(res => {
-        if (!res.ok) throw new Error("Download failed");
-        return res.blob();
+      .then(async response => {
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || "Download failed");
+        }
+        // Get filename from Content-Disposition header or use game title
+        const contentDisposition = response.headers.get('content-disposition');
+        const filename = contentDisposition
+          ? contentDisposition.split('filename=')[1].replace(/"/g, '')
+          : `${game.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.iso`;
+        return { blob: await response.blob(), filename };
       })
-      .then(blob => {
+      .then(({ blob, filename }) => {
+        // Create download link with game title as filename
         const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
         link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
+
+        // Update game status
         setGames(prev =>
           prev.map((g, i) =>
             i === index ? { ...g, status: "Completed", buttonLabel: "Play" } : g
@@ -203,7 +221,7 @@ const Downloads: React.FC = () => {
         );
       })
       .catch(error => {
-        if ((error as any).name === "AbortError") {
+        if (error.name === "AbortError") {
           console.log("Download aborted by user");
           return;
         }

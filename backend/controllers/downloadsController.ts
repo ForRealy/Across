@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import pool from '../db.js';
 import fs from 'fs';
+import { fetchGameById } from './gamesController.js';
 
 // Get current file path and directory
 const __filename = fileURLToPath(import.meta.url);
@@ -93,6 +94,14 @@ export const downloadGame = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
+    // Get game details from IGDB
+    const gameDetails = await fetchGameById(parseInt(gameId));
+    if (!gameDetails) {
+      res.status(404).json({ message: 'Game not found' });
+      return;
+    }
+
+    const sanitizedTitle = gameDetails.title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
     const filePath = path.join(DOWNLOADS_DIR, 'sample.iso');
     console.log('Attempting to download file from:', filePath);
 
@@ -111,8 +120,8 @@ export const downloadGame = async (req: Request, res: Response): Promise<void> =
       ['downloading', gameId, userId]
     );
 
-    // Start the download
-    res.download(filePath, `game-${gameId}.iso`, async (err) => {
+    // Start the download with the game title as filename
+    res.download(filePath, `${sanitizedTitle}.iso`, async (err) => {
       if (err) {
         console.error('Error downloading file:', err);
 
