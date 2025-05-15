@@ -33,6 +33,7 @@ const Cart: React.FC = () => {
     cvv: "",
     name: "",
   });
+
   const [paymentSuccess, setPaymentSuccess] = useState(false);
 
   // Cargar el carrito desde el backend
@@ -87,78 +88,113 @@ const Cart: React.FC = () => {
   };
 
   const removeFromCart = async (gameId: number) => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-
-    await axios.delete(`http://localhost:3000/api/cart/remove/${gameId}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
       }
-    });
 
-    setCartItems(prevItems => {
-      return prevItems.map(item => 
-        item.game_id === gameId 
-          ? { ...item, quantity: item.quantity - 1 } 
-          : item
-      ).filter(item => item.quantity > 0);
-    });
+      await axios.delete(`http://localhost:3000/api/cart/remove/${gameId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
 
-    // Obtener el carrito actualizado
-    const response = await axios.get<CartResponse>("http://localhost:3000/api/cart", {
-      headers: {
-        'Authorization': `Bearer ${token}`
+      setCartItems(prevItems => {
+        return prevItems.map(item => 
+          item.game_id === gameId 
+            ? { ...item, quantity: item.quantity - 1 } 
+            : item
+        ).filter(item => item.quantity > 0);
+      });
+
+      // Obtener el carrito actualizado
+      const response = await axios.get<CartResponse>("http://localhost:3000/api/cart", {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      setTotal(response.data.total);
+
+    } catch (error) {
+      console.error("Error al eliminar juego del carrito:", error);
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        navigate('/login');
       }
-    });
-    setTotal(response.data.total);
-
-  } catch (error) {
-    console.error("Error al eliminar juego del carrito:", error);
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      navigate('/login');
     }
-  }
-};
-
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setPaymentData({ ...paymentData, [name]: value });
+  const { name, value } = e.target;
+  let formattedValue = value;
+
+    switch (name) {
+      case "name":
+        // Solo letras y espacios, máximo 100 caracteres
+        formattedValue = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '').slice(0, 100);
+        break;
+      case "cardNumber":
+        // Solo números, agrupar cada 4 dígitos
+        formattedValue = value.replace(/\D/g, '')
+          .slice(0, 16)
+          .replace(/(\d{4})(?=\d)/g, '$1 ');
+        break;
+      case "expirationDate":
+        // Formato MM/YY
+        formattedValue = value.replace(/\D/g, '')
+          .slice(0, 4)
+          .replace(/(\d{2})(?=\d)/, '$1/');
+        break;
+      case "cvv":
+        // Solo 3 dígitos
+        formattedValue = value.replace(/\D/g, '').slice(0, 3);
+        break;
+    }
+
+    setPaymentData({ ...paymentData, [name]: formattedValue });
   };
 
   const handlePayment = async () => {
     const { cardNumber, expirationDate, cvv, name } = paymentData;
-    if (cardNumber && expirationDate && cvv && name) {
-      setPaymentSuccess(true);
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          navigate('/login');
-          return;
-        }
+    
+    // Eliminar espacios y caracteres no numéricos para validación
+    const cleanCardNumber = cardNumber.replace(/\s/g, '');
+    const cleanExpirationDate = expirationDate.replace(/\D/g, '');
+    
+    if (
+      name.length < 3 ||
+      cleanCardNumber.length !== 16 ||
+      cleanExpirationDate.length !== 4 ||
+      cvv.length !== 3
+    ) {
+      alert("Por favor, completa correctamente todos los campos de pago.");
+      return;
+    }
 
-        // Enviar los juegos comprados al backend
-        await axios.post("http://localhost:3000/api/cart/checkout", 
-          { cart: cartItems },
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          }
-        );
-        clearCart();
-      } catch (error) {
-        console.error("Error en el pago:", error);
-        if (axios.isAxiosError(error) && error.response?.status === 401) {
-          navigate('/login');
-        }
+    setPaymentSuccess(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
       }
-    } else {
-      alert("Por favor, completa todos los campos de pago.");
+
+      // Enviar los juegos comprados al backend
+      await axios.post("http://localhost:3000/api/cart/checkout", 
+        { cart: cartItems },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      clearCart();
+    } catch (error) {
+      console.error("Error en el pago:", error);
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        navigate('/login');
+      }
     }
   };
 
@@ -224,7 +260,7 @@ const Cart: React.FC = () => {
                     name="cardNumber"
                     value={paymentData.cardNumber}
                     onChange={handleInputChange}
-                    placeholder="**** **** **** ****"
+                    placeholder="1234 5678 9012 3456"
                     required
                   />
                 </div>
@@ -282,4 +318,4 @@ const Cart: React.FC = () => {
   );
 };
 
-export default Cart; 
+export default Cart;
