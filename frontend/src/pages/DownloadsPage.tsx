@@ -110,7 +110,22 @@ const Downloads: React.FC = () => {
 
       const gamesWithDetails = await Promise.all(
         response.data.map(async (download: Download) => {
-          const status = download.status.toLowerCase() as Game['status'];
+          // Map backend status to frontend status
+          let status: Game['status'];
+          switch (download.status.toLowerCase()) {
+            case 'completed':
+              status = 'Completed';
+              break;
+            case 'downloading':
+              status = 'downloading';
+              break;
+            case 'failed':
+              status = 'failed';
+              break;
+            default:
+              status = 'Pending';
+          }
+
           try {
             const res = await axios.get(
               `http://localhost:3000/api/games/details/${download.idGame}`,
@@ -298,7 +313,7 @@ const Downloads: React.FC = () => {
                     >
                       {game.buttonLabel}
                     </button>
-                    {(game.status === "Pending" || game.status === "Completed") && (
+                    {game.status === "Completed" && (
                       <button
                         className="delete-button"
                         onClick={() => handleDeleteButtonClick(index)}
