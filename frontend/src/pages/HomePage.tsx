@@ -27,6 +27,7 @@ const Home: React.FC = () => {
           axios.get("http://localhost:3000/api/games/popular"),
           axios.get("http://localhost:3000/api/games/upcoming")
         ]);
+        console.log('Upcoming games data:', upcomingResponse.data); // Debugging log
         setPopularGames(popularResponse.data);
         setUpcomingGames(upcomingResponse.data);
       } catch (error) {

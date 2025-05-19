@@ -55,18 +55,28 @@ const igdbRequest = async (body: string) => {
 };
 
 /**
+ * Genera un "falso screenshot" a partir de la portada
+ */
+const generateFakeScreenshot = (cover: string): string => {
+  // Assuming the cover URL is in a specific format, modify as needed
+  return cover.replace('t_cover_big', 't_screenshot_big'); // Change the transformation as needed
+};
+
+/**
  * Transforma la respuesta bruta de IGDB en un objeto con portada
  */
 const transformGame = (game: any): GameWithCover => {
+  const coverImage = game.cover?.image_id
+    ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg`
+    : 'https://via.placeholder.com/264x352?text=No+Cover';
+
   return {
     id: game.id,
     title: game.name,
-    cover: game.cover?.image_id
-      ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg`
-      : 'https://via.placeholder.com/264x352?text=No+Cover',
+    cover: coverImage,
     sliderImage: game.screenshots?.[0]?.image_id
       ? `https://images.igdb.com/igdb/image/upload/t_1080p/${game.screenshots[0].image_id}.jpg`
-      : undefined,
+      : generateFakeScreenshot(coverImage), // Use the fake screenshot if none exists
     path: `/details/${game.id}`,
     rating: game.aggregated_rating || 0,
     price: game.price || 59.99, // Precio por defecto
@@ -82,7 +92,7 @@ const transformPopularGame = (game: any, currentTimestamp?: number): GameWithCov
     ...base,
     sliderImage: game.screenshots?.[0]?.image_id
       ? `https://images.igdb.com/igdb/image/upload/t_screenshot_big/${game.screenshots[0].image_id}.jpg`
-      : base.cover,
+      : generateFakeScreenshot(base.cover), // Use the fake screenshot if none exists
     releaseDate: new Date(game.first_release_date * 1000)
       .toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }),
     daysRemaining: currentTimestamp

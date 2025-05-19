@@ -3,19 +3,15 @@ import axios from "axios";
 import Header from "../components/HeaderComponent";
 import "../styles/DownloadsPage.css";
 
-// Add NodeJS type
-declare global {
-  namespace NodeJS {
-    interface Timeout {}
-  }
-}
+// Remove the NodeJS namespace declaration
+// interface Timeout {} // This line can be removed
 
 interface Game {
   id: number;
   gameId: number;
   title: string;
   cover: string;
-  status: 'Pending' | 'downloading' | 'Completed' | 'failed';
+  status: 'Pending' | 'Downloading' | 'Completed' | 'Failed';
   buttonLabel: string;
   cancelLabel: string;
 }
@@ -117,10 +113,10 @@ const Downloads: React.FC = () => {
               status = 'Completed';
               break;
             case 'downloading':
-              status = 'downloading';
+              status = 'Downloading';
               break;
             case 'failed':
-              status = 'failed';
+              status = 'Failed';
               break;
             default:
               status = 'Pending';
@@ -178,7 +174,7 @@ const Downloads: React.FC = () => {
     // Mark as downloading
     setGames(prev =>
       prev.map((g, i) =>
-        i === index ? { ...g, status: "downloading", buttonLabel: "" } : g
+        i === index ? { ...g, status: "Downloading", buttonLabel: "" } : g
       )
     );
 
@@ -187,7 +183,7 @@ const Downloads: React.FC = () => {
       console.error("Usuario no autenticado.");
       setGames(prev =>
         prev.map((g, i) =>
-          i === index ? { ...g, status: "failed", buttonLabel: "Retry" } : g
+          i === index ? { ...g, status: "Failed", buttonLabel: "Retry" } : g
         )
       );
       return;
@@ -243,7 +239,7 @@ const Downloads: React.FC = () => {
         console.error("Error downloading file:", error);
         setGames(prev =>
           prev.map((g, i) =>
-            i === index ? { ...g, status: "failed", buttonLabel: "Retry" } : g
+            i === index ? { ...g, status: "Failed", buttonLabel: "Retry" } : g
           )
         );
       });
@@ -283,7 +279,7 @@ const Downloads: React.FC = () => {
                 <p>
                   Estado: <strong className={`status-${game.status}`}>{game.status}</strong>
                 </p>
-                {game.status === "downloading" && (
+                {game.status === "Downloading" && (
                   <div className="progress-bar">
                     <div
                       className="progress-fill"
@@ -297,7 +293,7 @@ const Downloads: React.FC = () => {
               </div>
 
               <div className="button-group">
-                {game.status === "downloading" ? (
+                {game.status === "Downloading" ? (
                   // Only show this one Cancel button while downloading
                   <button
                     className="cancel-button"

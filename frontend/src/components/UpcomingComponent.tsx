@@ -30,7 +30,7 @@ const UpcomingGames: React.FC<UpcomingGamesProps> = ({ upcomingGames }) => {
             }}
           >
             <img
-              src={game.cover}
+              src={game.cover || "path/to/placeholder-image.jpg"}
               alt={game.title}
               className="upcoming-game-image"
             />

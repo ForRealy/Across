@@ -37,19 +37,27 @@ const igdbRequest = (body) => __awaiter(void 0, void 0, void 0, function* () {
     }));
 });
 /**
+ * Genera un "falso screenshot" a partir de la portada
+ */
+const generateFakeScreenshot = (cover) => {
+    // Assuming the cover URL is in a specific format, modify as needed
+    return cover.replace('t_cover_big', 't_screenshot_big'); // Change the transformation as needed
+};
+/**
  * Transforma la respuesta bruta de IGDB en un objeto con portada
  */
 const transformGame = (game) => {
     var _a, _b, _c;
+    const coverImage = ((_a = game.cover) === null || _a === void 0 ? void 0 : _a.image_id)
+        ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg`
+        : 'https://via.placeholder.com/264x352?text=No+Cover';
     return {
         id: game.id,
         title: game.name,
-        cover: ((_a = game.cover) === null || _a === void 0 ? void 0 : _a.image_id)
-            ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg`
-            : 'https://via.placeholder.com/264x352?text=No+Cover',
+        cover: coverImage,
         sliderImage: ((_c = (_b = game.screenshots) === null || _b === void 0 ? void 0 : _b[0]) === null || _c === void 0 ? void 0 : _c.image_id)
             ? `https://images.igdb.com/igdb/image/upload/t_1080p/${game.screenshots[0].image_id}.jpg`
-            : undefined,
+            : generateFakeScreenshot(coverImage),
         path: `/details/${game.id}`,
         rating: game.aggregated_rating || 0,
         price: game.price || 59.99, // Precio por defecto
@@ -63,7 +71,7 @@ const transformPopularGame = (game, currentTimestamp) => {
     const base = transformGame(game);
     return Object.assign(Object.assign({}, base), { sliderImage: ((_b = (_a = game.screenshots) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.image_id)
             ? `https://images.igdb.com/igdb/image/upload/t_screenshot_big/${game.screenshots[0].image_id}.jpg`
-            : base.cover, releaseDate: new Date(game.first_release_date * 1000)
+            : generateFakeScreenshot(base.cover), releaseDate: new Date(game.first_release_date * 1000)
             .toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }), daysRemaining: currentTimestamp
             ? Math.ceil((game.first_release_date - currentTimestamp) / 86400)
             : undefined });
