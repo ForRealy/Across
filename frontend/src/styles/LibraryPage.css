@@ -10,14 +10,21 @@
   flex: 1;
 }
 
-/* Barra lateral */
+/* Barra lateral fija */
 .library-sidebar {
-  font-family: 'Courier New', Courier, monospace;
+  position: fixed;
+  top: 121px;                     /* ← adjust this to your Header’s height */
+  left: 8px;
   width: 250px;
+  height: calc(100vh - 60px);    /* ← same Header height subtracted */
+  overflow-y: auto;              /* scroll inside if content is tall */
   background: rgba(255, 255, 255, 0.85);
   padding: 20px;
   color: black;
-  transition: background 0.3s ease; 
+  font-family: 'Courier New', Courier, monospace;
+  transition: background 0.3s ease;
+ 
+  z-index: 10;
 }
 
 .library-sidebar-title {
@@ -44,8 +51,10 @@
 
 /* Contenido principal */
 .library-content {
-  flex: 1;
+  margin-left: 250px;            /* igual que el width de .library-sidebar */
   padding: 20px;
+  flex: 1;
+  color: white;
 }
 
 .library-title {
@@ -142,4 +151,46 @@
 
 .library-game-price{
   margin-left: 10px;
+}
+.library-filter-group {
+  margin-top: 1rem;
+}
+
+.library-rating-slider {
+  width: 100%;
+  margin: 0.5rem 0;
+}
+
+
+.library-filter-input {
+  width: 41%;
+  padding: 8px;
+  font-size: 16px;
+  margin-top: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+.library-star-filter {
+  flex-direction: row-reverse; /* keep reversed for hover */
+  justify-content: center; 
+  display: flex;
+  gap: 4px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  user-select: none;
+  margin: 0.5rem 0;
+}
+
+.clickable-star {
+  color: #ccc;
+  transition: color 0.2s ease;
+}
+
+.clickable-star.active {
+  color: #f5a623; /* gold star */
+}
+
+.clickable-star:hover,
+.clickable-star:hover ~ .clickable-star {
+  color: #ffcc66;
 }

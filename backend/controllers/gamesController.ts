@@ -32,6 +32,17 @@ export interface GameWithCover {
 }
 
 /**
+ * Genera un precio determinístico basado en el ID de juego
+ */
+const generatePrice = (gameId: number): number => {
+  const seed = gameId * 31;
+  const min = 9.99;
+  const max = 29.99;
+  const random = Math.abs(Math.sin(seed)) * (max - min) + min;
+  return Math.round(random * 100) / 100;
+};
+
+/**
  * Helper centralizado para hacer peticiones a IGDB
  */
 const igdbRequest = async (body: string) => {
@@ -58,8 +69,7 @@ const igdbRequest = async (body: string) => {
  * Genera un "falso screenshot" a partir de la portada
  */
 const generateFakeScreenshot = (cover: string): string => {
-  // Assuming the cover URL is in a specific format, modify as needed
-  return cover.replace('t_cover_big', 't_screenshot_big'); // Change the transformation as needed
+  return cover.replace('t_cover_big', 't_screenshot_big');
 };
 
 /**
@@ -76,10 +86,12 @@ const transformGame = (game: any): GameWithCover => {
     cover: coverImage,
     sliderImage: game.screenshots?.[0]?.image_id
       ? `https://images.igdb.com/igdb/image/upload/t_1080p/${game.screenshots[0].image_id}.jpg`
-      : generateFakeScreenshot(coverImage), // Use the fake screenshot if none exists
+      : generateFakeScreenshot(coverImage),
     path: `/details/${game.id}`,
     rating: game.aggregated_rating || 0,
-    price: game.price || 59.99, // Precio por defecto
+    price: typeof game.price === 'number'
+      ? game.price
+      : generatePrice(game.id),
   };
 };
 
@@ -92,7 +104,7 @@ const transformPopularGame = (game: any, currentTimestamp?: number): GameWithCov
     ...base,
     sliderImage: game.screenshots?.[0]?.image_id
       ? `https://images.igdb.com/igdb/image/upload/t_screenshot_big/${game.screenshots[0].image_id}.jpg`
-      : generateFakeScreenshot(base.cover), // Use the fake screenshot if none exists
+      : generateFakeScreenshot(base.cover),
     releaseDate: new Date(game.first_release_date * 1000)
       .toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }),
     daysRemaining: currentTimestamp
@@ -105,43 +117,33 @@ const transformPopularGame = (game: any, currentTimestamp?: number): GameWithCov
 // ——— FUNCIONES PRINCIPALES ———
 // ———————————————————————————
 
-/**
- * Busca juegos por nombre
- */
 export const searchGamesOptimized = async (query: string): Promise<GameWithCover[] | undefined> => {
   try {
-    // Estrategia 1: Búsqueda exacta primero
     let searchQuery = `
       search "${query}";
       fields id,name,cover.image_id;
       where category = (0, 2, 4, 8, 9);
       limit 5;
     `;
-    
     let { data } = await igdbRequest(searchQuery);
-    
-    // Estrategia 2: Si no hay resultados, intentar con términos clave
+
     if (!data || data.length === 0) {
-      const keywords = query.split(':')[0]; // "The Legend of Zelda"
+      const keywords = query.split(':')[0];
       searchQuery = `
         search "${keywords}";
         fields id,name,cover.image_id;
         where name ~ *"${keywords}"* & name ~ *"Breath of the Wild"*;
         limit 5;
       `;
-      const response = await igdbRequest(searchQuery);
-      data = response.data;
+      ({ data } = await igdbRequest(searchQuery));
     }
-
-    // Estrategia 3: Si sigue sin resultados, buscar solo palabras clave
     if (!data || data.length === 0) {
       searchQuery = `
         fields id,name,cover.image_id;
         where name ~ *"Zelda"* & name ~ *"Breath"*;
         limit 5;
       `;
-      const response = await igdbRequest(searchQuery);
-      data = response.data;
+      ({ data } = await igdbRequest(searchQuery));
     }
 
     return data?.map(transformGame) || [];
@@ -151,9 +153,6 @@ export const searchGamesOptimized = async (query: string): Promise<GameWithCover
   }
 };
 
-/**
- * Obtiene los 30 juegos mejor valorados
- */
 export const fetchGameData = async (): Promise<GameWithCover[] | undefined> => {
   try {
     const query = `
@@ -166,16 +165,15 @@ export const fetchGameData = async (): Promise<GameWithCover[] | undefined> => {
       limit 250;
     `;
     const { data } = await igdbRequest(query);
-    return data.map(transformGame).sort((a: GameWithCover, b: GameWithCover) => (b.rating || 0) - (a.rating || 0));
+    return data
+      .map(transformGame)
+      .sort((a: GameWithCover, b: GameWithCover) => (b.rating || 0) - (a.rating || 0));
   } catch (err) {
     console.error('Error al obtener datos de juegos:', err);
     return undefined;
   }
 };
 
-/**
- * Obtiene los próximos 6 lanzamientos
- */
 export const fetchUpcomingGames = async (): Promise<GameWithCover[] | undefined> => {
   try {
     const currentTimestamp = Math.floor(Date.now() / 1000);
@@ -194,9 +192,6 @@ export const fetchUpcomingGames = async (): Promise<GameWithCover[] | undefined>
   }
 };
 
-/**
- * Obtiene los 10 juegos más populares
- */
 export const fetchPopularGames = async (): Promise<GameWithCover[] | undefined> => {
   try {
     const query = `
@@ -215,9 +210,6 @@ export const fetchPopularGames = async (): Promise<GameWithCover[] | undefined> 
   }
 };
 
-/**
- * Obtiene un juego por su ID
- */
 export const fetchGameById = async (id: number): Promise<GameWithCover | undefined> => {
   try {
     const query = `
@@ -225,7 +217,7 @@ export const fetchGameById = async (id: number): Promise<GameWithCover | undefin
       where id = ${id};
     `;
     const { data } = await igdbRequest(query);
-    if (data.length === 0) return undefined;
+    if (!data.length) return undefined;
     return transformGame(data[0]);
   } catch (err) {
     console.error(`Error al obtener juego con ID ${id}:`, err);
@@ -237,202 +229,150 @@ export const fetchGameById = async (id: number): Promise<GameWithCover | undefin
 // ——— FUNCIONES DEL CARRITO ———
 // ———————————————————————————
 
-/**
- * Añade un juego al carrito (localStorage)
- */
 export const addGameToCartByName = async (gameName: string): Promise<boolean> => {
   try {
-    // Primero buscar el juego
     const games = await searchGamesOptimized(gameName);
-    
-    if (!games || games.length === 0) {
-      console.warn('No se encontró el juego:', gameName);
-      return false;
-    }
-
-    // Buscar la mejor coincidencia (no exacta)
-    const bestMatch = games.find(game => 
-      game.title.toLowerCase().includes(gameName.toLowerCase())
-    ) || games[0];
-
-    // Añadir al carrito
+    if (!games || !games.length) return false;
+    const bestMatch = games.find(g => g.title.toLowerCase().includes(gameName.toLowerCase())) || games[0];
     const cart: GameWithCover[] = JSON.parse(localStorage.getItem('cart') || '[]');
-    
     if (!cart.some(item => item.id === bestMatch.id)) {
       cart.push(bestMatch);
       localStorage.setItem('cart', JSON.stringify(cart));
-      console.log(`Añadido al carrito: ${bestMatch.title}`);
       return true;
     }
-
-    console.warn('El juego ya está en el carrito:', bestMatch.title);
     return false;
-  } catch (err) {
-    console.error('Error al añadir al carrito:', err);
+  } catch {
     return false;
   }
 };
 
-/**
- * Elimina un juego del carrito
- */
 export const removeFromCart = (gameId: number): void => {
   const cart: GameWithCover[] = JSON.parse(localStorage.getItem('cart') || '[]');
-  const newCart = cart.filter(game => game.id !== gameId);
-  localStorage.setItem('cart', JSON.stringify(newCart));
+  localStorage.setItem('cart', JSON.stringify(cart.filter(g => g.id !== gameId)));
 };
 
-/**
- * Obtiene todos los juegos del carrito
- */
-export const getCartItems = (): GameWithCover[] => {
-  return JSON.parse(localStorage.getItem('cart') || '[]');
-};
+export const getCartItems = (): GameWithCover[] =>
+  JSON.parse(localStorage.getItem('cart') || '[]');
 
-/**
- * Vacía el carrito por completo
- */
-export const clearCart = (): void => {
+export const clearCart = (): void =>
   localStorage.removeItem('cart');
-};
 
 export const testIGDBConnection = async (): Promise<boolean> => {
   try {
-    const query = `fields id,name; limit 1;`;
-    const response = await igdbRequest(query);
-    return response.status === 200;
-  } catch (err) {
-    console.error('Error de conexión con IGDB:', err);
+    const { status } = await igdbRequest(`fields id,name; limit 1;`);
+    return status === 200;
+  } catch {
     return false;
   }
 };
 
 export const cacheGameInDatabase = async (game: any) => {
-    try {
-        const gameId = parseInt(game.id);
-        console.log('Attempting to cache game:', gameId);
+  try {
+    const gameId = parseInt(game.id);
+    // Validate required fields
+    if (!game.name) throw new Error('Game name is required');
 
-        // Validate required fields
-        if (!game.name) {
-            console.error('Game name is required but was not provided');
-            throw new Error('Game name is required');
-        }
+    // Check if already exists
+    const [existing] = await pool.query<RowDataPacket[]>(
+      'SELECT idGame FROM games WHERE idGame = ?',
+      [gameId]
+    );
+    if (!existing.length) {
+      const priceValue = typeof game.price === 'number'
+        ? game.price
+        : generatePrice(gameId);
 
-        // Check if game already exists
-        const [existingGames] = await pool.query<RowDataPacket[]>(
-            'SELECT idGame FROM games WHERE idGame = ?',
-            [gameId]
-        );
-
-        if (existingGames.length === 0) {
-            // Insert new game with validated data
-            await pool.query(`
-                INSERT INTO games (
-                    idGame,
-                    name,
-                    releaseDate,
-                    publisher,
-                    developer,
-                    description,
-                    price,
-                    idLanguage
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            `, [
-                gameId,
-                game.name,
-                game.first_release_date ? new Date(game.first_release_date * 1000) : new Date(),
-                game.publisher?.name || null,
-                game.developer?.name || null,
-                game.summary || null,
-                game.price || 59.99,
-                1 // Default to Spanish (idLanguage = 1)
-            ]);
-            console.log('Game successfully cached in database:', gameId);
-        } else {
-            console.log('Game already exists in database:', gameId);
-        }
-    } catch (error) {
-        console.error('Error caching game:', error);
-        throw error;
+      await pool.query(`
+        INSERT INTO games (
+          idGame,
+          name,
+          releaseDate,
+          publisher,
+          developer,
+          description,
+          price,
+          idLanguage
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `, [
+        gameId,
+        game.name,
+        game.first_release_date ? new Date(game.first_release_date * 1000) : new Date(),
+        game.publisher?.name || null,
+        game.developer?.name || null,
+        game.summary || null,
+        priceValue,
+        1
+      ]);
     }
+  } catch (error) {
+    console.error('Error caching game:', error);
+    throw error;
+  }
 };
 
 export const getGameDetails = async (req: Request, res: Response) => {
-    try {
-        const gameId = parseInt(req.params.id);
-        console.log('Fetching game details for ID:', gameId);
-        
-        // First check if game exists in our database
-        const [existingGames] = await pool.query<RowDataPacket[]>(
-            'SELECT * FROM games WHERE idGame = ?',
-            [gameId]
-        );
-
-        if (existingGames.length > 0) {
-            // Game exists in our database, return it
-            const game = existingGames[0];
-            console.log('Game found in database:', gameId);
-            res.json({
-                id: game.idGame,
-                title: game.name,
-                cover: game.cover?.image_id ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg` : null,
-                sliderImage: game.screenshots?.[0]?.image_id ? `https://images.igdb.com/igdb/image/upload/t_screenshot_big/${game.screenshots[0].image_id}.jpg` : null,
-                releaseDate: game.releaseDate,
-                description: game.description,
-                publisher: game.publisher,
-                developer: game.developer,
-                price: game.price
-            });
-            return;
-        }
-
-        // Game not in database, fetch from IGDB
-        console.log('Game not found in database, fetching from IGDB:', gameId);
-        const query = `
-            fields id,name,first_release_date,summary,cover.image_id,screenshots.image_id,publisher.name,developer.name,price;
-            where id = ${gameId};
-        `;
-        
-        try {
-            const { data } = await igdbRequest(query);
-            
-            if (data && data.length > 0) {
-                const game = data[0];
-                
-                // Cache the game in our database
-                await cacheGameInDatabase(game);
-
-                // Format the response
-                const formattedGame = {
-                    id: parseInt(game.id),
-                    title: game.name,
-                    cover: game.cover?.image_id ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg` : null,
-                    sliderImage: game.screenshots?.[0]?.image_id ? `https://images.igdb.com/igdb/image/upload/t_screenshot_big/${game.screenshots[0].image_id}.jpg` : null,
-                    releaseDate: game.first_release_date ? new Date(game.first_release_date * 1000).toISOString() : null,
-                    description: game.summary,
-                    publisher: game.publisher?.name,
-                    developer: game.developer?.name,
-                    price: game.price || 59.99
-                };
-
-                res.json(formattedGame);
-            } else {
-                res.status(404).json({ message: 'Game not found in IGDB' });
-            }
-        } catch (error) {
-            console.error('Error fetching from IGDB:', error);
-            res.status(500).json({ 
-                message: 'Error fetching game from IGDB',
-                error: error instanceof Error ? error.message : 'Unknown error'
-            });
-        }
-    } catch (error) {
-        console.error('Error fetching game details:', error);
-        res.status(500).json({ 
-            message: 'Error fetching game details',
-            error: error instanceof Error ? error.message : 'Unknown error'
-        });
+  try {
+    const id = parseInt(req.params.id);
+    const [rows] = await pool.query<RowDataPacket[]>(
+      'SELECT * FROM games WHERE idGame = ?',
+      [id]
+    );
+    if (rows.length) {
+      const g = rows[0];
+      return res.json({
+        id: g.idGame,
+        title: g.name,
+        cover: g.cover,
+        sliderImage: g.screenshots,
+        releaseDate: g.releaseDate,
+        description: g.description,
+        publisher: g.publisher,
+        developer: g.developer,
+        price: g.price,
+      });
     }
+
+    const query = `
+      fields id,name,first_release_date,summary,cover.image_id,screenshots.image_id,publisher.name,developer.name,price;
+      where id = ${id};
+    `;
+    const { data } = await igdbRequest(query);
+
+    if (!data.length) {
+      return res.status(404).json({ message: 'Game not found in IGDB' });
+    }
+
+    const game = data[0];
+    const priceValue = typeof game.price === 'number'
+      ? game.price
+      : generatePrice(id);
+
+    await cacheGameInDatabase(game);
+
+    res.json({
+      id,
+      title: game.name,
+      cover: game.cover?.image_id
+        ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg`
+        : null,
+      sliderImage: game.screenshots?.[0]?.image_id
+        ? `https://images.igdb.com/igdb/image/upload/t_screenshot_big/${game.screenshots[0].image_id}.jpg`
+        : null,
+      releaseDate: game.first_release_date
+        ? new Date(game.first_release_date * 1000).toISOString()
+        : null,
+      description: game.summary,
+      publisher: game.publisher?.name,
+      developer: game.developer?.name,
+      price: priceValue,
+    });
+  } catch (err: any) {
+    console.error('Error fetching game details:', err);
+    res.status(500).json({
+      message: 'Error fetching game details',
+      error: err.message || 'Unknown error',
+    });
+  }
 };
 
 export default {
