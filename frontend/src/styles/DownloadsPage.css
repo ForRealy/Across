@@ -137,18 +137,18 @@
 }
 
 /* Status-specific styles */
-.status-UPDATING {
+.status-Downloading {
   color: #2196F3;
 }
 
-.status-COMPLETED {
+.status-Completed {
   color: #4CAF50;
 }
 
-.status-CANCELLED {
+.status-Failed {
   color: #f44336;
 }
 
-.status-PAUSED {
+.status-Pending {
   color: #FFC107;
 }
