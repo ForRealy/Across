@@ -25,6 +25,7 @@ interface CartResponse {
 
 const Cart: React.FC = () => {
   const navigate = useNavigate();
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [total, setTotal] = useState<string>("0.00");
   const [paymentData, setPaymentData] = useState({
@@ -157,11 +158,10 @@ const Cart: React.FC = () => {
 
   const handlePayment = async () => {
     const { cardNumber, expirationDate, cvv, name } = paymentData;
-    
-    // Eliminar espacios y caracteres no numéricos para validación
+  
     const cleanCardNumber = cardNumber.replace(/\s/g, '');
     const cleanExpirationDate = expirationDate.replace(/\D/g, '');
-    
+  
     if (
       name.length < 3 ||
       cleanCardNumber.length !== 16 ||
@@ -171,32 +171,38 @@ const Cart: React.FC = () => {
       alert("Por favor, completa correctamente todos los campos de pago.");
       return;
     }
-
-    setPaymentSuccess(true);
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-
-      // Enviar los juegos comprados al backend
-      await axios.post("http://localhost:3000/api/cart/checkout", 
-        { cart: cartItems },
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+  
+    setIsProcessingPayment(true); // Show spinner
+  
+    // Simulate 5s delay
+    setTimeout(async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          navigate('/login');
+          return;
         }
-      );
-      clearCart();
-    } catch (error) {
-      console.error("Error en el pago:", error);
-      if (axios.isAxiosError(error) && error.response?.status === 401) {
-        navigate('/login');
+  
+        await axios.post("http://localhost:3000/api/cart/checkout", 
+          { cart: cartItems },
+          {
+            headers: { 'Authorization': `Bearer ${token}` }
+          }
+        );
+  
+        clearCart();
+        setPaymentSuccess(true);
+      } catch (error) {
+        console.error("Error en el pago:", error);
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          navigate('/login');
+        }
+      } finally {
+        setIsProcessingPayment(false); // Hide spinner
       }
-    }
+    }, 5000);
   };
+  
 
   return (
     <div>
@@ -298,6 +304,16 @@ const Cart: React.FC = () => {
                 >
                   Pagar ${total}
                 </button>
+                {isProcessingPayment && (
+  <div className="cart-spinner-overlay">
+    <div className="cart-spinner-box">
+      <div className="spinner"></div>
+    
+    </div>
+  </div>
+)}
+
+
               </form>
             </div>
 
