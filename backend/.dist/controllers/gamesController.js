@@ -133,7 +133,7 @@ export const fetchGameData = () => __awaiter(void 0, void 0, void 0, function* (
         & aggregated_rating_count > 10
         & cover != null;
       sort aggregated_rating desc;
-      limit 30;
+      limit 250;
     `;
         const { data } = yield igdbRequest(query);
         return data.map(transformGame).sort((a, b) => (b.rating || 0) - (a.rating || 0));

@@ -119,3 +119,19 @@
 .library-add-button:hover {
   background-color: #059669;
 }
+
+.library-search-input {
+  width: 90%;
+  padding: 8px;
+  font-size: 16px;
+  margin-top: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.library-game-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 4px;
+  text-align: center;
+}

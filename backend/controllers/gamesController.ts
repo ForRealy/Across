@@ -163,7 +163,7 @@ export const fetchGameData = async (): Promise<GameWithCover[] | undefined> => {
         & aggregated_rating_count > 10
         & cover != null;
       sort aggregated_rating desc;
-      limit 30;
+      limit 250;
     `;
     const { data } = await igdbRequest(query);
     return data.map(transformGame).sort((a: GameWithCover, b: GameWithCover) => (b.rating || 0) - (a.rating || 0));
