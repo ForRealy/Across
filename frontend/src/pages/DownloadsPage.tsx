@@ -3,9 +3,6 @@ import axios from "axios";
 import Header from "../components/HeaderComponent";
 import "../styles/DownloadsPage.css";
 
-// Remove the NodeJS namespace declaration
-// interface Timeout {} // This line can be removed
-
 interface Game {
   id: number;
   gameId: number;
@@ -56,7 +53,6 @@ const Downloads: React.FC = () => {
   };
 
   const cancelDownload = (gameId: number) => {
-    // Abort the HTTP request
     const controller = downloadControllers[gameId];
     if (controller) {
       controller.abort();
@@ -67,7 +63,6 @@ const Downloads: React.FC = () => {
       });
     }
 
-    // Clear simulated progress
     if (downloadIntervals[gameId]) {
       clearInterval(downloadIntervals[gameId]);
       setDownloadIntervals(prev => {
@@ -77,14 +72,12 @@ const Downloads: React.FC = () => {
       });
     }
 
-    // Remove progress UI
     setDownloadProgress(prev => {
       const prog = { ...prev };
       delete prog[gameId];
       return prog;
     });
 
-    // Reset status & label
     setGames(prev =>
       prev.map(g =>
         g.id === gameId
@@ -106,20 +99,12 @@ const Downloads: React.FC = () => {
 
       const gamesWithDetails = await Promise.all(
         response.data.map(async (download: Download) => {
-          // Map backend status to frontend status
           let status: Game['status'];
           switch (download.status.toLowerCase()) {
-            case 'completed':
-              status = 'Completed';
-              break;
-            case 'downloading':
-              status = 'Downloading';
-              break;
-            case 'failed':
-              status = 'Failed';
-              break;
-            default:
-              status = 'Pending';
+            case 'completed':   status = 'Completed';   break;
+            case 'downloading': status = 'Downloading'; break;
+            case 'failed':      status = 'Failed';      break;
+            default:            status = 'Pending';
           }
 
           try {
@@ -171,7 +156,6 @@ const Downloads: React.FC = () => {
       return;
     }
 
-    // Mark as downloading
     setGames(prev =>
       prev.map((g, i) =>
         i === index ? { ...g, status: "Downloading", buttonLabel: "" } : g
@@ -189,15 +173,11 @@ const Downloads: React.FC = () => {
       return;
     }
 
-    // Setup AbortController
     const controller = new AbortController();
     setDownloadControllers(prev => ({ ...prev, [game.id]: controller }));
 
-    // Start the download
     fetch(`http://localhost:3000/api/downloads/file/${game.gameId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
+      headers: { Authorization: `Bearer ${token}` },
       credentials: "include",
       signal: controller.signal
     })
@@ -206,15 +186,13 @@ const Downloads: React.FC = () => {
           const errorData = await response.json().catch(() => ({}));
           throw new Error(errorData.message || "Download failed");
         }
-        // Get filename from Content-Disposition header or use game title
-        const contentDisposition = response.headers.get('content-disposition');
-        const filename = contentDisposition
-          ? contentDisposition.split('filename=')[1].replace(/"/g, '')
+        const contentDisp = response.headers.get('content-disposition');
+        const filename = contentDisp
+          ? contentDisp.split('filename=')[1].replace(/"/g, '')
           : `${game.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.iso`;
         return { blob: await response.blob(), filename };
       })
       .then(({ blob, filename }) => {
-        // Create download link with game title as filename
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
@@ -224,7 +202,6 @@ const Downloads: React.FC = () => {
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
 
-        // Update game status
         setGames(prev =>
           prev.map((g, i) =>
             i === index ? { ...g, status: "Completed", buttonLabel: "Play" } : g
@@ -247,23 +224,6 @@ const Downloads: React.FC = () => {
     simulateDownload(game.id);
   };
 
-  const handleDeleteButtonClick = async (index: number) => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-      await axios.delete(`http://localhost:3000/api/downloads/${games[index].id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setGames(prev => prev.filter((_, i) => i !== index));
-    } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        console.error("Error al eliminar la descarga:", err.response?.data || err.message);
-      } else {
-        console.error("Error desconocido:", err);
-      }
-    }
-  };
-
   return (
     <div className="container">
       <Header />
@@ -272,12 +232,21 @@ const Downloads: React.FC = () => {
       ) : (
         games.map((game, index) => (
           <div className="downloads" key={game.id}>
-            {game.cover && <img src={game.cover} alt={game.title} className="game-cover" />}
+            {game.cover && (
+              <img
+                src={game.cover}
+                alt={game.title}
+                className="game-cover"
+              />
+            )}
             <div className="download-info">
               <h1>{game.title}</h1>
               <div className="download-status">
                 <p>
-                  Estado: <strong className={`status-${game.status}`}>{game.status}</strong>
+                  Estado:{" "}
+                  <strong className={`status-${game.status}`}>
+                    {game.status}
+                  </strong>
                 </p>
                 {game.status === "Downloading" && (
                   <div className="progress-bar">
@@ -291,10 +260,8 @@ const Downloads: React.FC = () => {
                   </div>
                 )}
               </div>
-
               <div className="button-group">
                 {game.status === "Downloading" ? (
-                  // Only show this one Cancel button while downloading
                   <button
                     className="cancel-button"
                     onClick={() => cancelDownload(game.id)}
@@ -302,22 +269,12 @@ const Downloads: React.FC = () => {
                     {game.cancelLabel}
                   </button>
                 ) : (
-                  <>
-                    <button
-                      className="primary-button"
-                      onClick={() => handlePrimaryButtonClick(index)}
-                    >
-                      {game.buttonLabel}
-                    </button>
-                    {game.status === "Completed" && (
-                      <button
-                        className="delete-button"
-                        onClick={() => handleDeleteButtonClick(index)}
-                      >
-                        Delete
-                      </button>
-                    )}
-                  </>
+                  <button
+                    className="primary-button"
+                    onClick={() => handlePrimaryButtonClick(index)}
+                  >
+                    {game.buttonLabel}
+                  </button>
                 )}
               </div>
             </div>
