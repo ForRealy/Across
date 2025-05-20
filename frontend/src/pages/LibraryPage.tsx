@@ -105,12 +105,13 @@ const Library: React.FC = () => {
                   <h3 className="library-game-title">{game.title}</h3>
                   <div className="star-rating-wrapper">
                     <StarRating rating={game.rating} />
-                  </div>
-                  {game.price !== undefined && (
+                    {game.price !== undefined && (
                     <span className="library-game-price">
                       ${game.price.toFixed(2)}
                     </span>
                   )}
+                  </div>
+                  
                 </div>
 
                 <div className="library-button-container">

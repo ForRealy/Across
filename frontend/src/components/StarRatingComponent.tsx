@@ -21,7 +21,7 @@ const StarRating: React.FC<StarRatingProps> = ({ rating }) => {
       {[...Array(emptyStars)].map((_, i) => (
         <FaRegStar key={`empty-${i}`} className="star empty" />
       ))}
-      <span className="star-rating-number">{rating.toFixed(1)}/100</span>
+     
     </div>
   );
 };

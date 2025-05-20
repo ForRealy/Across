@@ -135,3 +135,11 @@
   margin-bottom: 4px;
   text-align: center;
 }
+
+.library-content{
+  color: white;
+}
+
+.library-game-price{
+  margin-left: 10px;
+}

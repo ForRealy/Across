@@ -24,3 +24,8 @@
     color: #333;
   }
   
+  .star-rating-number{
+    margin-left: 6px;
+    font-weight: 500;
+    color: white;
+  }
