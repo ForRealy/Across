@@ -194,3 +194,15 @@
 .clickable-star:hover ~ .clickable-star {
   color: #ffcc66;
 }
+.empty-message {
+  text-align: center; /* Center the text */
+  font-size: 1.5rem; /* Increase font size */
+  color: #ff0000; /* Change text color to red for emphasis */
+  margin: 20px 0; /* Add some margin for spacing */
+  margin-left: 250px; /* Add left margin for more space */
+  padding: 10px; /* Add padding for better appearance */
+  border: 1px solid #ff0000; /* Add a border */
+  border-radius: 5px; /* Round the corners */
+  background-color: #ffe6e6; /* Light red background */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+}

@@ -27,7 +27,7 @@ const Library: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cartStatus, setCartStatus] = useState<{
-    [key: number]: 'loading' | 'success' | 'error' | undefined;
+    [key: number]: "loading" | "success" | "error" | undefined;
   }>({});
 
   useEffect(() => {
@@ -51,24 +51,39 @@ const Library: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    // Helper to normalize and remove accents from strings
+    const normalizeString = (str: string) =>
+      str
+        .normalize("NFD") // Normalize to decomposed form
+        .replace(/\p{Diacritic}/gu, "") // Remove diacritics
+        .toLowerCase();
+
     let filtered = [...games];
 
     if (searchTerm.trim()) {
-      filtered = filtered.filter((g) =>
-        g.title.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      const normalizedSearch = normalizeString(searchTerm.trim());
+      filtered = filtered.filter((g) => {
+        const normalizedTitle = normalizeString(g.title || "");
+        return normalizedTitle.includes(normalizedSearch);
+      });
     }
 
     if (minPrice !== undefined) {
-      filtered = filtered.filter((g) => g.price !== undefined && g.price >= minPrice);
+      filtered = filtered.filter(
+        (g) => typeof g.price === "number" && g.price >= minPrice
+      );
     }
 
     if (maxPrice !== undefined) {
-      filtered = filtered.filter((g) => g.price !== undefined && g.price <= maxPrice);
+      filtered = filtered.filter(
+        (g) => typeof g.price === "number" && g.price <= maxPrice
+      );
     }
 
     if (minStarRating > 0) {
-      filtered = filtered.filter((g) => g.rating >= minStarRating * 20); // convert stars to 100-scale
+      filtered = filtered.filter(
+        (g) => typeof g.rating === "number" && g.rating >= minStarRating * 20
+      );
     }
 
     setFilteredGames(filtered);
@@ -76,7 +91,7 @@ const Library: React.FC = () => {
 
   const updateCartStatus = (
     gameId: number,
-    status: 'loading' | 'success' | 'error' | undefined
+    status: "loading" | "success" | "error" | undefined
   ) => {
     setCartStatus((prev) => ({ ...prev, [gameId]: status }));
   };
@@ -86,9 +101,6 @@ const Library: React.FC = () => {
   };
 
   if (loading) return <div className="loading-message">Cargando juegos...</div>;
-  if (error) return <div className="error-message">{error}</div>;
-  if (filteredGames.length === 0)
-    return <div className="empty-message">No hay juegos disponibles</div>;
 
   return (
     <div className="library-container">
@@ -111,7 +123,7 @@ const Library: React.FC = () => {
             <input
               type="number"
               placeholder="Precio mínimo"
-              value={minPrice ?? ''}
+              value={minPrice ?? ""}
               onChange={(e) =>
                 setMinPrice(e.target.value ? parseFloat(e.target.value) : undefined)
               }
@@ -120,7 +132,7 @@ const Library: React.FC = () => {
             <input
               type="number"
               placeholder="Precio máximo"
-              value={maxPrice ?? ''}
+              value={maxPrice ?? ""}
               onChange={(e) =>
                 setMaxPrice(e.target.value ? parseFloat(e.target.value) : undefined)
               }
@@ -129,54 +141,58 @@ const Library: React.FC = () => {
           </div>
 
           <div className="library-filter-group">
-  <h3>Filtrar por estrellas</h3>
-  <div className="library-star-filter">
-    {[5, 4, 3, 2, 1].map((star) => (
-      <span
-        key={star}
-        onClick={() => setMinStarRating(minStarRating === star ? 0 : star)}
-        className={`clickable-star ${minStarRating >= star ? 'active' : ''}`}
-      >
-        ★
-      </span>
-    ))}
-  </div>
-</div>
-
+            <h3>Filtrar por estrellas</h3>
+            <div className="library-star-filter">
+              {[5, 4, 3, 2, 1].map((star) => (
+                <span
+                  key={star}
+                  onClick={() => setMinStarRating(minStarRating === star ? 0 : star)}
+                  className={`clickable-star ${minStarRating >= star ? "active" : ""}`}
+                >
+                  ★
+                </span>
+              ))}
+            </div>
+          </div>
         </aside>
 
         <main className="library-content">
+          {error && <div className="error-message">{error}</div>}
           <div className="library-gallery">
-            {filteredGames.map((game) => (
-              <div key={game.id} className="library-game-item">
-                <img
-                  src={game.cover}
-                  alt={game.title}
-                  className="library-game-cover"
-                  onClick={() => goToGamePage(game.id)}
-                />
-                <div className="library-game-info">
-                  <h3 className="library-game-title">{game.title}</h3>
-                  <div className="star-rating-wrapper">
-                    <StarRating rating={game.rating} />
-                    {game.price !== undefined && (
-                      <span className="library-game-price">
-                        ${game.price.toFixed(2)}
-                      </span>
-                    )}
+            {filteredGames.length === 0 ? (
+              <div className="empty-message">No hay juegos disponibles</div>
+            ) : (
+              filteredGames.map((game) => (
+                <div key={game.id} className="library-game-item">
+                  <img
+                    src={game.cover}
+                    alt={game.title}
+                    className="library-game-cover"
+                    onClick={() => goToGamePage(game.id)}
+                  />
+                  <div className="library-game-info">
+                    <h3 className="library-game-title">{game.title}</h3>
+                    <div className="star-rating-wrapper">
+                      <StarRating rating={game.rating} />
+                      {game.price !== undefined && (
+                        <span className="library-game-price">
+                          ${game.price.toFixed(2)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="library-button-container">
+                    <AddToCartButton
+                      gameId={game.id}
+                      status={cartStatus[game.id]}
+                      setStatus={(status) => updateCartStatus(game.id, status)}
+                      setError={setError}
+                    />
                   </div>
                 </div>
-
-                <div className="library-button-container">
-                  <AddToCartButton
-                    gameId={game.id}
-                    status={cartStatus[game.id]}
-                    setStatus={(status) => updateCartStatus(game.id, status)}
-                    setError={setError}
-                  />
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </main>
       </div>
