@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Header from "../components/HeaderComponent";
 import AddToCartButton from "../components/AddToCartButtonComponent";
-import StarRating from "../components/StarRatingComponent"; // rating out of 100
+import StarRating from "../components/StarRatingComponent";
+import StarRatingFilter from "../components/StarRatingFilter";
 import "../styles/LibraryPage.css";
 import axios, { AxiosError } from "axios";
 
@@ -51,12 +52,8 @@ const Library: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // Helper to normalize and remove accents from strings
     const normalizeString = (str: string) =>
-      str
-        .normalize("NFD") // Normalize to decomposed form
-        .replace(/\p{Diacritic}/gu, "") // Remove diacritics
-        .toLowerCase();
+      str.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
 
     let filtered = [...games];
 
@@ -81,11 +78,15 @@ const Library: React.FC = () => {
     }
 
     if (minStarRating > 0) {
+      const min = minStarRating * 20;
+      const max = min + 20;
       filtered = filtered.filter(
-        (g) => typeof g.rating === "number" && g.rating >= minStarRating * 20
+        (g) =>
+          typeof g.rating === "number" &&
+          g.rating >= min &&
+          g.rating < max
       );
     }
-
     setFilteredGames(filtered);
   }, [searchTerm, minPrice, maxPrice, minStarRating, games]);
 
@@ -140,20 +141,10 @@ const Library: React.FC = () => {
             />
           </div>
 
-          <div className="library-filter-group">
-            <h3>Filtrar por estrellas</h3>
-            <div className="library-star-filter">
-              {[5, 4, 3, 2, 1].map((star) => (
-                <span
-                  key={star}
-                  onClick={() => setMinStarRating(minStarRating === star ? 0 : star)}
-                  className={`clickable-star ${minStarRating >= star ? "active" : ""}`}
-                >
-                  ★
-                </span>
-              ))}
-            </div>
-          </div>
+          <StarRatingFilter
+            minStarRating={minStarRating}
+            setMinStarRating={setMinStarRating}
+          />
         </aside>
 
         <main className="library-content">

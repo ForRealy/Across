@@ -1,4 +1,3 @@
-// src/pages/GamesPage.tsx
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
@@ -38,7 +37,7 @@ const GamesPage: React.FC = () => {
             withCredentials: true
           }
         );
-        
+
         setGameDetails(gameResponse.data);
       } catch (error) {
         console.error("Error fetching game details:", error);
@@ -81,9 +80,13 @@ const GamesPage: React.FC = () => {
           <div className="gamepage-info-panel">
             <p>
               <strong>Rating:</strong>{" "}
-              {gameDetails.rating
-                ? `${gameDetails.rating.toFixed(1)}/100`
-                : "No reviews yet"}
+              {gameDetails.rating !== undefined ? (
+                <>
+                  {gameDetails.rating.toFixed(1)}/100
+                </>
+              ) : (
+                "No reviews yet"
+              )}
             </p>
             <p>
               <strong>Release Date:</strong>{" "}
