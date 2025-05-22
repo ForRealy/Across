@@ -1,7 +1,7 @@
 /* For the whole review section */
 .gamepage-reviews-section {
     margin-top: 20px;
-    background-color: #444;
+    background-color: #360000;
     padding: 20px;
     border-radius: 10px; /* Rounded corners */
   }
@@ -12,15 +12,16 @@
   
   /* Review form styling */
   .review-form {
+    color: white;
     margin-bottom: 20px;
-    background: #666; /* Same background for the form */
+    background: #360000;
     padding: 20px;
     border-radius: 8px;
   }
 
   .review-form h3{
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-    color: black;
+    color: white;
   }
   
   .review-form label {
@@ -47,7 +48,7 @@
   .review-form button {
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     padding: 10px 20px;
-    background-color: orangered;
+    background-color: #580000;
     color: white;
     border: none;
     cursor: pointer;
@@ -55,7 +56,7 @@
   }
   
   .review-form button:hover {
-    background-color: #e43b00; /* Darker blue on hover */
+    background-color: #9C0000; /* Darker blue on hover */
   }
   
   /* Reviews list container */
@@ -65,7 +66,7 @@
   
   /* Each review card styling */
   .review-card {
-    background-color: #666;
+    background-color: #600000;
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     padding: 15px;
     margin-bottom: 10px;

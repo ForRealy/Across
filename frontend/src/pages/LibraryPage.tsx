@@ -24,12 +24,32 @@ const Library: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [minPrice, setMinPrice] = useState<number | undefined>();
   const [maxPrice, setMaxPrice] = useState<number | undefined>();
-  const [minStarRating, setMinStarRating] = useState<number>(0); // 0–5
+  const [minStarRating, setMinStarRating] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cartStatus, setCartStatus] = useState<{
     [key: number]: "loading" | "success" | "error" | undefined;
   }>({});
+
+  // Sidebar visibility state
+  const [sidebarVisible, setSidebarVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  // Oculta sidebar al hacer scroll hacia abajo
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY > lastScrollY && sidebarVisible) {
+        setSidebarVisible(false);
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY, sidebarVisible]);
 
   useEffect(() => {
     const loadGames = async () => {
@@ -108,43 +128,57 @@ const Library: React.FC = () => {
       <Header />
 
       <div className="library-layout">
-        <aside className="library-sidebar">
-          <h2 className="library-sidebar-title">Buscar juegos</h2>
+        <aside className={`library-sidebar ${!sidebarVisible ? "hidden" : ""}`}>
+          {/* Botón toggle dentro del sidebar, a la derecha */}
+          <button
+            id="toggleSidebar"
+            className="sidebar-toggle-btn"
+            onClick={() => setSidebarVisible(!sidebarVisible)}
+          >
+            {sidebarVisible ? "⮜" : "➤"}
+          </button>
 
-          <input
-            type="text"
-            placeholder="Buscar por título..."
-            className="library-search-input"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <h2 className="library-sidebar-title">Buscar y filtrar</h2>
 
-          <div className="library-filter-group">
-            <h3>Filtrar por precio</h3>
+          <div className="library-filters">
             <input
-              type="number"
-              placeholder="Precio mínimo"
-              value={minPrice ?? ""}
-              onChange={(e) =>
-                setMinPrice(e.target.value ? parseFloat(e.target.value) : undefined)
-              }
-              className="library-filter-input"
+              type="text"
+              placeholder="Buscar por título..."
+              className="library-search-input"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <input
-              type="number"
-              placeholder="Precio máximo"
-              value={maxPrice ?? ""}
-              onChange={(e) =>
-                setMaxPrice(e.target.value ? parseFloat(e.target.value) : undefined)
-              }
-              className="library-filter-input"
-            />
+
+            <div className="library-filter-group">
+              <h3>Filtrar por precio</h3>
+              <input
+                type="number"
+                placeholder="Mínimo"
+                value={minPrice ?? ""}
+                onChange={(e) =>
+                  setMinPrice(e.target.value ? parseFloat(e.target.value) : undefined)
+                }
+                className="library-filter-input"
+              />
+              <input
+                type="number"
+                placeholder="Máximo"
+                value={maxPrice ?? ""}
+                onChange={(e) =>
+                  setMaxPrice(e.target.value ? parseFloat(e.target.value) : undefined)
+                }
+                className="library-filter-input"
+              />
+            </div>
+
+            <div className="library-filter-group">
+              <h3>Filtrar por estrellas</h3>
+              <StarRatingFilter
+                minStarRating={minStarRating}
+                setMinStarRating={setMinStarRating}
+              />
+            </div>
           </div>
-
-          <StarRatingFilter
-            minStarRating={minStarRating}
-            setMinStarRating={setMinStarRating}
-          />
         </aside>
 
         <main className="library-content">

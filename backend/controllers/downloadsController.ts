@@ -25,12 +25,27 @@ export const getDownloads = async (req: Request, res: Response): Promise<void> =
     }
 
     const downloads = await Download.findAll({ where: { idUser: userId } });
-    res.status(200).json(downloads);
+
+    // Enriquecer cada descarga con título y precio del juego usando fetchGameById
+    const downloadsWithDetails = await Promise.all(downloads.map(async (download) => {
+      const game = await fetchGameById(download.idGame);
+      return {
+        idDownload: download.idDownload,
+        idGame: download.idGame,
+        title: game?.title ?? `Juego ${download.idGame}`,
+        price: game?.price ?? null,
+        status: download.status,  // si tienes más campos como status, añádelos
+      };
+    }));
+
+    res.status(200).json(downloadsWithDetails);
   } catch (error) {
     console.error("Error obteniendo descargas:", error);
     res.status(500).json({ success: false, message: "Error al obtener descargas" });
   }
 };
+
+
 
 // GET /downloads/check/:gameId - Verifica si un juego ya está en descargas
 export const checkDownload = async (req: Request, res: Response): Promise<void> => {

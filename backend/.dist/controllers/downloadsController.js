@@ -29,7 +29,19 @@ export const getDownloads = (req, res) => __awaiter(void 0, void 0, void 0, func
             return;
         }
         const downloads = yield Download.findAll({ where: { idUser: userId } });
-        res.status(200).json(downloads);
+        // Enriquecer cada descarga con título y precio del juego usando fetchGameById
+        const downloadsWithDetails = yield Promise.all(downloads.map((download) => __awaiter(void 0, void 0, void 0, function* () {
+            var _b, _c;
+            const game = yield fetchGameById(download.idGame);
+            return {
+                idDownload: download.idDownload,
+                idGame: download.idGame,
+                title: (_b = game === null || game === void 0 ? void 0 : game.title) !== null && _b !== void 0 ? _b : `Juego ${download.idGame}`,
+                price: (_c = game === null || game === void 0 ? void 0 : game.price) !== null && _c !== void 0 ? _c : null,
+                status: download.status, // si tienes más campos como status, añádelos
+            };
+        })));
+        res.status(200).json(downloadsWithDetails);
     }
     catch (error) {
         console.error("Error obteniendo descargas:", error);
@@ -38,9 +50,9 @@ export const getDownloads = (req, res) => __awaiter(void 0, void 0, void 0, func
 });
 // GET /downloads/check/:gameId - Verifica si un juego ya está en descargas
 export const checkDownload = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _b;
+    var _d;
     try {
-        const userId = (_b = req.user) === null || _b === void 0 ? void 0 : _b.idUser;
+        const userId = (_d = req.user) === null || _d === void 0 ? void 0 : _d.idUser;
         const { gameId } = req.params;
         if (!userId) {
             res.status(401).json({ success: false, message: "Usuario no autenticado" });
@@ -61,9 +73,9 @@ export const checkDownload = (req, res) => __awaiter(void 0, void 0, void 0, fun
 });
 // DELETE /downloads/:id - Delete a download for the authenticated user
 export const deleteDownload = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _c;
+    var _e;
     try {
-        const userId = (_c = req.user) === null || _c === void 0 ? void 0 : _c.idUser;
+        const userId = (_e = req.user) === null || _e === void 0 ? void 0 : _e.idUser;
         if (!userId) {
             res.status(401).json({ success: false, message: "Usuario no autenticado" });
             return;
@@ -82,10 +94,10 @@ export const deleteDownload = (req, res) => __awaiter(void 0, void 0, void 0, fu
 });
 // GET /download/:id - Download a game and update status
 export const downloadGame = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _d;
+    var _f;
     try {
         const gameId = req.params.id;
-        const userId = (_d = req.user) === null || _d === void 0 ? void 0 : _d.idUser;
+        const userId = (_f = req.user) === null || _f === void 0 ? void 0 : _f.idUser;
         if (!userId) {
             res.status(401).json({ message: "Usuario no autenticado" });
             return;

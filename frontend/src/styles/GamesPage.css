@@ -14,7 +14,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #222;
+  background-color: #360000;
   padding: 10px 20px;
   margin-top: 20px;
 }
@@ -53,7 +53,7 @@
 
 /* Panel de información */
 .gamepage-info-panel {
-  background-color: #444;
+  background-color: #360000;
   padding: 15px;
   border-radius: 8px;
   font-family: monospace;

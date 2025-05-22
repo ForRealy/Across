@@ -11,7 +11,6 @@ const StarRatingFilter: React.FC<StarRatingFilterProps> = ({
 }) => {
   return (
     <div className="library-filter-group">
-      <h3>Filtrar por estrellas</h3>
       <div className="library-star-filter">
         {[5, 4, 3, 2, 1].map((star) => (
           <span

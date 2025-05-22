@@ -1,7 +1,7 @@
-// src/components/ReviewComponent.tsx
 import React, { useState, useEffect } from "react";
 import axios, { AxiosError } from "axios";
 import "../styles/ReviewComponent.css";
+
 
 interface Review {
   idReview: number;
@@ -16,27 +16,68 @@ interface ReviewComponentProps {
   gameId: string;
 }
 
+const StarRating: React.FC<{ rating: number; onRate: (rate: number) => void }> = ({ rating, onRate }) => {
+  return (
+    <div className="library-star-filter" style={{ cursor: "pointer" }}>
+      {[5, 4, 3, 2, 1].map((star) => (
+        <span
+          key={star}
+          onClick={() => onRate(star)}
+          className={`clickable-star ${rating >= star ? "active" : ""}`}
+          style={{ fontSize: "20px", color: rating >= star ? "#f5b50a" : "#ccc" }}
+          role="button"
+          aria-label={`${star} stars`}
+        >
+          ★
+        </span>
+      ))}
+    </div>
+  );
+};
+
 const ReviewComponent: React.FC<ReviewComponentProps> = ({ gameId }) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewType, setReviewType] = useState("Positive");
   const [description, setDescription] = useState("");
   const [recommended, setRecommended] = useState(true);
+  const [userRatings, setUserRatings] = useState<Record<number, number>>({});
 
-  // Fetch reviews when the component loads or when gameId changes
+  const token = localStorage.getItem("token");
+
   useEffect(() => {
     const fetchReviews = async () => {
-  try {
-    console.log("Fetching reviews from:", `http://localhost:3000/api/games/${gameId}/reviews`);
-    const response = await axios.get(`http://localhost:3000/api/games/${gameId}/reviews`);
-    setReviews(response.data);
-  } catch (error) {
-    console.error("Error fetching reviews:", error);
-  }
-};
+      try {
+        const response = await axios.get(`http://localhost:3000/api/games/${gameId}/reviews`);
+        setReviews(response.data);
 
+        if (token) {
+          const ratingsPromises = response.data.map(async (review: Review) => {
+            try {
+              const res = await axios.get(
+                `http://localhost:3000/api/reviews/${review.idReview}/rating`,
+                { headers: { Authorization: `Bearer ${token}` } }
+              );
+              return { idReview: review.idReview, rating: res.data.rating || 0 };
+            } catch (err) {
+              console.log(`Error fetching rating for review ${review.idReview}`, err);
+              return { idReview: review.idReview, rating: 0 };
+            }
+          });
+
+          const ratings = await Promise.all(ratingsPromises);
+          const ratingsMap: Record<number, number> = {};
+          ratings.forEach(({ idReview, rating }) => {
+            ratingsMap[idReview] = rating;
+          });
+          setUserRatings(ratingsMap);
+        }
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+      }
+    };
 
     fetchReviews();
-  }, [gameId]);
+  }, [gameId, token]);
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,36 +86,22 @@ const ReviewComponent: React.FC<ReviewComponentProps> = ({ gameId }) => {
       return;
     }
 
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("You must be logged in to submit a review");
-        return;
-      }
+    if (!token) {
+      alert("You must be logged in to submit a review");
+      return;
+    }
 
+    try {
       await axios.post(
         `http://localhost:3000/api/games/${gameId}/reviews`,
-        {
-          review_type: reviewType,
-          description,
-          recommended,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
+        { review_type: reviewType, description, recommended },
+        { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
       );
 
-      // Refresh reviews after submission
-      const refreshed = await axios.get<Review[]>(
-        `http://localhost:3000/api/games/${gameId}/reviews`
-      );
+      const refreshed = await axios.get<Review[]>(`http://localhost:3000/api/games/${gameId}/reviews`);
       setReviews(refreshed.data);
       alert("Review submitted successfully!");
 
-      // Reset form
       setReviewType("Positive");
       setDescription("");
       setRecommended(true);
@@ -88,21 +115,37 @@ const ReviewComponent: React.FC<ReviewComponentProps> = ({ gameId }) => {
     }
   };
 
+  const handleRatingChange = async (idReview: number, rating: number) => {
+    if (!token) {
+      alert("You must be logged in to rate a review");
+      return;
+    }
+
+    try {
+      await axios.post(
+        `http://localhost:3000/api/reviews/${idReview}/rating`,
+        { rating },
+        { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+      );
+
+      setUserRatings((prev) => ({ ...prev, [idReview]: rating }));
+    } catch (error) {
+      console.error("Error submitting rating:", error);
+      alert("Error submitting rating");
+    }
+  };
+
   return (
     <div className="gamepage-reviews-section">
       <h2>Reviews</h2>
 
-      {/* Review Form */}
       <form className="review-form" onSubmit={handleReviewSubmit}>
         <h3>Write a Review</h3>
 
         <label>
           Review Type:
-          <br></br>
-          <select
-            value={reviewType}
-            onChange={(e) => setReviewType(e.target.value)}
-          >
+          <br />
+          <select value={reviewType} onChange={(e) => setReviewType(e.target.value)}>
             <option value="Positive">Positive</option>
             <option value="Negative">Negative</option>
           </select>
@@ -118,25 +161,23 @@ const ReviewComponent: React.FC<ReviewComponentProps> = ({ gameId }) => {
           />
         </label>
 
-        <button type="submit" className="btn-submit-review">
-          Submit Review
-        </button>
+        <button type="submit" className="btn-submit-review">Submit Review</button>
       </form>
 
-      {/* Reviews List */}
       <div className="reviews-list">
         {reviews.map((review) => (
           <div key={review.idReview} className="review-card">
             <div className="review-header">
-              <span className="review-author">
-                {review.profile_name || "Anonymous"}
-              </span>
-              <span className={`review-type ${review.review_type}`}>
-                {review.review_type}
-              </span>
+              <span className="review-author">{review.profile_name || "Anonymous"}</span>
+              <span className={`review-type ${review.review_type}`}>{review.review_type}</span>
             </div>
             <p className="review-description">{review.description}</p>
+
             <div className="review-footer">
+              <StarRating
+                rating={userRatings[review.idReview] || 0}
+                onRate={(rating) => handleRatingChange(review.idReview, rating)}
+              />
             </div>
           </div>
         ))}

@@ -13,19 +13,37 @@
 /* Barra lateral fija */
 .library-sidebar {
   position: fixed;
-  top: 121px;                     /* ← adjust this to your Header’s height */
+  top: 121px;
   left: 8px;
-  width: 250px;
-  height: calc(100vh - 60px);    /* ← same Header height subtracted */
-  overflow-y: auto;              /* scroll inside if content is tall */
+  width: 200px;
+  overflow-y: auto;
   background: rgba(255, 255, 255, 0.85);
-  padding: 20px;
+  padding: 16px 40px 16px 16px; /* Padding derecho extra para el botón */
   color: black;
   font-family: 'Courier New', Courier, monospace;
-  transition: background 0.3s ease;
- 
+  transition: transform 0.3s ease;
   z-index: 10;
+  border-radius: 8px;
 }
+
+.sidebar-toggle-btn {
+  position: absolute;
+  top: 16px;     /* Para que quede alineado con padding superior */
+  right: 8px;    /* Pegado al borde derecho del sidebar */
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 18px;
+  z-index: 20;
+  user-select: none;
+}
+
+.library-sidebar.hidden {
+  transform: translateX(-220px);
+}
+
 
 .library-sidebar-title {
   font-size: 1.5rem;
@@ -79,7 +97,7 @@
 /* 3 por fila en pantallas grandes */
 @media (min-width: 1024px) {
   .library-gallery {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 

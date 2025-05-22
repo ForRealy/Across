@@ -29,7 +29,7 @@
 }
 
 /* Clases personalizadas para los contenedores de los campos del formulario */
-.login-input-container {
+.login-input-cavontainer {
     margin-bottom: 20px;
     display: flex;
     flex-direction: column;
