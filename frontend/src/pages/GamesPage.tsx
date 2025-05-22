@@ -16,8 +16,10 @@ interface GameDetails {
   rating?: number;
   releaseDate?: string;
   daysRemaining?: number;
-  description?: string; // Añadido para la descripción del juego
+  description?: string;
+  price?: number; 
 }
+
 
 const GamesPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -56,7 +58,14 @@ const GamesPage: React.FC = () => {
       <Header />
 
       {/* Game Header Section */}
-      <GameHeader title={gameDetails.title} gameId={gameDetails.id} />
+      <GameHeader 
+  title={gameDetails.title} 
+  gameId={gameDetails.id} 
+  daysRemaining={gameDetails.daysRemaining}
+  releaseDate={gameDetails.releaseDate}
+/>
+
+
 
       <div className="gamepage-main-content">
         <div className="gamepage-left-column">
@@ -100,6 +109,10 @@ const GamesPage: React.FC = () => {
                 {gameDetails.daysRemaining}
               </p>
             )}
+            <p>
+  <strong>Price:</strong>{" "}
+  {gameDetails.price !== undefined ? `$${gameDetails.price.toFixed(2)}` : "N/A"}
+</p>
           </div>
 
           
