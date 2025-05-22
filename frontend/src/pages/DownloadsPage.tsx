@@ -196,10 +196,11 @@ const Downloads: React.FC = () => {
   };
 
   return (
-    <div className="container">
+    <div >
       <Header />
+      <div className="container">
       {games.length === 0 ? (
-        <p className="no-games-message">No tienes juegos para descargar.</p>
+        <p className="no-games-message">You don't have any games to download.</p>
       ) : (
         games.map((game, index) => (
           <div className="downloads" key={game.id}>
@@ -214,7 +215,7 @@ const Downloads: React.FC = () => {
               <h1>{game.title}</h1>
               <div className="download-status">
               <p style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-       Estado:{" "}
+       State:{" "}
   <strong className={`status-${game.status}`}>
     {game.status}
   </strong>
@@ -248,6 +249,8 @@ const Downloads: React.FC = () => {
           </div>
         ))
       )}
+      </div>
+      
     </div>
   );
 };

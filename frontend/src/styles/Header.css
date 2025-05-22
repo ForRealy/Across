@@ -28,16 +28,18 @@
   }
   
   .nav-link:hover {
-    color: blanchedalmond;
+    color: #FFAAAA;
   }
   
   .username-link {
     font-weight: bold;
-    color: blanchedalmond;
+    color: #FFAAAA;
   }
   
   .logout-button {
-    background-color: brown;
+    padding: 8px 14px;
+
+    background-color: #ef4444;
     border: none;
     color: white;
     font-size: 1.1rem;
@@ -45,10 +47,7 @@
     transition: color 0.3s ease;
     border-radius: 5px;
   }
-  
-  .logout-button:hover {
-    color: blanchedalmond;
-  }
+
   
   /* Ajustes para pantallas pequeñas */
   @media (max-width: 599px) {

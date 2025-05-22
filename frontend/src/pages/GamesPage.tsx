@@ -69,7 +69,7 @@ const GamesPage: React.FC = () => {
           </div>
           {/* Descripción del juego */}
           <div className="gamepage-description, gamepage-description-panel">
-            <h3>Descripción</h3>
+            <h3>Description</h3>
             <p>{gameDetails.description || "No hay descripción disponible."}</p>
           </div>
         </div>

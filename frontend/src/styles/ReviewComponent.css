@@ -89,12 +89,12 @@
   }
   
   .review-type.Positive {
-    background-color: #28a745;
+    background-color: #10b981;
     color: white;
   }
   
   .review-type.Negative {
-    background-color: #dc3545;
+    background-color: #ef4444;
     color: white;
   }
   

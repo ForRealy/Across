@@ -18,7 +18,7 @@ const UpcomingGames: React.FC<UpcomingGamesProps> = ({ upcomingGames }) => {
   return (
     
     <section className="upcoming-section">
-      <h2 className="section-title">Próximos Lanzamientos</h2>
+      <h2 className="section-title">Upcoming Releases</h2>
       <div className="upcoming-games">
         {upcomingGames.map((game, index) => (
           <div
@@ -36,7 +36,7 @@ const UpcomingGames: React.FC<UpcomingGamesProps> = ({ upcomingGames }) => {
             />
             <div className="upcoming-game-info">
               <h3>{game.title}</h3>
-              <p>Lanzamiento: {game.releaseDate}</p>
+              <p>Release Date: {game.releaseDate}</p>
             </div>
           </div>
         ))}

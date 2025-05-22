@@ -38,7 +38,6 @@ const PopularGames: React.FC<PopularGamesProps> = ({ popularGames, currentSlide,
             />
             <div className="slider-info">
               <h3>{popularGames[currentSlide].title}</h3>
-              <p>Rating: {popularGames[currentSlide].rating?.toFixed(1)}/100</p>
             </div>
           </div>
         )}

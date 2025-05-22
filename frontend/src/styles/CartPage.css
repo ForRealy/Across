@@ -10,8 +10,8 @@
 
 .cart-container {
   padding: 30px;
-  color: #1f2937;
-  background: rgba(255, 255, 255, 0.85);
+  color: white;
+  background: #360000;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   border-radius: 15px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
@@ -44,7 +44,7 @@
 
 .cart-clear-button {
   padding: 12px 18px;
-  background-color: #f97316; /* Naranja fuerte */
+  background-color: #a04545; /* Naranja fuerte */
   color: white;
   border: none;
   border-radius: 8px;
@@ -55,7 +55,7 @@
 }
 
 .cart-clear-button:hover {
-  background-color: #ea580c; /* Más oscuro al pasar el mouse */
+  background-color: #b75858; /* Más oscuro al pasar el mouse */
   transform: translateY(-2px);
 }
 
@@ -67,7 +67,7 @@
 
 .cart-remove-button {
   padding: 8px 14px;
-  background-color: #ef4444; /* Rojo suave */
+  background-color: #ef4444;
   color: white;
   border: none;
   border-radius: 6px;
@@ -94,10 +94,7 @@
   text-align: center;
 }
 
-.cart-payment-section h2 {
-  margin-bottom: 25px;
-  color: #111827;
-}
+
 
 .cart-payment-section label {
   display: block;
@@ -147,7 +144,7 @@
 }
 
 .cart-pay-button {
-  background-color: #34D399;
+  background-color: #10b981;
   color: white;
 }
 
@@ -157,12 +154,12 @@
 }
 
 .cart-back-button {
-  background-color: #64748b;
+  background-color: #b63d3d;
   color: white;
 }
 
 .cart-back-button:hover {
-  background-color: #475569;
+  background-color: #b64848;
   transform: translateY(-2px);
 }
 

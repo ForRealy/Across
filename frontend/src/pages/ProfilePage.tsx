@@ -14,21 +14,16 @@ interface Download {
 }
 
 const Profile: React.FC = () => {
-  const navigate = useNavigate();
   const { user } = userAuth();
   const [downloads, setDownloads] = useState<Download[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleRedirect = () => navigate("/configuration");
-
   const fetchGameTitle = async (gameId: number, token: string): Promise<string> => {
     try {
       const response = await axios.get(
         `http://localhost:3000/api/games/details/${gameId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       return response.data.title || `Juego ${gameId}`;
     } catch (error) {
@@ -79,55 +74,54 @@ const Profile: React.FC = () => {
   return (
     <div className="profile-container">
       <Header />
-
-      <div className="profile-header">
-        <img src={Foto_Perfil} alt="Foto de perfil" className="profile-img" />
-        <div className="profile-details">
-          <h2>{user ? user.username : "Invitado"}</h2>
-          <p>Segundo de DAW es increíble</p>
+      <div className="profile-main">
+        {/* Header and profile info side by side */}
+        <div className="profile-header">
+          <img src={Foto_Perfil} alt="Foto de perfil" className="profile-img" />
+          <div className="profile-details">
+            <h2>{user ? user.username : "Invitado"}</h2>
+          </div>
         </div>
-      </div>
 
-      <div className="profile-content">
-        <div className="profile-downloads">
-          <h3>Mis compras</h3>
-          {loading && <p>Cargando compras...</p>}
-          {error && <p className="error-message">{error}</p>}
-          {!loading && !error && downloads.length === 0 && (
-            <p>No tienes descargas disponibles.</p>
-          )}
+        {/* Descargas */}
+        <div className="profile-content">
+          <div className="profile-downloads">
+            {loading && <p>Loading purchases...</p>}
+            {error && <p className="error-message">{error}</p>}
+            {!loading && !error && downloads.length === 0 && (
+              <p>No tienes descargas disponibles.</p>
+            )}
 
-          {!loading && !error && downloads.length > 0 && (
-            <>
-              {/* Tabla principal */}
-              <table className="download-table">
-                <thead>
-                  <tr>
-                    <th>Juego</th>
-                    <th>Precio</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {downloads.map((download) => (
-                    <tr key={download.idDownload}>
-                      <td>{download.title || `Juego ${download.idGame}`}</td>
-                      <td><strong>${download.price?.toFixed(2) ?? 'N/A'}</strong></td>
+            {!loading && !error && downloads.length > 0 && (
+              <>
+                <table className="download-table">
+                  <thead>
+                    <tr>
+                      <th>Game</th>
+                      <th>Price</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {downloads.map((download) => (
+                      <tr key={download.idDownload}>
+                        <td>{download.title || `Juego ${download.idGame}`}</td>
+                        <td><strong>${download.price?.toFixed(2) ?? 'N/A'}</strong></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
 
-              {/* Tabla separada para el total */}
-              <table className="download-table total-table">
-                <tbody>
-                  <tr>
-                    <td><strong>Total</strong></td>
-                    <td><strong>${total.toFixed(2)}</strong></td>
-                  </tr>
-                </tbody>
-              </table>
-            </>
-          )}
+                <table className="download-table total-table">
+                  <tbody>
+                    <tr>
+                      <td><strong>Total</strong></td>
+                      <td><strong>${total.toFixed(2)}</strong></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

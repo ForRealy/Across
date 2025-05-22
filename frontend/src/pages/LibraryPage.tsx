@@ -121,7 +121,7 @@ const Library: React.FC = () => {
     window.location.href = `/details/${gameId}`;
   };
 
-  if (loading) return <div className="loading-message">Cargando juegos...</div>;
+  if (loading) return <div className="loading-message">Loading games...</div>;
 
   return (
     <div className="library-container">
@@ -138,22 +138,22 @@ const Library: React.FC = () => {
             {sidebarVisible ? "⮜" : "➤"}
           </button>
 
-          <h2 className="library-sidebar-title">Buscar y filtrar</h2>
+          <h2 className="library-sidebar-title">Search and filter</h2>
 
           <div className="library-filters">
             <input
               type="text"
-              placeholder="Buscar por título..."
+              placeholder="Search by title..."
               className="library-search-input"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
 
             <div className="library-filter-group">
-              <h3>Filtrar por precio</h3>
+              <h3>Price filter</h3>
               <input
                 type="number"
-                placeholder="Mínimo"
+                placeholder="MIN"
                 value={minPrice ?? ""}
                 onChange={(e) =>
                   setMinPrice(e.target.value ? parseFloat(e.target.value) : undefined)
@@ -162,7 +162,7 @@ const Library: React.FC = () => {
               />
               <input
                 type="number"
-                placeholder="Máximo"
+                placeholder="MAX"
                 value={maxPrice ?? ""}
                 onChange={(e) =>
                   setMaxPrice(e.target.value ? parseFloat(e.target.value) : undefined)
@@ -172,7 +172,7 @@ const Library: React.FC = () => {
             </div>
 
             <div className="library-filter-group">
-              <h3>Filtrar por estrellas</h3>
+              <h3>Reviews filter</h3>
               <StarRatingFilter
                 minStarRating={minStarRating}
                 setMinStarRating={setMinStarRating}

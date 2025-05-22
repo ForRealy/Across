@@ -210,10 +210,10 @@ const Cart: React.FC = () => {
       <div className="page-container">
         <div className="cart-container">
           <main className="cart-content">
-            <h1 className="cart-title">Carrito de Compras</h1>
+            <h1 className="cart-title">Shopping Cart</h1>
 
             {cartItems.length === 0 ? (
-              <p className="cart-empty-message">Tu carrito está vacío.</p>
+              <p className="cart-empty-message">Your cart is empty.</p>
             ) : (
               <div className="cart-list-section">
                 <ol className="cart-list">
@@ -229,7 +229,7 @@ const Cart: React.FC = () => {
                         onClick={() => removeFromCart(item.game_id)}
                         className="cart-remove-button"
                       >
-                        Eliminar
+                        Delete
                       </button>
                     </li>
                   ))}
@@ -238,28 +238,28 @@ const Cart: React.FC = () => {
                   <span>Total: ${total}</span>
                 </div>
                 <button className="cart-clear-button" onClick={clearCart}>
-                  Vaciar Carrito
+                Empty Cart
                 </button>
               </div>
             )}
 
             <div className="cart-payment-section">
-              <h2 className="cart-payment-title">Datos de Pago</h2>
+              <h2 className="cart-payment-title">Payment Data</h2>
               <form className="cart-payment-form">
                 <div className="cart-form-group">
-                  <label htmlFor="name">Nombre en la tarjeta</label>
+                  <label htmlFor="name">Card Owner</label>
                   <input
                     type="text"
                     id="name"
                     name="name"
                     value={paymentData.name}
                     onChange={handleInputChange}
-                    placeholder="Nombre completo"
+                    placeholder="Full name"
                     required
                   />
                 </div>
                 <div className="cart-form-group">
-                  <label htmlFor="cardNumber">Número de tarjeta</label>
+                  <label htmlFor="cardNumber">Card number</label>
                   <input
                     type="text"
                     id="cardNumber"
@@ -272,7 +272,7 @@ const Cart: React.FC = () => {
                 </div>
                 <div className="cart-form-row">
                   <div className="cart-form-group">
-                    <label htmlFor="expirationDate">Fecha de expiración</label>
+                    <label htmlFor="expirationDate">Expiration date</label>
                     <input
                       type="text"
                       id="expirationDate"
@@ -302,7 +302,7 @@ const Cart: React.FC = () => {
                   onClick={handlePayment}
                   disabled={cartItems.length === 0}
                 >
-                  Pagar ${total}
+                  Pay ${total}
                 </button>
                 {isProcessingPayment && (
   <div className="cart-spinner-overlay">
@@ -319,13 +319,13 @@ const Cart: React.FC = () => {
 
             {paymentSuccess && (
               <div className="cart-payment-success">
-                <h3>¡Pago exitoso!</h3>
-                <p>Gracias por tu compra. Tu pedido será procesado.</p>
+                <h3>Payment successful!</h3>
+                <p>Thank you for your purchase. Your order will be processed.</p>
               </div>
             )}
 
             <button className="cart-back-button" onClick={() => navigate("/library")}>
-              Volver a la Biblioteca
+            Return to Library
             </button>
           </main>
         </div>
