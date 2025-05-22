@@ -18,7 +18,7 @@ const limiter = new Bottleneck({ minTime: 250 });
 // ——— Instancia de Axios con timeout global ———
 const axiosInstance = axios.create({ timeout: 10000 });
 
-// ——— Interface para tipar los juegos con portada ———
+// ——— Interface para tipar los juegos con portada y descripción ———
 export interface GameWithCover {
   id?: number;
   title: string;
@@ -29,6 +29,7 @@ export interface GameWithCover {
   releaseDate?: string;
   daysRemaining?: number;
   sliderImage?: string;
+  description?: string;
 }
 
 /**
@@ -73,14 +74,14 @@ const generateFakeScreenshot = (cover: string): string => {
 };
 
 /**
- * Transforma la respuesta bruta de IGDB en un objeto con portada
+ * Transforma la respuesta bruta de IGDB en un objeto con portada y descripción
  */
 const transformGame = (game: any): GameWithCover => {
   const coverImage = game.cover?.image_id
     ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg`
     : 'https://via.placeholder.com/264x352?text=No+Cover';
 
-  return {
+  const base: GameWithCover = {
     id: game.id,
     title: game.name,
     cover: coverImage,
@@ -92,11 +93,19 @@ const transformGame = (game: any): GameWithCover => {
     price: typeof game.price === 'number'
       ? game.price
       : generatePrice(game.id),
+    description: game.summary || undefined,
   };
+
+  if (game.first_release_date) {
+    base.releaseDate = new Date(game.first_release_date * 1000)
+      .toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+
+  return base;
 };
 
 /**
- * Transforma la respuesta para juegos populares o próximos
+ * Transforma la respuesta para juegos populares o próximos lanzamientos
  */
 const transformPopularGame = (game: any, currentTimestamp?: number): GameWithCover => {
   const base = transformGame(game);
@@ -105,8 +114,6 @@ const transformPopularGame = (game: any, currentTimestamp?: number): GameWithCov
     sliderImage: game.screenshots?.[0]?.image_id
       ? `https://images.igdb.com/igdb/image/upload/t_screenshot_big/${game.screenshots[0].image_id}.jpg`
       : generateFakeScreenshot(base.cover),
-    releaseDate: new Date(game.first_release_date * 1000)
-      .toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }),
     daysRemaining: currentTimestamp
       ? Math.ceil((game.first_release_date - currentTimestamp) / 86400)
       : undefined,
@@ -121,7 +128,7 @@ export const searchGamesOptimized = async (query: string): Promise<GameWithCover
   try {
     let searchQuery = `
       search "${query}";
-      fields id,name,cover.image_id;
+      fields id,name,cover.image_id,first_release_date,summary;
       where category = (0, 2, 4, 8, 9);
       limit 5;
     `;
@@ -131,7 +138,7 @@ export const searchGamesOptimized = async (query: string): Promise<GameWithCover
       const keywords = query.split(':')[0];
       searchQuery = `
         search "${keywords}";
-        fields id,name,cover.image_id;
+        fields id,name,cover.image_id,first_release_date,summary;
         where name ~ *"${keywords}"* & name ~ *"Breath of the Wild"*;
         limit 5;
       `;
@@ -139,7 +146,7 @@ export const searchGamesOptimized = async (query: string): Promise<GameWithCover
     }
     if (!data || data.length === 0) {
       searchQuery = `
-        fields id,name,cover.image_id;
+        fields id,name,cover.image_id,first_release_date,summary;
         where name ~ *"Zelda"* & name ~ *"Breath"*;
         limit 5;
       `;
@@ -156,7 +163,7 @@ export const searchGamesOptimized = async (query: string): Promise<GameWithCover
 export const fetchGameData = async (): Promise<GameWithCover[] | undefined> => {
   try {
     const query = `
-      fields id,name,cover.image_id,aggregated_rating,first_release_date,screenshots.image_id;
+      fields id,name,cover.image_id,aggregated_rating,first_release_date,screenshots.image_id,summary;
       where aggregated_rating > 0
         & first_release_date > 0
         & aggregated_rating_count > 10
@@ -178,7 +185,7 @@ export const fetchUpcomingGames = async (): Promise<GameWithCover[] | undefined>
   try {
     const currentTimestamp = Math.floor(Date.now() / 1000);
     const query = `
-      fields id,name,cover.image_id,first_release_date;
+      fields id,name,cover.image_id,first_release_date,summary;
       where first_release_date >= ${currentTimestamp}
         & cover != null;
       sort first_release_date asc;
@@ -195,7 +202,7 @@ export const fetchUpcomingGames = async (): Promise<GameWithCover[] | undefined>
 export const fetchPopularGames = async (): Promise<GameWithCover[] | undefined> => {
   try {
     const query = `
-      fields id,name,cover.image_id,aggregated_rating,hypes,first_release_date,screenshots.image_id;
+      fields id,name,cover.image_id,aggregated_rating,hypes,first_release_date,screenshots.image_id,summary;
       where aggregated_rating > 0
         & cover != null
         & first_release_date > 0;
@@ -213,7 +220,7 @@ export const fetchPopularGames = async (): Promise<GameWithCover[] | undefined> 
 export const fetchGameById = async (id: number): Promise<GameWithCover | undefined> => {
   try {
     const query = `
-      fields id,name,cover.image_id,aggregated_rating,first_release_date;
+      fields id,name,cover.image_id,aggregated_rating,first_release_date,summary;
       where id = ${id};
     `;
     const { data } = await igdbRequest(query);
@@ -236,7 +243,8 @@ export const addGameToCartByName = async (gameName: string): Promise<boolean> =>
     const bestMatch = games.find(g => g.title.toLowerCase().includes(gameName.toLowerCase())) || games[0];
     const cart: GameWithCover[] = JSON.parse(localStorage.getItem('cart') || '[]');
     if (!cart.some(item => item.id === bestMatch.id)) {
-      cart.push(bestMatch);
+      cart
+.push(bestMatch);
       localStorage.setItem('cart', JSON.stringify(cart));
       return true;
     }
@@ -269,10 +277,8 @@ export const testIGDBConnection = async (): Promise<boolean> => {
 export const cacheGameInDatabase = async (game: any) => {
   try {
     const gameId = parseInt(game.id);
-    // Validate required fields
     if (!game.name) throw new Error('Game name is required');
 
-    // Check if already exists
     const [existing] = await pool.query<RowDataPacket[]>(
       'SELECT idGame FROM games WHERE idGame = ?',
       [gameId]
@@ -313,25 +319,6 @@ export const cacheGameInDatabase = async (game: any) => {
 export const getGameDetails = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
-    const [rows] = await pool.query<RowDataPacket[]>(
-      'SELECT * FROM games WHERE idGame = ?',
-      [id]
-    );
-    if (rows.length) {
-      const g = rows[0];
-      return res.json({
-        id: g.idGame,
-        title: g.name,
-        cover: g.cover,
-        sliderImage: g.screenshots,
-        releaseDate: g.releaseDate,
-        description: g.description,
-        publisher: g.publisher,
-        developer: g.developer,
-        price: g.price,
-      });
-    }
-
     const query = `
       fields id,name,first_release_date,summary,cover.image_id,screenshots.image_id,publisher.name,developer.name,price;
       where id = ${id};
@@ -347,21 +334,17 @@ export const getGameDetails = async (req: Request, res: Response) => {
       ? game.price
       : generatePrice(id);
 
-    await cacheGameInDatabase(game);
+    const base = transformGame(game);
+    const currentTimestamp = Math.floor(Date.now() / 1000);
 
     res.json({
-      id,
-      title: game.name,
-      cover: game.cover?.image_id
-        ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg`
-        : null,
+      ...base,
       sliderImage: game.screenshots?.[0]?.image_id
         ? `https://images.igdb.com/igdb/image/upload/t_screenshot_big/${game.screenshots[0].image_id}.jpg`
-        : null,
-      releaseDate: game.first_release_date
-        ? new Date(game.first_release_date * 1000).toISOString()
-        : null,
-      description: game.summary,
+        : generateFakeScreenshot(base.cover),
+      daysRemaining: game.first_release_date
+        ? Math.ceil((game.first_release_date - currentTimestamp) / 86400)
+        : undefined,
       publisher: game.publisher?.name,
       developer: game.developer?.name,
       price: priceValue,

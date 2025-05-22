@@ -53,14 +53,14 @@ const generateFakeScreenshot = (cover) => {
     return cover.replace('t_cover_big', 't_screenshot_big');
 };
 /**
- * Transforma la respuesta bruta de IGDB en un objeto con portada
+ * Transforma la respuesta bruta de IGDB en un objeto con portada y descripción
  */
 const transformGame = (game) => {
     var _a, _b, _c;
     const coverImage = ((_a = game.cover) === null || _a === void 0 ? void 0 : _a.image_id)
         ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg`
         : 'https://via.placeholder.com/264x352?text=No+Cover';
-    return {
+    const base = {
         id: game.id,
         title: game.name,
         cover: coverImage,
@@ -72,18 +72,23 @@ const transformGame = (game) => {
         price: typeof game.price === 'number'
             ? game.price
             : generatePrice(game.id),
+        description: game.summary || undefined,
     };
+    if (game.first_release_date) {
+        base.releaseDate = new Date(game.first_release_date * 1000)
+            .toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+    return base;
 };
 /**
- * Transforma la respuesta para juegos populares o próximos
+ * Transforma la respuesta para juegos populares o próximos lanzamientos
  */
 const transformPopularGame = (game, currentTimestamp) => {
     var _a, _b;
     const base = transformGame(game);
     return Object.assign(Object.assign({}, base), { sliderImage: ((_b = (_a = game.screenshots) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.image_id)
             ? `https://images.igdb.com/igdb/image/upload/t_screenshot_big/${game.screenshots[0].image_id}.jpg`
-            : generateFakeScreenshot(base.cover), releaseDate: new Date(game.first_release_date * 1000)
-            .toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }), daysRemaining: currentTimestamp
+            : generateFakeScreenshot(base.cover), daysRemaining: currentTimestamp
             ? Math.ceil((game.first_release_date - currentTimestamp) / 86400)
             : undefined });
 };
@@ -94,7 +99,7 @@ export const searchGamesOptimized = (query) => __awaiter(void 0, void 0, void 0,
     try {
         let searchQuery = `
       search "${query}";
-      fields id,name,cover.image_id;
+      fields id,name,cover.image_id,first_release_date,summary;
       where category = (0, 2, 4, 8, 9);
       limit 5;
     `;
@@ -103,7 +108,7 @@ export const searchGamesOptimized = (query) => __awaiter(void 0, void 0, void 0,
             const keywords = query.split(':')[0];
             searchQuery = `
         search "${keywords}";
-        fields id,name,cover.image_id;
+        fields id,name,cover.image_id,first_release_date,summary;
         where name ~ *"${keywords}"* & name ~ *"Breath of the Wild"*;
         limit 5;
       `;
@@ -111,7 +116,7 @@ export const searchGamesOptimized = (query) => __awaiter(void 0, void 0, void 0,
         }
         if (!data || data.length === 0) {
             searchQuery = `
-        fields id,name,cover.image_id;
+        fields id,name,cover.image_id,first_release_date,summary;
         where name ~ *"Zelda"* & name ~ *"Breath"*;
         limit 5;
       `;
@@ -127,7 +132,7 @@ export const searchGamesOptimized = (query) => __awaiter(void 0, void 0, void 0,
 export const fetchGameData = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const query = `
-      fields id,name,cover.image_id,aggregated_rating,first_release_date,screenshots.image_id;
+      fields id,name,cover.image_id,aggregated_rating,first_release_date,screenshots.image_id,summary;
       where aggregated_rating > 0
         & first_release_date > 0
         & aggregated_rating_count > 10
@@ -149,7 +154,7 @@ export const fetchUpcomingGames = () => __awaiter(void 0, void 0, void 0, functi
     try {
         const currentTimestamp = Math.floor(Date.now() / 1000);
         const query = `
-      fields id,name,cover.image_id,first_release_date;
+      fields id,name,cover.image_id,first_release_date,summary;
       where first_release_date >= ${currentTimestamp}
         & cover != null;
       sort first_release_date asc;
@@ -166,7 +171,7 @@ export const fetchUpcomingGames = () => __awaiter(void 0, void 0, void 0, functi
 export const fetchPopularGames = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const query = `
-      fields id,name,cover.image_id,aggregated_rating,hypes,first_release_date,screenshots.image_id;
+      fields id,name,cover.image_id,aggregated_rating,hypes,first_release_date,screenshots.image_id,summary;
       where aggregated_rating > 0
         & cover != null
         & first_release_date > 0;
@@ -184,7 +189,7 @@ export const fetchPopularGames = () => __awaiter(void 0, void 0, void 0, functio
 export const fetchGameById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const query = `
-      fields id,name,cover.image_id,aggregated_rating,first_release_date;
+      fields id,name,cover.image_id,aggregated_rating,first_release_date,summary;
       where id = ${id};
     `;
         const { data } = yield igdbRequest(query);
@@ -208,7 +213,8 @@ export const addGameToCartByName = (gameName) => __awaiter(void 0, void 0, void 
         const bestMatch = games.find(g => g.title.toLowerCase().includes(gameName.toLowerCase())) || games[0];
         const cart = JSON.parse(localStorage.getItem('cart') || '[]');
         if (!cart.some(item => item.id === bestMatch.id)) {
-            cart.push(bestMatch);
+            cart
+                .push(bestMatch);
             localStorage.setItem('cart', JSON.stringify(cart));
             return true;
         }
@@ -237,10 +243,8 @@ export const cacheGameInDatabase = (game) => __awaiter(void 0, void 0, void 0, f
     var _c, _d;
     try {
         const gameId = parseInt(game.id);
-        // Validate required fields
         if (!game.name)
             throw new Error('Game name is required');
-        // Check if already exists
         const [existing] = yield pool.query('SELECT idGame FROM games WHERE idGame = ?', [gameId]);
         if (!existing.length) {
             const priceValue = typeof game.price === 'number'
@@ -275,24 +279,9 @@ export const cacheGameInDatabase = (game) => __awaiter(void 0, void 0, void 0, f
     }
 });
 export const getGameDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _e, _f, _g, _h, _j;
+    var _e, _f, _g, _h;
     try {
         const id = parseInt(req.params.id);
-        const [rows] = yield pool.query('SELECT * FROM games WHERE idGame = ?', [id]);
-        if (rows.length) {
-            const g = rows[0];
-            return res.json({
-                id: g.idGame,
-                title: g.name,
-                cover: g.cover,
-                sliderImage: g.screenshots,
-                releaseDate: g.releaseDate,
-                description: g.description,
-                publisher: g.publisher,
-                developer: g.developer,
-                price: g.price,
-            });
-        }
         const query = `
       fields id,name,first_release_date,summary,cover.image_id,screenshots.image_id,publisher.name,developer.name,price;
       where id = ${id};
@@ -305,24 +294,13 @@ export const getGameDetails = (req, res) => __awaiter(void 0, void 0, void 0, fu
         const priceValue = typeof game.price === 'number'
             ? game.price
             : generatePrice(id);
-        yield cacheGameInDatabase(game);
-        res.json({
-            id,
-            title: game.name,
-            cover: ((_e = game.cover) === null || _e === void 0 ? void 0 : _e.image_id)
-                ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg`
-                : null,
-            sliderImage: ((_g = (_f = game.screenshots) === null || _f === void 0 ? void 0 : _f[0]) === null || _g === void 0 ? void 0 : _g.image_id)
+        const base = transformGame(game);
+        const currentTimestamp = Math.floor(Date.now() / 1000);
+        res.json(Object.assign(Object.assign({}, base), { sliderImage: ((_f = (_e = game.screenshots) === null || _e === void 0 ? void 0 : _e[0]) === null || _f === void 0 ? void 0 : _f.image_id)
                 ? `https://images.igdb.com/igdb/image/upload/t_screenshot_big/${game.screenshots[0].image_id}.jpg`
-                : null,
-            releaseDate: game.first_release_date
-                ? new Date(game.first_release_date * 1000).toISOString()
-                : null,
-            description: game.summary,
-            publisher: (_h = game.publisher) === null || _h === void 0 ? void 0 : _h.name,
-            developer: (_j = game.developer) === null || _j === void 0 ? void 0 : _j.name,
-            price: priceValue,
-        });
+                : generateFakeScreenshot(base.cover), daysRemaining: game.first_release_date
+                ? Math.ceil((game.first_release_date - currentTimestamp) / 86400)
+                : undefined, publisher: (_g = game.publisher) === null || _g === void 0 ? void 0 : _g.name, developer: (_h = game.developer) === null || _h === void 0 ? void 0 : _h.name, price: priceValue }));
     }
     catch (err) {
         console.error('Error fetching game details:', err);

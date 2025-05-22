@@ -16,6 +16,7 @@ interface GameDetails {
   rating?: number;
   releaseDate?: string;
   daysRemaining?: number;
+  description?: string; // Añadido para la descripción del juego
 }
 
 const GamesPage: React.FC = () => {
@@ -31,14 +32,11 @@ const GamesPage: React.FC = () => {
       }
 
       try {
-        const gameResponse = await axios.get<GameDetails>(
+        const response = await axios.get<GameDetails>(
           `http://localhost:3000/api/games/details/${id}`,
-          {
-            withCredentials: true
-          }
+          { withCredentials: true }
         );
-
-        setGameDetails(gameResponse.data);
+        setGameDetails(response.data);
       } catch (error) {
         console.error("Error fetching game details:", error);
         setGameDetails(null);
@@ -69,6 +67,11 @@ const GamesPage: React.FC = () => {
               className="gamepage-main-image"
             />
           </div>
+          {/* Descripción del juego */}
+          <div className="gamepage-description, gamepage-description-panel">
+            <h3>Descripción</h3>
+            <p>{gameDetails.description || "No hay descripción disponible."}</p>
+          </div>
         </div>
 
         <div className="gamepage-right-column">
@@ -77,13 +80,12 @@ const GamesPage: React.FC = () => {
             alt={gameDetails.title}
             className="gamepage-side-image"
           />
+          
           <div className="gamepage-info-panel">
             <p>
               <strong>Rating:</strong>{" "}
               {gameDetails.rating !== undefined ? (
-                <>
-                  {gameDetails.rating.toFixed(1)}/100
-                </>
+                <>{gameDetails.rating.toFixed(1)}/100</>
               ) : (
                 "No reviews yet"
               )}
@@ -99,6 +101,8 @@ const GamesPage: React.FC = () => {
               </p>
             )}
           </div>
+
+          
         </div>
       </div>
 
