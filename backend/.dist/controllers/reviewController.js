@@ -107,3 +107,21 @@ export const getReviewRating = (req, res) => __awaiter(void 0, void 0, void 0, f
         res.status(500).json({ message: "Internal server error", error });
     }
 });
+// Get all reviews for a specific user
+export const getUserReviews = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = parseInt(req.params.userId);
+        const [reviews] = yield pool.query(`
+            SELECT r.*, u.profile_name 
+            FROM review r
+            LEFT JOIN users u ON r.idUser = u.idUser
+            WHERE r.idUser = ?
+            ORDER BY r.created_at DESC
+        `, [userId]);
+        res.status(200).json(reviews.length ? reviews : []);
+    }
+    catch (error) {
+        console.error("Error fetching user reviews:", error);
+        res.status(500).json({ message: "Internal server error", error });
+    }
+});

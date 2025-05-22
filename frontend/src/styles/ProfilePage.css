@@ -17,7 +17,7 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
     border-radius: 8px;
     margin-right: 20px;
-    max-width: 30%;
+    max-width: 60%;
   }
   
   .profile-header h2 {
@@ -103,5 +103,27 @@
     .profile-img {
       margin-bottom: 10px;
     }
+  }
+  .toggle-buttons {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+  }
+  .btn-toggle {
+    padding: 10px 10px;
+    background-color: #800000;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .btn-toggle:hover {
+    background-color: #a00000;
+  }
+  .btn-toggle.active {
+    background-color: #a00000; /* o el color que prefieras para mostrar activo */
+    color: #fff;
+    font-weight: bold;
+    box-shadow: 0 0 8px #a00000;
   }
   
