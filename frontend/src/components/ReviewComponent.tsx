@@ -138,18 +138,31 @@ const ReviewComponent: React.FC<ReviewComponentProps> = ({ gameId }) => {
   return (
     <div className="gamepage-reviews-section">
       <h2>Reviews</h2>
-
+      <div className="reviews-layout">
       <form className="review-form" onSubmit={handleReviewSubmit}>
         <h3>Write a Review</h3>
 
-        <label>
-          Review Type:
-          <br />
-          <select value={reviewType} onChange={(e) => setReviewType(e.target.value)}>
-            <option value="Positive">Positive</option>
-            <option value="Negative">Negative</option>
-          </select>
-        </label>
+        <div className="review-type-toggle">
+  <label className="radio-label">
+    <input
+      type="radio"
+      value="Positive"
+      checked={reviewType === "Positive"}
+      onChange={() => setReviewType("Positive")}
+    />
+    👍 Positive
+  </label>
+  <label className="radio-label">
+    <input
+      type="radio"
+      value="Negative"
+      checked={reviewType === "Negative"}
+      onChange={() => setReviewType("Negative")}
+    />
+    👎 Negative
+  </label>
+</div>
+
 
         <label>
           Description:
@@ -182,6 +195,7 @@ const ReviewComponent: React.FC<ReviewComponentProps> = ({ gameId }) => {
           </div>
         ))}
       </div>
+    </div>
     </div>
   );
 };
