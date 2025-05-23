@@ -47,6 +47,7 @@ cd across
 2. Install all dependencies (frontend, backend, and root):
 ```bash
 npm run install:all
+npm install concurrently --save-dev
 ```
 
 ## 🚀 Development
