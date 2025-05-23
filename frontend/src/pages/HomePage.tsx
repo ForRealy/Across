@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Header from "../components/HeaderComponent";
+import Spinner from "../components/Spinner";
 import "../styles/HomePage.css";
 import axios from "axios";
 import PopularGames from "../components/PopularComponent";
@@ -19,19 +20,22 @@ const Home: React.FC = () => {
   const [popularGames, setPopularGames] = useState<Game[]>([]);
   const [upcomingGames, setUpcomingGames] = useState<Game[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [loading, setLoading] = useState(true); // Estado de carga
 
   useEffect(() => {
     const loadGames = async () => {
+      setLoading(true);
       try {
         const [popularResponse, upcomingResponse] = await Promise.all([
-          axios.get("http://localhost:3000/api/games/popular"),
-          axios.get("http://localhost:3000/api/games/upcoming")
+          axios.get<Game[]>("http://localhost:3000/api/games/popular"),
+          axios.get<Game[]>("http://localhost:3000/api/games/upcoming")
         ]);
-        console.log('Upcoming games data:', upcomingResponse.data); // Debugging log
         setPopularGames(popularResponse.data);
         setUpcomingGames(upcomingResponse.data);
       } catch (error) {
         console.error("Error al cargar juegos:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -39,25 +43,30 @@ const Home: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    if (!popularGames.length) return;
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % popularGames.length);
+      setCurrentSlide(prev => (prev + 1) % popularGames.length);
     }, 5000);
 
     return () => clearInterval(timer);
-  }, [popularGames.length]);
+  }, [popularGames]);
 
   return (
-  <div className="home-page-wrapper">
-    <Header />
-    <main className="home-main">
-      <PopularGames
-        popularGames={popularGames}
-        currentSlide={currentSlide}
-        setCurrentSlide={setCurrentSlide}
-      />
-      <UpcomingGames upcomingGames={upcomingGames} />
-    </main>
-  </div>
+    <div className="home-page-wrapper">
+      <Header />
+      {loading ? (
+        <Spinner/>
+      ) : (
+        <main className="home-main">
+          <PopularGames
+            popularGames={popularGames}
+            currentSlide={currentSlide}
+            setCurrentSlide={setCurrentSlide}
+          />
+          <UpcomingGames upcomingGames={upcomingGames} />
+        </main>
+      )}
+    </div>
   );
 };
 

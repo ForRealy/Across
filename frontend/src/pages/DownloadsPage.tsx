@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
-import axios from "axios";
 import Header from "../components/HeaderComponent";
+import Spinner from "../components/Spinner";  // Import Spinner
+import axios from "axios";
 import "../styles/DownloadsPage.css";
 
 interface Game {
@@ -21,60 +22,31 @@ interface Download {
 
 const Downloads: React.FC = () => {
   const [games, setGames] = useState<Game[]>([]);
+  const [loading, setLoading] = useState(true); // Loading state
   const [downloadControllers, setDownloadControllers] = useState<{
     [key: number]: AbortController
   }>({});
 
-  const cancelDownload = (gameId: number) => {
-    const controller = downloadControllers[gameId];
-    if (controller) {
-      controller.abort();
-      setDownloadControllers(prev => {
-        const c = { ...prev };
-        delete c[gameId];
-        return c;
-      });
-    }
-
-    setGames(prev =>
-      prev.map(g =>
-        g.id === gameId
-          ? { ...g, status: "Pending", buttonLabel: "Download" }
-          : g
-      )
-    );
-  };
-
   const fetchDownloads = useCallback(async () => {
+    setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      if (!token) return console.error("Usuario no autenticado.");
+      if (!token) throw new Error("Usuario no autenticado.");
 
-      const response = await axios.get(
+      const response = await axios.get<Download[]>(
         "http://localhost:3000/api/downloads",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
-        }
+        { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
       );
 
       const gamesWithDetails = await Promise.all(
-        response.data.map(async (download: Download) => {
-          let status: Game['status'];
+        response.data.map(async (download) => {
+          let status: Game['status'] = 'Pending';
           switch (download.status.toLowerCase()) {
-            case 'completed':
-              status = 'Completed';
-              break;
-            case 'downloading':
-              status = 'Downloading';
-              break;
-            case 'failed':
-              status = 'Failed';
-              break;
-            default:
-              status = 'Pending';
+            case 'completed': status = 'Completed'; break;
+            case 'downloading': status = 'Downloading'; break;
+            case 'failed': status = 'Failed'; break;
+            default: status = 'Pending';
           }
-
           try {
             const res = await axios.get(
               `http://localhost:3000/api/games/details/${download.idGame}`,
@@ -86,33 +58,28 @@ const Downloads: React.FC = () => {
               title: res.data.title,
               cover: res.data.cover,
               status,
-              buttonLabel: status === "Completed" ? "Play" : "Download",
-              cancelLabel: "Cancel",
+              buttonLabel: status === 'Completed' ? 'Play' : 'Download',
+              cancelLabel: 'Cancel',
             };
           } catch {
             return {
               id: download.idDownload,
               gameId: download.idGame,
               title: `Juego #${download.idGame}`,
-              cover: "",
+              cover: '',
               status,
-              buttonLabel: status === "Completed" ? "Play" : "Download",
-              cancelLabel: "Cancel",
+              buttonLabel: status === 'Completed' ? 'Play' : 'Download',
+              cancelLabel: 'Cancel',
             };
           }
         })
       );
 
       setGames(gamesWithDetails);
-    } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        console.error(
-          "Error al obtener descargas:",
-          err.response?.data || err.message
-        );
-      } else {
-        console.error("Error desconocido:", err);
-      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -120,43 +87,45 @@ const Downloads: React.FC = () => {
     fetchDownloads();
   }, [fetchDownloads]);
 
+  const cancelDownload = (gameId: number) => {
+    const controller = downloadControllers[gameId];
+    controller?.abort();
+    setDownloadControllers(prev => {
+      const copy = { ...prev };
+      delete copy[gameId];
+      return copy;
+    });
+    setGames(prev => prev.map(g =>
+      g.id === gameId ? { ...g, status: 'Pending', buttonLabel: 'Download' } : g
+    ));
+  };
+
   const handlePrimaryButtonClick = (index: number) => {
     const game = games[index];
-    if (game.status === "Completed") {
-      console.log("Playing game:", game.title);
+    if (game.status === 'Completed') {
+      console.log('Playing game:', game.title);
       return;
     }
-
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
     if (!token) {
-      console.error("Usuario no autenticado.");
-      setGames(prev =>
-        prev.map((g, i) =>
-          i === index ? { ...g, status: "Failed", buttonLabel: "Retry" } : g
-        )
-      );
+      setGames(prev => prev.map((g, i) =>
+        i === index ? { ...g, status: 'Failed', buttonLabel: 'Retry' } : g
+      ));
       return;
     }
-
-    setGames(prev =>
-      prev.map((g, i) =>
-        i === index ? { ...g, status: "Downloading", buttonLabel: "" } : g
-      )
-    );
-
+    setGames(prev => prev.map((g, i) =>
+      i === index ? { ...g, status: 'Downloading', buttonLabel: '' } : g
+    ));
     const controller = new AbortController();
     setDownloadControllers(prev => ({ ...prev, [game.id]: controller }));
 
     fetch(`http://localhost:3000/api/downloads/file/${game.gameId}`, {
       headers: { Authorization: `Bearer ${token}` },
-      credentials: "include",
+      credentials: 'include',
       signal: controller.signal,
     })
       .then(async response => {
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || "Download failed");
-        }
+        if (!response.ok) throw new Error('Download failed');
         const contentDisp = response.headers.get('content-disposition');
         const filename = contentDisp
           ? contentDisp.split('filename=')[1].replace(/"/g, '')
@@ -165,92 +134,64 @@ const Downloads: React.FC = () => {
       })
       .then(({ blob, filename }) => {
         const url = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
+        const link = document.createElement('a');
         link.href = url;
         link.download = filename;
         document.body.appendChild(link);
         link.click();
-        document.body.removeChild(link);
+        link.remove();
         window.URL.revokeObjectURL(url);
-
-        setGames(prev =>
-          prev.map((g, i) =>
-            i === index
-              ? { ...g, status: "Completed", buttonLabel: "Play" }
-              : g
-          )
-        );
+        setGames(prev => prev.map((g, i) =>
+          i === index ? { ...g, status: 'Completed', buttonLabel: 'Play' } : g
+        ));
       })
-      .catch(error => {
-        if (error.name === "AbortError") {
-          console.log("Download aborted by user");
-          return;
-        }
-        console.error("Error downloading file:", error);
-        setGames(prev =>
-          prev.map((g, i) =>
-            i === index ? { ...g, status: "Failed", buttonLabel: "Retry" } : g
-          )
-        );
+      .catch(err => {
+        if (err.name === 'AbortError') return;
+        console.error(err);
+        setGames(prev => prev.map((g, i) =>
+          i === index ? { ...g, status: 'Failed', buttonLabel: 'Retry' } : g
+        ));
       });
   };
 
   return (
-    <div >
+    <div>
       <Header />
-      <div className="container">
-      {games.length === 0 ? (
-        <p className="no-games-message">You don't have any games to download.</p>
+      {loading ? (
+        <Spinner/>
       ) : (
-        games.map((game, index) => (
-          <div className="downloads" key={game.id}>
-            {game.cover && (
-              <img
-                src={game.cover}
-                alt={game.title}
-                className="game-cover"
-              />
-            )}
-            <div className="download-info">
-              <h1>{game.title}</h1>
-              <div className="download-status">
-              <p style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-       State:{" "}
-  <strong className={`status-${game.status}`}>
-    {game.status}
-  </strong>
-  {game.status === "Downloading" && (
-    <div className="spinner" aria-label="Descargando…" />
-  )}
-</p>
-
-                
-                
-
+        <div className="container">
+          {games.length === 0 ? (
+            <p className="no-games-message">You don't have any games to download.</p>
+          ) : (
+            games.map((game, index) => (
+              <div className="downloads" key={game.id}>
+                {game.cover && <img src={game.cover} alt={game.title} className="game-cover" />}  
+                <div className="download-info">
+                  <h1>{game.title}</h1>
+                  <div className="download-status">
+                    <p>State: <strong className={`status-${game.status}`}>{game.status}</strong></p>
+                    {game.status === 'Downloading' && (
+                      <Spinner />  // Spinner inline sin mensaje
+                    )}
+                  </div>
+                  <div className="button-group">
+                    {game.status === 'Downloading' ? (
+                      <button className="cancel-button" onClick={() => cancelDownload(game.id)}>
+                        {game.cancelLabel}
+                      </button>
+                    ) : (
+                      <button className="primary-button" onClick={() => handlePrimaryButtonClick(index)}>
+                        {game.buttonLabel}
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
-              <div className="button-group">
-                {game.status === "Downloading" ? (
-                  <button
-                    className="cancel-button"
-                    onClick={() => cancelDownload(game.id)}
-                  >
-                    {game.cancelLabel}
-                  </button>
-                ) : (
-                  <button
-                    className="primary-button"
-                    onClick={() => handlePrimaryButtonClick(index)}
-                  >
-                    {game.buttonLabel}
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        ))
+            ))
+          )}
+        </div>
       )}
-      </div>
-      
     </div>
   );
 };
