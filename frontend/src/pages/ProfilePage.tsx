@@ -147,13 +147,13 @@ const Profile: React.FC = () => {
                 className={`btn-toggle ${showDownloads ? "active" : ""}`}
                 onClick={() => { setShowDownloads(prev => !prev); setShowReviews(false); }}
               >
-                {showDownloads ? "Ocultar Gastos" : "Mostrar Gastos"}
+                {showDownloads ? "Hide Expenses" : "Show Expenses"}
               </button>
               <button
                 className={`btn-toggle ${showReviews ? "active" : ""}`}
                 onClick={() => { setShowReviews(prev => !prev); setShowDownloads(false); }}
               >
-                {showReviews ? "Ocultar Reseñas" : "Mostrar Reseñas"}
+                {showReviews ? "Hide Reviews" : "Show Reviews"}
               </button>
             </div>
           </div>
@@ -167,11 +167,11 @@ const Profile: React.FC = () => {
               ) : errorDownloads ? (
                 <p className="error-message">{errorDownloads}</p>
               ) : downloads.length === 0 ? (
-                <p>No tienes descargas disponibles.</p>
+                <p>You have no downloads available.</p>
               ) : (
                 <> 
                   <table className="download-table">
-                    <thead><tr><th>Juego</th><th>Precio</th></tr></thead>
+                    <thead><tr><th>Game</th><th>Price</th></tr></thead>
                     <tbody>
                       {downloads.map(d => (
                         <tr key={d.idDownload}>
@@ -198,10 +198,10 @@ const Profile: React.FC = () => {
               ) : errorReviews ? (
                 <p className="error-message">{errorReviews}</p>
               ) : userReviews.length === 0 ? (
-                <p>No has escrito reseñas aún.</p>
+                <p>You haven't written any reviews yet..</p>
               ) : (
                 <table className="download-table">
-                  <thead><tr><th>Juego</th><th>Tipo</th><th>Descripción</th></tr></thead>
+                  <thead><tr><th>Game</th><th>Type</th><th>Description</th></tr></thead>
                   <tbody>
                     {userReviews.map(r => (
                       <tr key={r.idReview}>
