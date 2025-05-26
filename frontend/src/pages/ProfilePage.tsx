@@ -141,7 +141,7 @@ const Profile: React.FC = () => {
         <div className="profile-header">
           <img src={Foto_Perfil} alt="Perfil" className="profile-img" />
           <div className="profile-details">
-            <h2>{user?.username || "Invitado"}</h2>
+            <h2>{user?.username || "Guest"}</h2>
             <div className="toggle-buttons">
               <button
                 className={`btn-toggle ${showDownloads ? "active" : ""}`}
