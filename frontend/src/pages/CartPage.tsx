@@ -279,7 +279,7 @@ const Cart: React.FC = () => {
                 >
                   Pay ${total}
                 </button>
-                {isProcessingPayment && <Spinner message="Procesando pago..." />}
+                {isProcessingPayment && <Spinner/>}
               </form>
             </div>
 
