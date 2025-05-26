@@ -172,7 +172,7 @@ const Downloads: React.FC = () => {
                   <div className="download-status">
                     <p>State: <strong className={`status-${game.status}`}>{game.status}</strong></p>
                     {game.status === 'Downloading' && (
-                      <Spinner />  // Spinner inline sin mensaje
+                      <div className="spinner" />  // Spinner inline sin mensaje
                     )}
                   </div>
                   <div className="button-group">
