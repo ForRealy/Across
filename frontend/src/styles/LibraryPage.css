@@ -96,7 +96,7 @@
   }
 }
 
-/* 3 por fila en pantallas grandes */
+/* 4 por fila en pantallas grandes */
 @media (min-width: 1024px) {
   .library-gallery {
     grid-template-columns: repeat(4, 1fr);
@@ -214,18 +214,22 @@
 .clickable-star:hover ~ .clickable-star {
   color: #ffcc66;
 }
+
 .empty-message {
-  text-align: center; /* Center the text */
-  font-size: 1.5rem; /* Increase font size */
-  color: #ff0000; /* Change text color to red for emphasis */
-  margin: 20px 0; /* Add some margin for spacing */
-  margin-left: 250px; /* Add left margin for more space */
-  padding: 10px; /* Add padding for better appearance */
-  border: 1px solid #ff0000; /* Add a border */
-  border-radius: 5px; /* Round the corners */
-  background-color: #ffe6e6; /* Light red background */
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 500px;
+  padding: 15px;
+  text-align: center;
+  font-size: 1.25rem;
+  color:white;
+  border: 2px solid black;
+  border-radius: 8px;
+  background-color: #360000;
 }
+
 .loading-message{
  color: white;
 }
