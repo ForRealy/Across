@@ -8,7 +8,7 @@
 
 /* Estilo para el contenedor del formulario de registro */
 .register-container {
-    background-color: #fff;
+    background-color: #360000;
     padding: 40px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -21,7 +21,7 @@
 .register-title {
     margin-bottom: 30px;
     font-size: 2rem;
-    color: #333;
+    color: white;
 }
 
 /* Clases personalizadas para los contenedores de los campos del formulario */
@@ -34,7 +34,7 @@
 
 .register-input-container label {
     font-size: 1rem;
-    color: #555;
+    color: white;
     margin-bottom: 5px;
 }
 
@@ -73,7 +73,7 @@
 .login-btn {
     padding: 12px;
     width: 100%;
-    background-color: #dcffb5;
+    background-color: #10b981;
     color: black;
     border: none;
     border-radius: 4px;
@@ -84,7 +84,7 @@
 }
 
 .login-btn:hover {
-    background-color: #b9f07c;
+    background-color: #059669;
 }
 
 /* Estilo para los mensajes de error */
