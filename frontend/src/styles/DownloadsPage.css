@@ -1,11 +1,12 @@
 .container {
+  font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
 }
 
 .no-games-message {
-    text-align: center;
+  text-align: center;
   font-size: 1.2rem;
   color: whitesmoke;
   margin-top: 40px;

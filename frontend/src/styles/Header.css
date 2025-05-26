@@ -1,3 +1,4 @@
+/* Contenedor del header */
 .header-container {
     background-color: #360000;
     color: #fff;
@@ -9,51 +10,99 @@
     width: 100%; /* Asegura que ocupe todo el ancho */
     box-sizing: border-box; /* Incluye el padding dentro del tamaño total */
     position: relative; /* Esto ayuda a asegurar que se mantenga bien en todas las pantallas */
-  
-  }
-  
-  .nav-links {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Agrega sombra sutil para darle más profundidad */
+}
+
+/* Estilos para el título */
+.header-title {
+    font-family: monospace;
+    font-size: 2.5rem; /* Reducir ligeramente el tamaño */
+    font-weight: 700;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 3px; /* Espaciado entre letras */
+    text-align: center;
+    margin: 0;
+    transition: transform 0.3s ease; /* Efecto de transform en hover */
+}
+/* Navegación */
+.nav-links {
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 16px;
-  }
-  
-  .nav-link {
+}
+
+/* Enlaces de navegación */
+.nav-link {
     display: inline-flex;
     align-items: center;
     text-decoration: none;
     color: white;
     transition: color 0.3s ease;
-  }
-  
-  .nav-link:hover {
+    font-size: 1rem; /* Tamaño de texto más pequeño para que no se vea tan grande */
+    padding: 5px 10px; /* Agregar algo de padding para aumentar la zona de clic */
+}
+
+/* Hover sobre los enlaces */
+.nav-link:hover {
     color: #FFAAAA;
-  }
-  
-  .username-link {
+    text-decoration: underline; /* Subrayado cuando el usuario pasa el ratón */
+}
+
+/* Enlace de usuario */
+.username-link {
     font-weight: bold;
     color: #FFAAAA;
-  }
-  
-  .logout-button {
-    padding: 8px 14px;
+}
 
+/* Estilos del botón de logout */
+.logout-button {
+    padding: 8px 14px;
     background-color: #ef4444;
     border: none;
     color: white;
     font-size: 1.1rem;
     cursor: pointer;
-    transition: color 0.3s ease;
+    transition: background-color 0.3s ease, color 0.3s ease;
     border-radius: 5px;
-  }
+}
 
-  
-  /* Ajustes para pantallas pequeñas */
-  @media (max-width: 599px) {
+/* Hover en el botón de logout */
+.logout-button:hover {
+    background-color: #d14343; /* Un color un poco más oscuro */
+    color: #fff;
+}
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 599px) {
     .header-container {
-      padding: 10px;  /* Ajustar el padding para pantallas pequeñas */
-      width: 100vw;   /* Asegura que ocupe todo el ancho de la ventana del navegador */
+        padding: 10px;  /* Ajustar el padding para pantallas pequeñas */
+        flex-direction: column; /* Poner los elementos en columna para mejor disposición */
+        align-items: flex-start; /* Alinear todo al inicio */
+        gap: 10px; /* Espaciado entre los elementos */
     }
-  }
-  
+
+    .header-title {
+        font-size: 2rem; /* Reducir el tamaño del título para pantallas pequeñas */
+        text-align: left; /* Alinear el título a la izquierda */
+        letter-spacing: 2px; /* Reducir el espaciado entre letras */
+    }
+
+    .nav-links {
+        flex-direction: column; /* Los enlaces de navegación estarán en columna */
+        gap: 12px; /* Espaciado entre los enlaces */
+        width: 100%; /* Ocupa todo el ancho */
+    }
+
+    .nav-link {
+        padding: 8px 0; /* Mejorar la accesibilidad de los enlaces al hacerlos más grandes */
+        text-align: center; /* Centrar los enlaces */
+    }
+
+    .logout-button {
+        width: 100%; /* Hacer el botón de logout más grande en pantallas pequeñas */
+        text-align: center;
+        margin-top: 10px;
+    }
+}

@@ -20,7 +20,7 @@
   background: #360000;
   padding: 16px 40px 16px 16px; /* Padding derecho extra para el botón */
   color: white;
-  font-family: 'Courier New', Courier, monospace;
+  font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
   transition: transform 0.3s ease;
   z-index: 10;
   border-radius: 8px;
@@ -70,6 +70,7 @@
 
 /* Contenido principal */
 .library-content {
+  font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
   margin-left: 250px;            /* igual que el width de .library-sidebar */
   padding: 20px;
   flex: 1;

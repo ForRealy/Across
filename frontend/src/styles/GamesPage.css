@@ -17,6 +17,8 @@
   background-color: #360000;
   padding: 10px 20px;
   margin-top: 20px;
+  font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+
 }
 
 /* Contenido principal */
@@ -57,18 +59,17 @@
   background-color: #360000;
   padding: 15px;
   border-radius: 8px;
-  font-family: monospace;
+  font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
   font-size: 17px;
-
   max-width: 270px;
 }
+
 .gamepage-description-panel {
   background-color: #360000;
   padding: 15px;
   border-radius: 8px;
-  font-family: monospace;
+  font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
   font-size: 17px;
-  
 }
 
 /* Mensajes de carga/error */
