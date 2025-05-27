@@ -130,7 +130,7 @@ export const searchGamesOptimized = async (query: string): Promise<GameWithCover
       search "${query}";
       fields id,name,cover.image_id,first_release_date,summary;
       where category = (0, 2, 4, 8, 9);
-      limit 5;
+      limit 10;
     `;
     let { data } = await igdbRequest(searchQuery);
 

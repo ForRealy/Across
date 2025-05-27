@@ -1,6 +1,6 @@
 // src/controllers/userController.ts
 import { Request, Response } from 'express';
-import db from '../db';
+import db from '../db.js';
 
 export const updateUserProfile = async (req: Request, res: Response) => {
   const { idUser } = req.params;
