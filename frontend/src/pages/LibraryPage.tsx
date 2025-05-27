@@ -58,10 +58,16 @@ const Library: React.FC = () => {
           "http://localhost:3000/api/games/library",
           { withCredentials: true, params: { includeCover: true } }
         );
+        console.log(`Received ${response.data.length} games from API`);
+        console.log('Games by rating:', {
+          highRated: response.data.filter(g => (g.rating || 0) >= 60).length,
+          lowRated: response.data.filter(g => (g.rating || 0) < 60).length
+        });
         setGames(response.data);
         setFilteredGames(response.data);
       } catch (err) {
         if (err instanceof AxiosError) {
+          console.error('Error loading games:', err);
           setError(err.response?.data?.message || "Error al cargar los juegos");
         }
       } finally {
@@ -77,6 +83,16 @@ const Library: React.FC = () => {
       str.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
 
     let filtered = [...games];
+    
+    // Apply low-rated filter first
+    if (minStarRating > 0) {
+      const min = minStarRating * 20;
+      const max = min + 20;
+      filtered = filtered.filter(
+        g => g.rating >= min && g.rating < max
+      );
+    }
+
     if (searchTerm.trim()) {
       const ns = normalizeString(searchTerm);
       filtered = filtered.filter(g =>
@@ -93,13 +109,8 @@ const Library: React.FC = () => {
         g => typeof g.price === "number" && g.price <= maxPrice
       );
     }
-    if (minStarRating > 0) {
-      const min = minStarRating * 20;
-      const max = min + 20;
-      filtered = filtered.filter(
-        g => g.rating >= min && g.rating < max
-      );
-    }
+
+    console.log(`Final filtered games count: ${filtered.length}`);
     setFilteredGames(filtered);
   }, [searchTerm, minPrice, maxPrice, minStarRating, games]);
 
@@ -137,6 +148,7 @@ const Library: React.FC = () => {
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
               />
+              
               <div className="library-filter-group">
                 <h3>Price filter</h3>
                 <input

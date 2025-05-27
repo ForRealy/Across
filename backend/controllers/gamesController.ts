@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 import { Request, Response } from 'express';
 import pool from '../db.js';
-import { RowDataPacket } from 'mysql2';
+import type { RowDataPacket } from 'mysql2';
 
 // ——— Configuración de paths y variables de entorno ———
 const __filename = fileURLToPath(import.meta.url);
@@ -130,7 +130,7 @@ export const searchGamesOptimized = async (query: string): Promise<GameWithCover
       search "${query}";
       fields id,name,cover.image_id,first_release_date,summary;
       where category = (0, 2, 4, 8, 9);
-      limit 10;
+      limit 5;
     `;
     let { data } = await igdbRequest(searchQuery);
 
@@ -160,21 +160,71 @@ export const searchGamesOptimized = async (query: string): Promise<GameWithCover
   }
 };
 
-export const fetchGameData = async (): Promise<GameWithCover[] | undefined> => {
+export const fetchLowRatedGames = async (): Promise<GameWithCover[] | undefined> => {
   try {
     const query = `
       fields id,name,cover.image_id,aggregated_rating,first_release_date,screenshots.image_id,summary;
       where aggregated_rating > 0
+        & aggregated_rating < 60
         & first_release_date > 0
-        & aggregated_rating_count > 10
         & cover != null;
-      sort aggregated_rating desc;
-      limit 250;
+      sort aggregated_rating asc;
+      limit 150;
     `;
     const { data } = await igdbRequest(query);
-    return data
-      .map(transformGame)
-      .sort((a: GameWithCover, b: GameWithCover) => (b.rating || 0) - (a.rating || 0));
+    const games = data.map(transformGame);
+    console.log(`Fetched ${games.length} low-rated games`);
+    return games;
+  } catch (err) {
+    console.error('Error al obtener juegos de baja calificación:', err);
+    return undefined;
+  }
+};
+
+export const fetchGameData = async (): Promise<GameWithCover[] | undefined> => {
+  try {
+    const [highRatedGames, lowRatedGames] = await Promise.all([
+      // High rated games query
+      (async () => {
+        const query = `
+          fields id,name,cover.image_id,aggregated_rating,first_release_date,screenshots.image_id,summary;
+          where aggregated_rating >= 60
+            & first_release_date > 0
+            & aggregated_rating_count > 10
+            & cover != null;
+          sort aggregated_rating desc;
+          limit 150;  // Increased from 100 to 150
+        `;
+        const { data } = await igdbRequest(query);
+        const games = data.map(transformGame);
+        console.log(`Fetched ${games.length} high-rated games`);
+        return games;
+      })(),
+      // Low rated games
+      fetchLowRatedGames()
+    ]);
+
+    const allGames = [
+      ...(highRatedGames || []),
+      ...(lowRatedGames || [])
+    ];
+
+    console.log(`Total games after combining: ${allGames.length}`);
+    console.log(`High-rated games: ${highRatedGames?.length || 0}`);
+    console.log(`Low-rated games: ${lowRatedGames?.length || 0}`);
+
+    // Sort by rating but keep high-rated games first
+    return allGames.sort((a: GameWithCover, b: GameWithCover) => {
+      // If both are high-rated or both are low-rated, sort by rating
+      if ((a.rating || 0) >= 60 && (b.rating || 0) >= 60) {
+        return (b.rating || 0) - (a.rating || 0);
+      }
+      if ((a.rating || 0) < 60 && (b.rating || 0) < 60) {
+        return (b.rating || 0) - (a.rating || 0);
+      }
+      // If one is high-rated and one is low-rated, high-rated comes first
+      return (a.rating || 0) >= 60 ? -1 : 1;
+    });
   } catch (err) {
     console.error('Error al obtener datos de juegos:', err);
     return undefined;
@@ -189,7 +239,7 @@ export const fetchUpcomingGames = async (): Promise<GameWithCover[] | undefined>
       where first_release_date >= ${currentTimestamp}
         & cover != null;
       sort first_release_date asc;
-      limit 6;
+      limit 10;
     `;
     const { data } = await igdbRequest(query);
     return data.map((g: any) => transformPopularGame(g, currentTimestamp));
@@ -364,6 +414,7 @@ export default {
   fetchUpcomingGames,
   fetchPopularGames,
   fetchGameById,
+  fetchLowRatedGames,
   addGameToCartByName,
   removeFromCart,
   getCartItems,

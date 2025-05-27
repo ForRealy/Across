@@ -32,7 +32,7 @@ Download.init({
     },
 }, {
     sequelize,
-    tableName: 'downloads',
+    tableName: 'downloads', // Asegura que use la tabla correcta
     timestamps: false, // Evita `createdAt` y `updatedAt`
 });
 export default Download;

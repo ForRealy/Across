@@ -94,7 +94,7 @@ export const searchGamesOptimized = async (query) => {
       search "${query}";
       fields id,name,cover.image_id,first_release_date,summary;
       where category = (0, 2, 4, 8, 9);
-      limit 10;
+      limit 5;
     `;
         let { data } = await igdbRequest(searchQuery);
         if (!data || data.length === 0) {
@@ -151,7 +151,7 @@ export const fetchUpcomingGames = async () => {
       where first_release_date >= ${currentTimestamp}
         & cover != null;
       sort first_release_date asc;
-      limit 6;
+      limit 10;
     `;
         const { data } = await igdbRequest(query);
         return data.map((g) => transformPopularGame(g, currentTimestamp));

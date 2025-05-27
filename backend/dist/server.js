@@ -8,7 +8,7 @@ import reviewRoutes from "./routes/reviewRoutes.js";
 import downloadsRoutes from "./routes/downloadsRoutes.js";
 const app = express();
 const corsOptions = {
-    origin: true,
+    origin: true, // Permitir todos los orígenes en desarrollo
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'cart-id', 'Accept', 'Origin', 'X-Requested-With'],
