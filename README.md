@@ -11,7 +11,7 @@ A full-stack web application built with React (Frontend) and Node.js/Express (Ba
 
 - Modern React frontend with TypeScript
 - Express.js backend with TypeScript
-- SQLite database with Sequelize ORM
+- MySQL database with Sequelize ORM
 - Authentication system with JWT
 - RESTful API architecture
 - Unified build process
@@ -39,7 +39,7 @@ A full-stack web application built with React (Frontend) and Node.js/Express (Ba
 - Express.js
 - TypeScript
 - Sequelize ORM
-- SQLite3
+- MySQL
 - JWT Authentication
 - Express Session
 - CORS
@@ -52,7 +52,7 @@ A full-stack web application built with React (Frontend) and Node.js/Express (Ba
 
 - Node.js (v16 or higher)
 - npm (v7 or higher)
-- SQLite3
+- MySQL Server
 
 ## 🔧 Installation
 
@@ -72,7 +72,11 @@ npm run install:all
 # Backend
 cd backend
 cp .env.example .env
-# Edit .env with your configuration
+# Edit .env with your MySQL configuration:
+# DB_HOST=localhost
+# DB_USER=your_mysql_user
+# DB_PASSWORD=your_mysql_password
+# DB_NAME=across
 
 # Frontend
 cd ../frontend
