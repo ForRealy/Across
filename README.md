@@ -58,7 +58,7 @@ A full-stack web application built with React (Frontend) and Node.js/Express (Ba
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/across.git
+git clone https://github.com/ForRealy/Across
 cd across
 ```
 
