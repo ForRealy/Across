@@ -4,7 +4,7 @@ A full-stack web application built with React (Frontend) and Node.js/Express (Ba
 
 ## 📚 Documentation
 
-- [Backend Documentation](BACKEND.md) - Comprehensive guide to the backend architecture and implementation
+- [Backend Documentation](#backend) - Overview of the backend implementation
 - [Frontend Overview](#frontend) - Overview of the frontend implementation
 
 ## 🚀 Features
