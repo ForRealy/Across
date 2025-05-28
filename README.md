@@ -4,7 +4,7 @@ A full-stack web application built with React (Frontend) and Node.js/Express (Ba
 
 ## 📚 Documentation
 
-- [Backend Documentation](#backend) - Overview of the backend implementation
+- [Backend Overview](#backend) - Overview of the backend implementation
 - [Frontend Overview](#frontend) - Overview of the frontend implementation
 
 ## 🚀 Features
@@ -165,13 +165,6 @@ VITE_API_URL=http://localhost:3000/api
 VITE_APP_ENV=development
 ```
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ## 📄 License
 
