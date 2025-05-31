@@ -1,21 +1,20 @@
 import React, { useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom"; 
-import '../styles/RegisterPage.css'; // Asegúrate de que el archivo esté correctamente enlazado
+import '../styles/RegisterPage.css';
 
 const Register: React.FC = () => {
     const [name, setName] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [passwordConfirm, setPasswordConfirm] = useState("");
-    const [email, setMail] = useState<string>("");
+    const [email, setEmail] = useState<string>("");
     const [error, setError] = useState<string>("");
     const navigate = useNavigate();
     
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         if (!name || !password || !email) {
-            setError("Por favor, ingresa tu nombre de usuario, contraseña y email");
-        }
-        else {
+            setError("Please enter your username, password and email.");
+        } else {
             setError("");
             fetch("http://localhost:3000/api/register", {
                 method: "POST",
@@ -33,12 +32,12 @@ const Register: React.FC = () => {
             })
             .then(response => response.json())
             .then(data => {
-                console.log("Respuesta del servidor:", data);
-                alert("Usuario creado correctamente");
-                navigate("/login"); // Redirige al login después de registrarse
+                console.log("Server response:", data);
+                alert("User created successfully");
+                navigate("/login");
             })
             .catch(error => {
-                console.error("Error al registrar:", error);
+                console.error("Error registering:", error);
             });
         }
     };
@@ -46,36 +45,36 @@ const Register: React.FC = () => {
     return (
         <div className="register-page">
             <div className="register-container">
-                <h2 className="register-title">Regístrate</h2>
+                <h2 className="register-title">Sign Up</h2>
                 <form onSubmit={handleSubmit}>
                     <div className="register-input-container">
-                        <label htmlFor="name">Nombre de usuario:</label>
+                        <label htmlFor="name">Username:</label>
                         <input
                             type="text"
                             id="name"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            placeholder="Ingresa tu nombre de usuario"
+                            placeholder="Enter your username"
                         />
                     </div>
                     <div className="register-input-container">
-                        <label htmlFor="password">Contraseña:</label>
+                        <label htmlFor="password">Password:</label>
                         <input
                             type="password"
                             id="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Ingresa tu contraseña"
+                            placeholder="Enter your password"
                         />
                     </div>
                     <div className="register-input-container">
-                        <label htmlFor="passwordConfirm">Repite la contraseña:</label>
+                        <label htmlFor="passwordConfirm">Confirm password:</label>
                         <input
                             type="password"
                             id="passwordConfirm"
                             value={passwordConfirm}
                             onChange={(e) => setPasswordConfirm(e.target.value)}
-                            placeholder="Confirma tu contraseña"
+                            placeholder="Confirm your password"
                         />
                     </div>
                     <div className="register-input-container">
@@ -84,19 +83,19 @@ const Register: React.FC = () => {
                             type="email"
                             id="mail"
                             value={email}
-                            onChange={(e) => setMail(e.target.value)}
-                            placeholder="Ingresa tu email"
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="Enter your email"
                         />
                     </div>
                     {error && <p className="error-message">{error}</p>}
-                    <button type="submit" className="register-btn">Regístrate</button>
+                    <button type="submit" className="register-btn">Sign Up</button>
                 </form>
                 <button 
                     type="button" 
                     className="login-btn" 
-                    onClick={() => navigate("/login")} // Redirigir al hacer clic
+                    onClick={() => navigate("/login")}
                 >
-                    ¿Ya tienes cuenta? Inicia sesión
+                    Already have an account? Sign in
                 </button>
             </div>
         </div>
