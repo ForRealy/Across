@@ -141,11 +141,10 @@ const Cart: React.FC = () => {
 
     let valid = true;
     let text = '';
-    if (name.length < 3) { text = 'Nombre demasiado corto'; valid=false; }
-    else if (cleanCard.length!==16) { text = 'Número de tarjeta incorrecto'; valid=false; }
-    else if (cleanExp.length!==4 || !expirationValid) { text = 'Fecha de expiración inválida o expirada'; valid=false; }
-    else if (cvv.length!==3) { text = 'CVV inválido'; valid=false; }
-
+    if (name.length < 3) { text = 'Name too short'; valid=false; }
+    else if (cleanCard.length!==16) { text = 'Wrong card number'; valid=false; }
+    else if (cleanExp.length!==4 || !expirationValid) { text = 'Invalid or expired expiration date'; valid=false; }
+    else if (cvv.length!==3) { text = 'Invalid CVV'; valid=false; }
     if (!valid) { 
       setMessage({ text, type: 'error' });
       return;
