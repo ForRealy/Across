@@ -30,7 +30,7 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
       const release = new Date(releaseDate);
       const today = new Date();
       if (release > today) {
-        window.alert("Este juego aún no está disponible para su compra.");
+        window.alert("This game is not yet available for purchase.");
         return;
       }
     }
@@ -49,7 +49,7 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
         { headers: { Authorization: `Bearer ${token}` }, validateStatus: () => true }
       );
       if (checkDownloads.data.isDownloaded) {
-        window.alert("Ya está en tus descargas.");
+        window.alert("It's already in your downloads.");
         setStatus(undefined);
         return;
       }
@@ -60,7 +60,7 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
         { headers: { Authorization: `Bearer ${token}` }, validateStatus: () => true }
       );
       if (resp.status === 409) {
-        window.alert("Ya está en tu carrito.");
+        window.alert("It's already in your cart.");
         setStatus(undefined);
         return;
       }
@@ -85,7 +85,7 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
         const data = axiosErr.response.data as ErrorResponse;
         setError(data.message);
       } else {
-        setError("Error al agregar al carrito");
+        setError("Error adding to cart");
       }
       
     
@@ -100,9 +100,9 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
       onClick={handleAddToCart}
       disabled={status === 'loading'}
     >
-      {status === 'loading' ? 'Añadiendo...' :
-       status === 'success' ? '✓ Añadido' :
-       status === 'error' ? 'Error' : 'Añadir al carrito'}
+      {status === 'loading' ? 'Adding...' :
+       status === 'success' ? '✓ Added' :
+       status === 'error' ? 'Error' : 'Add to cart'}
     </button>
   );
 };
